@@ -1,7 +1,7 @@
-CREATE DATABASE AuctioSitenDb2;
+CREATE DATABASE AuctionSite;
 GO
 
-USE AuctioSitenDb2;
+USE AuctionSite;
 GO
 
 -- USERS: login accounts (credentials only)
