@@ -16,14 +16,44 @@ DROP TABLE IF EXISTS Users;
 
 -- USERS: login accounts (credentials only)
 CREATE TABLE IF NOT EXISTS Users (
-    UserID        INT AUTO_INCREMENT PRIMARY KEY,
-    Username      VARCHAR(50) NOT NULL UNIQUE,
-    Email         VARCHAR(100) NOT NULL UNIQUE,
-    PasswordHashed NVARCHAR(255) NOT NULL,
-    CreatedAt     DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+    UserID           INT AUTO_INCREMENT PRIMARY KEY,
 
--- USER PROFILES: personal details for each user
+    -- Local credential
+    Username         VARCHAR(50)  NOT NULL UNIQUE,
+    Email            VARCHAR(100) NULL,            -- FB có thể không có email
+    -- Dùng VARBINARY để không dính collation; nếu bạn thích NVARCHAR thì vẫn chạy được
+    PasswordHashed   VARBINARY(255) NULL,          -- NULL nếu social-only
+
+    -- Social credential (NHÓM 2 cột này thay cho GoogleId/FacebookId)
+    SocialProvider   ENUM('google','facebook') NULL,
+    SocialUID        VARCHAR(255) NULL,
+
+    -- Thông tin chung
+    AuthPrimary      ENUM('local','google','facebook') NOT NULL DEFAULT 'local',
+    Status           ENUM('active','disabled','banned') NOT NULL DEFAULT 'active',
+    CreatedAt        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    -- Uniques
+    CONSTRAINT uq_email UNIQUE (Email),
+    CONSTRAINT uq_social UNIQUE (SocialProvider, SocialUID),
+
+    -- Nếu AuthPrimary='local' => BẮT BUỘC có PasswordHashed, và KHÔNG cần SocialUID
+    -- Nếu AuthPrimary là social  => BẮT BUỘC có SocialProvider & SocialUID, và KHÔNG cần PasswordHashed
+    CONSTRAINT chk_credentials
+      CHECK (
+        (AuthPrimary = 'local'
+          AND PasswordHashed IS NOT NULL
+          AND SocialProvider IS NULL
+          AND SocialUID IS NULL)
+        OR
+        (AuthPrimary IN ('google','facebook')
+          AND PasswordHashed IS NULL
+          AND SocialProvider = AuthPrimary
+          AND SocialUID IS NOT NULL)
+      )
+) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- USER PROFILES giữ nguyên (avatar, họ tên, v.v.)
 CREATE TABLE IF NOT EXISTS UserProfiles (
     ProfileID   INT AUTO_INCREMENT PRIMARY KEY,
     UserID      INT NOT NULL UNIQUE,
@@ -33,7 +63,8 @@ CREATE TABLE IF NOT EXISTS UserProfiles (
     Bio         VARCHAR(500),
     AvatarUrl   VARCHAR(300),
     DateOfBirth DATE,
-    CONSTRAINT FK_UserProfiles_User FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE
+    CONSTRAINT FK_UserProfiles_User
+        FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE
 );
 
 -- CATEGORIES
