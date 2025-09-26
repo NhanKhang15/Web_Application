@@ -2,6 +2,8 @@ package com.example.backend.security.auth;
 
 import java.time.LocalDateTime;
 
+import com.example.backend.user_profile.UserProfile;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,6 +12,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
@@ -22,7 +25,7 @@ import jakarta.persistence.UniqueConstraint;
 public class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="UserID")
-    private Integer UserId;
+    private Integer userId;
 
     @Column(name="Username", nullable=false, length=50)
     private String username;
@@ -53,9 +56,12 @@ public class User {
     @Column(name="CreatedAt", nullable=false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @OneToOne(mappedBy = "user")
+    private UserProfile profile;
+
   // getters/setters...
-    public Integer getUserId() {return UserId;}
-    public void setId(Integer UserId) {this.UserId = UserId;}
+    public Integer getUserId() {return userId;}
+    public void setId(Integer UserId) {this.userId = UserId;}
     public String getUsername() {return username;}
     public void setUsername(String username) {this.username = username;}
     public String getEmail() {return email;}
