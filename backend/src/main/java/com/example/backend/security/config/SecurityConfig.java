@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -24,26 +26,32 @@ public class SecurityConfig {
       .csrf(csrf -> csrf.disable())
       .cors(cors -> cors.configurationSource(request -> {
         CorsConfiguration c = new CorsConfiguration();
-        c.setAllowedOrigins(List.of("http://localhost:5173")); // FE origin
+        c.setAllowedOrigins(List.of("http://localhost:5174")); // FE origin
         c.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
         c.setAllowedHeaders(List.of("*"));
         c.setAllowCredentials(true);
         return c;
       }))
       .authorizeHttpRequests(auth -> auth
-        // Cho phép các endpoint public
+        // Public web & oauth
         .requestMatchers("/", "/error", "/public/**", "/actuator/health").permitAll()
-        .requestMatchers(HttpMethod.GET, "/oauth2/**", "/login/**").permitAll()
+        .requestMatchers("/oauth2/**", "/login/**").permitAll()
 
-        // ✅ Local auth API: permitAll để Postman gọi không bị redirect
+        // Local auth API (JWT trong body)
         .requestMatchers(HttpMethod.POST, "/api/login", "/api/signup").permitAll()
 
-        // Các API khác yêu cầu auth
-        .requestMatchers("/api/**").authenticated()
-        .anyRequest().authenticated()
-      )
+        // debug/test (dev)
+        .requestMatchers("/api/test/**").permitAll()
 
-      // ✅ Khi gọi /api/** mà chưa auth ⇒ trả 401 JSON (không redirect Google)
+        // image upload
+        .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
+
+        // nếu bạn còn dùng /api/auth/me để debug → mở tạm
+        .requestMatchers("/api/auth/me").permitAll()
+
+        // các API khác: tạm thời mở để dev cho đỡ 401
+        .anyRequest().permitAll()
+      )
       .exceptionHandling(e -> e
         .defaultAuthenticationEntryPointFor(
           (req, res, ex) -> {
@@ -54,12 +62,15 @@ public class SecurityConfig {
           new AntPathRequestMatcher("/api/**")
         )
       )
-
-      // OAuth2 login cho flow Google
       .oauth2Login(o -> o.successHandler(successHandler))
-
       .logout(l -> l.logoutUrl("/logout").logoutSuccessUrl("/"));
 
     return http.build();
+  }
+
+  // cần nếu bạn dùng AuthenticationManager cho login form
+  @Bean
+  public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+    return configuration.getAuthenticationManager();
   }
 }

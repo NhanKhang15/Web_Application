@@ -78,6 +78,23 @@
       <artifactId>spring-security-config</artifactId>
     </dependency>
 
+    <!-- Spring Security OAuth2 Resource Server -->
+    <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-oauth2-resource-server</artifactId>
+    </dependency>
+    
+    <!-- Spring Security OAuth2 JOSE (cho JWT support) -->
+    <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-oauth2-jose</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+    </dependency>
+
     <!-- Lombok (nếu dùng @RequiredArgsConstructor, @Getter/@Setter, v.v.) -->
     <dependency>
       <groupId>org.projectlombok</groupId>
