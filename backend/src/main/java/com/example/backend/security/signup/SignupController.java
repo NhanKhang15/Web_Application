@@ -28,7 +28,6 @@ public class SignupController {
     }
 
     @PostMapping("/signup")
-    // @CrossOrigin(origins = "http://localhost:5173") // bật nếu bị CORS
     public ResponseEntity<Map<String, Object>> signup(@Valid @RequestBody SignupRequest req) {
         Map<String, Object> res = new HashMap<>();
 

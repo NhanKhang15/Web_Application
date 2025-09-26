@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/Button";
 import { Card, CardContent } from "../ui/Card";
 import { Input } from "../ui/Input";
-import { signup } from "../../services/signup_api";
+import { signup } from "../services/signup_api";
 
 export default function Signup() {
   const navigate = useNavigate();

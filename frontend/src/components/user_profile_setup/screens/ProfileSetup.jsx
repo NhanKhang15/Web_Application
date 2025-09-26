@@ -1,0 +1,287 @@
+import React, { useMemo, useRef, useState, useEffect } from "react";
+import { getCurrentUser, upsertProfile } from "../../auth/services/userprofile_api";
+import { useNavigate } from "react-router-dom";
+import { uploadAvatar } from "../lib/upload_api"; 
+
+export default function ProfileSetup() {
+  const [step, setStep] = useState(1);
+
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [dob, setDob] = useState(""); // yyyy-mm-dd
+  const [bio, setBio] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
+
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [err, setErr] = useState("");
+
+  const fileInputRef = useRef(null);
+  const navigate = useNavigate();
+
+
+  const initials = useMemo(() => {
+    if (!fullName.trim()) return "?";
+    return fullName
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((s) => s[0]?.toUpperCase())
+      .join("");
+  }, [fullName]);
+
+  const avatarPreviewUrl = useMemo(() => {
+    if (avatarFile) return URL.createObjectURL(avatarFile);
+    if (avatarUrl) return avatarUrl;
+    return null;
+  }, [avatarFile, avatarUrl]);
+
+  useEffect(() => {
+    return () => {
+      if (avatarPreviewUrl && avatarFile) URL.revokeObjectURL(avatarPreviewUrl);
+    };
+  }, [avatarPreviewUrl, avatarFile]);
+
+  const nameOk = fullName.trim().length >= 2;
+  const phoneOk = /^(\+?\d)[\d\s.-]{7,}$/.test(phone.trim());
+  const addressOk = address.trim().length >= 5;
+  const dobOk = Boolean(dob);
+  const canFinish = nameOk && phoneOk && addressOk && dobOk;
+
+  // chọn file
+  const onPickAvatar = (e) => {
+    const f = e.target.files?.[0];
+    if (f) {
+      if (avatarPreviewUrl && avatarFile) URL.revokeObjectURL(avatarPreviewUrl);
+      setAvatarFile(f);
+    }
+  };
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    if (!canFinish) return;
+
+    setErr("");
+    setSubmitting(true);
+    try {
+      const me = getCurrentUser();
+      if (!me?.userId) throw new Error("Thiếu userId. Hãy đăng nhập lại.");
+
+      // 1) Upload nếu có file, không thì để rỗng (skip)
+      const uploadedUrl = await uploadAvatar(avatarFile);
+
+      // 2) Upsert profile
+      const payload = {
+        fullName: fullName.trim(),
+        phone: phone.trim(),
+        address: address.trim(),
+        bio: bio.trim(),
+        avatarUrl: uploadedUrl || "",
+        dateOfBirth: dob,
+      };
+
+      const res = await upsertProfile(me.userId, payload);
+      if (res?.success) {
+        // alert("Đã lưu profile ✅");
+        window.location.replace("/dashboard");
+      } else {
+        throw new Error(res?.message || "Lưu thất bại");
+      }
+    } catch (e) {
+      setErr(e.message || "Có lỗi xảy ra");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const nextStep = () => setStep((s) => Math.min(4, s + 1));
+  const prevStep = () => setStep((s) => Math.max(1, s - 1));
+  const finalStep = step === 4;
+
+  return (
+    <div className="min-h-screen w-full relative bg-[#212121] flex items-center justify-center p-4">
+      <div
+        className="absolute inset-0 z-0"
+        style={{ background: "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255, 80, 120, 0.25), transparent 70%), #000000" }}
+      />
+      <div className="relative z-10 w-full max-w-xl rounded-3xl bg-neutral-900 shadow-xl p-6">
+        <div className="mb-6 flex items-center gap-3 text-sm font-medium text-neutral-400">
+          {[1, 2, 3, 4].map((s) => (
+            <React.Fragment key={s}>
+              <Step label={`Step ${s}`} active={step === s} done={step > s} />
+              {s < 4 && <Dash />}
+            </React.Fragment>
+          ))}
+        </div>
+
+        <div className="mb-4">
+          <p className="text-sm font-semibold text-[#E43137]">Step {step}</p>
+          <h2 className="mt-1 text-2xl font-bold text-white">
+            {step === 1 && "What’s your full name?"}
+            {step === 2 && "What’s your phone number?"}
+            {step === 3 && "What’s your address?"}
+            {step === 4 && "Your birthday, bio & avatar"}
+          </h2>
+        </div>
+
+        {err && (
+          <div className="mb-3 rounded-md border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+            {err}
+          </div>
+        )}
+
+        <form onSubmit={onSubmit} className="space-y-5">
+          {step === 1 && (
+            <div>
+              <label className="block text-sm font-medium text-neutral-200">Full name</label>
+              <input
+                type="text"
+                placeholder="Jane Marie"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="mt-1 w-full rounded-md border border-neutral-700 bg-neutral-900 text-white px-4 py-2.5"
+              />
+            </div>
+          )}
+
+          {step === 2 && (
+            <div>
+              <label className="block text-sm font-medium text-neutral-200">Phone number</label>
+              <input
+                type="tel"
+                placeholder="+84 912 345 678"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="mt-1 w-full rounded-md border border-neutral-700 bg-neutral-900 text-white px-4 py-2.5"
+              />
+            </div>
+          )}
+
+          {step === 3 && (
+            <div>
+              <label className="block text-sm font-medium text-neutral-200">Home address</label>
+              <input
+                type="text"
+                placeholder="123 Example St, Footscray, VIC"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                className="mt-1 w-full rounded-md border border-neutral-700 bg-neutral-900 text-white px-4 py-2.5"
+              />
+            </div>
+          )}
+
+          {step === 4 && (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-neutral-200">Date of Birth</label>
+                <input
+                  type="date"
+                  value={dob}
+                  onChange={(e) => setDob(e.target.value)}
+                  className="mt-1 w-full rounded-md border border-neutral-700 bg-neutral-900 text-white px-4 py-2.5"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-neutral-200">Bio (optional)</label>
+                <textarea
+                  placeholder="A few words about you…"
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  className="mt-1 w-full rounded-md border border-neutral-700 bg-neutral-900 text-white px-4 py-2.5"
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-neutral-200">Avatar</label>
+                <div className="mt-2 flex items-center gap-4">
+                  <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-neutral-800 ring-1 ring-neutral-600">
+                    {avatarPreviewUrl ? (
+                      <img src={avatarPreviewUrl} alt="avatar preview" className="h-full w-full object-cover" />
+                    ) : (
+                      <span className="text-lg font-semibold text-neutral-300">{initials}</span>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="rounded-md bg-[#E43137] px-3 py-2 text-sm text-white"
+                    >
+                      Upload
+                    </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={onPickAvatar}
+                    />
+                  </div>
+                </div>
+                <p className="mt-2 text-xs text-neutral-400">
+                  Không chọn ảnh avatar hiển thị bằng chữ cái đầu tên của bạn.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-between pt-4">
+            {step > 1 && (
+              <button
+                type="button"
+                onClick={prevStep}
+                className="rounded-md border border-neutral-500 px-4 py-2 text-sm text-neutral-200"
+              >
+                Back
+              </button>
+            )}
+            {!finalStep ? (
+              <button
+                type="button"
+                onClick={nextStep}
+                className="ml-auto rounded-md bg-[#E43137] px-4 py-2 text-sm text-white"
+              >
+                Next
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={submitting || !canFinish}
+                className="ml-auto rounded-md bg-[#E43137] px-4 py-2 text-sm text-white disabled:opacity-50"
+              >
+                {submitting ? "Saving…" : "Finish"}
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function Dash() {
+  return <div className="h-0.5 w-10 rounded-full bg-neutral-600" />;
+}
+
+function Step({ label, active, done }) {
+  return (
+    <div className={`flex items-center gap-2 ${active ? "text-white" : done ? "text-[#E43137]" : "text-neutral-500"}`}>
+      <div
+        className={`grid h-6 w-6 place-items-center rounded-full border-2 ${
+          active ? "border-[#E43137]" : done ? "border-[#E43137] bg-[#E43137]" : "border-neutral-500"
+        }`}
+      >
+        {done ? (
+          <svg viewBox="0 0 20 20" className="h-3.5 w-3.5 fill-white">
+            <path d="M7.5 13.1 3.9 9.5l-1.4 1.4 5 5 10-10-1.4-1.4-8.6 8.6z" />
+          </svg>
+        ) : (
+          <div className={`h-2.5 w-2.5 rounded-full ${active ? "bg-[#E43137]" : "bg-transparent"}`} />
+        )}
+      </div>
+      <span className={`${active ? "font-semibold" : ""}`}>{label}</span>
+    </div>
+  );
+}
