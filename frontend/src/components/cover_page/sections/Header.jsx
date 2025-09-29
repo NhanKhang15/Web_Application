@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Menu, X, Search as SearchIcon } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "../ui/button.jsx";
 import { Card, CardContent } from "../ui/card.jsx";
 import { Separator } from "../ui/separator.jsx";
