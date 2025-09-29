@@ -1,4 +1,6 @@
-import React from "react";
+// src/widget/sceens/CardShell.jsx
+import React, { useMemo } from "react";
+import { motion } from "framer-motion";
 import SubSidebar from "../../slidebar/screens/SubSidebar";
 
 export default function CardShell({
@@ -8,21 +10,45 @@ export default function CardShell({
   variant = "sub",
   customLeft = null,
   plClass,
+  stickyTop, // <<< thêm prop để nhận top động (equals contentPadTop)
 }) {
-  const defaultLeftPad = variant === "sub"
-    ? "pl-24 md:pl-32 lg:pl-36"
-    : "pl-6 md:pl-10 lg:pl-[320px]";
-  const leftPad = plClass ?? defaultLeftPad;
+  const { cardClasses, contentClasses, extraPaddingClasses } = useMemo(() => {
+    const defaultLeftPad =
+      variant === "sub"
+        ? "pl-24 md:pl-32 lg:pl-36"
+        : "pl-6 md:pl-10 lg:pl-[320px]";
+    const leftPad = plClass ?? defaultLeftPad;
+
+    const PC_EXTRA_PL = "pl-[clamp(60px,4.7vw,96px)]";
+
+    return {
+      cardClasses:
+        "relative bg-white rounded-[15px] shadow-[0_2px_15px_rgba(0,0,0,0.15)] min-h-0 z-20",
+      contentClasses: `p-4 sm:p-6 lg:p-8 ${leftPad} min-h-0 flex flex-col`,
+      extraPaddingClasses: PC_EXTRA_PL,
+    };
+  }, [variant, plClass]);
 
   return (
-    <div className="relative overflow-hidden bg-white rounded-[15px] shadow-[0_2px_15px_rgba(0,0,0,0.15)] h-full min-h-0 z-50">
+    <div className={cardClasses}>
       {variant === "sub" ? (
-        <SubSidebar active={subKey} onChange={onSubChange} />
+        // Sub nav stick dưới header (top = stickyTop động)
+        <motion.div
+          style={{
+            position: "sticky",
+            top: stickyTop ?? 0,
+            zIndex: 39, // dưới header (50), trên nền
+            willChange: "top",
+          }}
+        >
+          <SubSidebar active={subKey} onChange={onSubChange} />
+        </motion.div>
       ) : (
         customLeft
       )}
-      <div className={`p-4 sm:p-6 lg:p-8 ${leftPad} h-full min-h-0 flex flex-col overflow-auto overflow-x-hidden`}>
-        {children}
+
+      <div className={contentClasses}>
+        <div className={extraPaddingClasses}>{children}</div>
       </div>
     </div>
   );
