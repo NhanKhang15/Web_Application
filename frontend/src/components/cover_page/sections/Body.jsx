@@ -3,12 +3,8 @@ import Slider from "react-slick";
 import { Button } from "../ui/button.jsx";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../ui/card.jsx";
 import { Separator } from "../ui/separator.jsx";
-import { useNavigate } from "react-router-dom";
 
-export default function Body() {
-    const navigate = useNavigate();
-
-
+export default function Body({onRequireAuth}) {
     // ===== Static data =====
     const SLIDES = useMemo(
         () => [
@@ -146,7 +142,7 @@ export default function Body() {
                 <Button
                     size="lg"
                     className="rounded-[29px] bg-[#FF3B30] hover:bg-[#b83d26]"
-                    onClick={() => navigate("/login")}>
+                    onClick={onRequireAuth}>
                     Check Auctions
                 </Button>
             </div>
@@ -163,7 +159,7 @@ export default function Body() {
                 {CATEGORIES.map((c) => (
                     <Card
                         key={c.title}
-                        onClick={() => navigate("/login")}
+                        onClick={onRequireAuth}
                         className="overflow-hidden relative group hover:scale-[1.02] transition-transform cursor-pointer"
                         style={{ animation: `fade-in 300ms ease ${c.delay}ms both` }}
                     >
@@ -226,7 +222,7 @@ export default function Body() {
                 <Button
                     size="lg"
                     className="rounded-[29px] bg-[#FF3B30] hover:bg-[#b83d26] text-white font-semibold"
-                    onClick={() => navigate("/login")}
+                    onClick={onRequireAuth}
                 >
                     Bid In Auction
                 </Button>

@@ -3,13 +3,11 @@ import { Menu, X } from "lucide-react";
 import { Button } from "../ui/button.jsx";
 import { Card, CardContent } from "../ui/card.jsx";
 import { Separator } from "../ui/separator.jsx";
-import { useNavigate } from "react-router-dom";
 
-export default function Header({ active = "home", onLogin, onRegister }) {
+export default function Header({ active = "home", onLogin, onRegister, onRequireAuth }) {
     const [open, setOpen] = useState(false);
     const triggerRef = useRef(null);
     const panelRef = useRef(null);
-    const navigate = useNavigate();
 
     const nav = [
         { key: "home", label: "Home", href: "#home" },
@@ -47,7 +45,7 @@ export default function Header({ active = "home", onLogin, onRegister }) {
         setOpen(false);
 
         if (key === "ongoing" || key === "upcoming") {
-            navigate("/login");
+            onRequireAuth?.();
             return;
         }
 
@@ -153,7 +151,7 @@ export default function Header({ active = "home", onLogin, onRegister }) {
                                     <a
                                         key={item.key}
                                         href={item.href}
-                                        onClick={(e) => handleNavClick(e, item.href)}
+                                        onClick={(e) => handleNavClick(e, item.href, item.key)}
                                         className={`block rounded-md px-3 py-2 font-semibold text-sm transition-colors ${
                                             isActive
                                                 ? "text-[#FF3B30] bg-gray-50"

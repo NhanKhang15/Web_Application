@@ -1,22 +1,27 @@
+import { useState } from "react";
 import Header from "./Header.jsx";
-import Footer from "./Footer";
-import Body from "./Body";
+import Footer from "./Footer.jsx";
+import Body from "./Body.jsx";
+import AuthDialog from "../ui/AuthDialog.jsx";
+import { useNavigate } from "react-router-dom";
 
 export default function Homepage() {
+    const [authOpen, setAuthOpen] = useState(false);
+    const navigate = useNavigate();
+
     return (
         <main className="bg-black min-h-screen w-full relative">
-            <div
-                className="absolute inset-0 -z-10"
-                style={{
-                    background:
-                        "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(226,232,240,0.15), transparent 70%), #000",
-                }}
+            <Header
+                active="home"
+                onLogin={() => navigate("/login")}
+                onRegister={() => navigate("/signup")}
+                onRequireAuth={() => setAuthOpen(true)}
             />
-            <div className="max-w-screen-xl mx-auto w-full">
-                <Header active="home" onLogin={() => {/* navigate('/login') */}} onRegister={() => {/* navigate('/signup') */}} />
-                <Body />
-                <Footer />
-            </div>
+            <Body onRequireAuth={() => setAuthOpen(true)} />
+            <Footer />
+
+            {/* Popup */}
+            <AuthDialog open={authOpen} onClose={() => setAuthOpen(false)} />
         </main>
     );
 }
