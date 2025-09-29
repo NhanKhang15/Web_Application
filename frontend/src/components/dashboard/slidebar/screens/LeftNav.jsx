@@ -22,7 +22,7 @@ export default function LeftNav({ activeKey: controlledKey, onChange }) {
 
   return (
     // ~120px @1920px, nhưng co giãn bằng clamp (tỉ lệ)
-    <aside className="flex w-[clamp(6rem,6.25vw,9rem)] bg-[#efeff2] flex-col sticky top-0 h-screen overflow-hidden">
+    <aside className="flex w-[clamp(6rem,6.25vw,9rem)] bg-[#efeff2] flex-col h-full">
       {/* KHÔNG còn header avatar ở đây */}
       <div className="flex-1 relative">
         {/* Vạch đỏ active */}
