@@ -4,6 +4,7 @@ import Signup from "./components/auth/screens/Signup";
 import AuthCallback from "./components/auth/screens/AuthCallback";
 import ProfileSetup from "./components/user_profile_setup/screens/ProfileSetup";
 import MerchantProfile from "./components/dashboard/pages/MerchantProfile"; 
+import Homepage from "./components/cover_page/sections/Homepage";
 
 function getUser() {
   const u = sessionStorage.getItem("user");
@@ -25,36 +26,35 @@ function RedirectHome() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<RedirectHome />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
+      <BrowserRouter>
+          <Routes>
+              <Route path="/" element={<Homepage />} />
+              <Route path="/Homepage" element={<Homepage />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
 
-        {/* OAuth callback */}
-        <Route path="/auth/callback" element={<AuthCallback />} />
+              {/* OAuth callback */}
+              <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route
+                  path="/user/profile"
+                  element={
+                  <RequireAuth>
+                      <ProfileSetup />
+                  </RequireAuth>
+              }
+              />
+              {/* ✅ đổi Dashboard -> MerchantProfile */}
+              <Route
+                  path="/dashboard"
+                  element={
+                  <RequireAuth>
+                      <MerchantProfile />
+                  </RequireAuth>
+              }
+              />
 
-        <Route
-          path="/user/profile"
-          element={
-            <RequireAuth>
-              <ProfileSetup />
-            </RequireAuth>
-          }
-        />
-
-        {/* ✅ đổi Dashboard -> MerchantProfile */}
-        <Route
-          path="/dashboard"
-          element={
-            <RequireAuth>
-              <MerchantProfile />
-            </RequireAuth>
-          }
-        />
-
-        <Route path="*" element={<RedirectHome />} />
-      </Routes>
-    </BrowserRouter>
+              <Route path="*" element={<Homepage />} />
+          </Routes>
+      </BrowserRouter>
   );
 }
