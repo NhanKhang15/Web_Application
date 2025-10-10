@@ -2,220 +2,282 @@
 import React from "react";
 import LeftNav from "../slidebar/screens/LeftNav";
 import CardShell from "../widget/sceens/CardShell";
-import InfoCardBody from "../user_infor/screens/InfoCardBody";
 import AuctionSideBar from "../slidebar/screens/AuctionSideBar";
 import UserProfileInfo from "../widget/sceens/UserProfileInfo";
 import fullLogo from "../../../assets/logo/full_logo.png";
 import Logo from "../../../assets/logo/logo.png";
-import { Search } from "lucide-react";
-import { motion, useScroll, useTransform, useMotionValueEvent } from "framer-motion";
+import { Search, Globe } from "lucide-react"; // 🌐 thêm Globe icon
+import {
+    motion,
+    useScroll,
+    useTransform,
+    useMotionValueEvent,
+} from "framer-motion";
+import { useUserProfile } from "../user_infor/lib/useUserProfile.js";
+import UserOverview from "../user_infor/screens/user/UserOverview.jsx";
+import UserAttachment from "../user_infor/screens/attachment/UserAttachment.jsx";
+import AuctionView from "../auction/AuctionView.jsx";
+import Settings from "../settings/Settings.jsx";
+import Utilities from "../utils/Utilities.jsx";
+import AboutUs from "../about/AboutUs.jsx";
+import CalculatorWidget from "../widget/sceens/CalculatorWidget.jsx";
 
-function AuctionView({ view }) {
-  return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-semibold">Auction – {view || "Dashboard"}</h2>
-      <div className="rounded-lg border border-neutral-200 p-4">
-        <p className="text-sm text-neutral-600">
-          Nội dung của <strong>{view}</strong> (demo). Thay bằng component thật của bạn.
-        </p>
-      </div>
-    </div>
-  );
-}
+// 🌍 import i18n
+import { useTranslation } from "react-i18next";
 
 function EmptyPage({ title }) {
-  return (
-    <div className="flex flex-col gap-4 h-full">
-      <h2 className="text-xl font-semibold">{title}</h2>
-      <div className="flex-1 min-h-[300px] rounded-lg border border-dashed border-neutral-300 p-6 text-neutral-400">
-        (để trống)
-      </div>
-    </div>
-  );
+    return (
+        <div className="flex flex-col gap-4 h-full">
+            <h2 className="text-xl font-semibold">{title}</h2>
+            <div className="flex-1 min-h-[300px] rounded-lg border border-dashed border-neutral-300 dark:border-neutral-700 p-6 text-neutral-400 dark:text-neutral-500">
+                (để trống)
+            </div>
+        </div>
+    );
 }
 
 export default function MerchantProfile() {
-  const [leftKey, setLeftKey] = React.useState("user");
-  const [activeSub, setActiveSub] = React.useState("bell");
-  const [auctionView, setAuctionView] = React.useState("Dashboard");
-  const [scrolled, setScrolled] = React.useState(false);
+    const [leftKey, setLeftKey] = React.useState("user");
+    const [activeSub, setActiveSub] = React.useState("user");
+    const [auctionView, setAuctionView] = React.useState("Dashboard");
+    const [scrolled, setScrolled] = React.useState(false);
+    const [isEditing, setIsEditing] = React.useState(false);
 
-  // === Config ===
-  const EXPANDED_HEADER_VH = 200; // header lớn
-  const COLLAPSED_HEADER_VH = 80; // header nhỏ
-  const OVERLAP_VH = 140;         // card cắn vào header ban đầu
+    const { profile, email, loading, updateProfile } = useUserProfile();
 
-  // === Framer Motion ===
-  const { scrollY } = useScroll();
+    const EXPANDED_HEADER_VH = 200;
+    const COLLAPSED_HEADER_VH = 80;
+    const OVERLAP_VH = 140;
 
-  // Header height: 30vh -> 56px
-  const headerH = useTransform(
-    scrollY,
-    [0, 80],
-    [`${EXPANDED_HEADER_VH}vh`, `${COLLAPSED_HEADER_VH}px`]
-  );
+    const { scrollY } = useScroll();
 
-  // Card overlap (negative margin): -12vh -> 0
-  const cardOverlap = useTransform(scrollY, [0, 80], [`-${EXPANDED_HEADER_VH - OVERLAP_VH}vh`, `0px`]);
+    const headerH = useTransform(scrollY, [0, 80], [`${EXPANDED_HEADER_VH}vh`, `${COLLAPSED_HEADER_VH}px`]);
+    const cardOverlap = useTransform(scrollY, [0, 80], [`-${EXPANDED_HEADER_VH - OVERLAP_VH}vh`, `0px`]);
+    const contentPadTop = useTransform(scrollY, [0, 80], [`${EXPANDED_HEADER_VH}vh`, `${COLLAPSED_HEADER_VH}px`]);
 
-  // Content padding-top to sit below header: 30vh -> 56px
-  const contentPadTop = useTransform(
-    scrollY,
-    [0, 80],
-    [`${EXPANDED_HEADER_VH}vh`, `${COLLAPSED_HEADER_VH}px`]
-  );
+    const logoFullOpacity = useTransform(scrollY, [0, 40], [1, 0]);
+    const logoMarkOpacity = useTransform(scrollY, [20, 80], [0, 1]);
+    const logoFullScale = useTransform(scrollY, [0, 40], [1, 0.95]);
 
-  // Logo transitions
-  const logoFullOpacity = useTransform(scrollY, [0, 40], [1, 0]);
-  const logoMarkOpacity = useTransform(scrollY, [20, 80], [0, 1]);
-  const logoFullScale = useTransform(scrollY, [0, 40], [1, 0.95]);
+    const searchWidth = useTransform(scrollY, [0, 80], ["min(640px,60vw)", "min(420px,40vw)"]);
+    const searchHeight = useTransform(scrollY, [0, 80], ["40px", "34px"]);
 
-  // Search size
-  const searchWidth = useTransform(scrollY, [0, 80], ["min(640px,60vw)", "min(420px,40vw)"]);
-  const searchHeight = useTransform(scrollY, [0, 80], ["40px", "34px"]);
-
-  // Toggle boolean with hysteresis to avoid flicker near the threshold
-  // Enter collapsed when y > thresholdHigh, return to expanded when y < thresholdLow
-  useMotionValueEvent(scrollY, "change", (y) => {
-    const thresholdHigh = 80;
-    const thresholdLow = 40;
-    setScrolled((prev) => {
-      if (!prev && y > thresholdHigh) return true;
-      if (prev && y < thresholdLow) return false;
-      return prev;
+    useMotionValueEvent(scrollY, "change", (y) => {
+        const thresholdHigh = 80;
+        const thresholdLow = 40;
+        setScrolled((prev) => {
+            if (!prev && y > thresholdHigh) return true;
+            if (prev && y < thresholdLow) return false;
+            return prev;
+        });
     });
-  });
 
-  const renderSubPage = () => {
-    switch (activeSub) {
-      case "file":
-        return <InfoCardBody />;
-      case "user":
-        return (
-          <>
-            <h2 className="text-xl font-semibold mb-4">User Overview</h2>
-            <p className="text-sm text-neutral-500">Trang User (demo).</p>
-          </>
-        );
-      case "wallet":
-        return (
-          <>
-            <h2 className="text-xl font-semibold mb-4">Wallet</h2>
-            <div className="rounded-lg border border-neutral-200 p-4">
-              <p className="text-sm text-neutral-600">Ghi chú trống…</p>
-            </div>
-          </>
-        );
-      case "chart":
-        return (
-          <>
-            <h2 className="text-xl font-semibold mb-4">Analytics</h2>
-            <div className="rounded-lg border border-neutral-200 p-4">
-              <p className="text-sm text-neutral-600">Biểu đồ (demo).</p>
-            </div>
-          </>
-        );
-      default:
-        return <p className="text-sm text-neutral-500">Chọn mục ở sub sidebar.</p>;
-    }
-  };
+    // 🌍 i18next setup
+    const { i18n } = useTranslation();
+    const changeLang = (lng) => {
+        i18n.changeLanguage(lng);
+        localStorage.setItem("lang", lng);
+    };
 
-  return (
-    <div className="bg-[#efeff2] min-h-screen w-full flex flex-col text-[#212121]">
-      {/* HEADER (sticky + motion height) */}
-      <motion.div
-        className="sticky top-0 bg-[#111] w-full z-20"
-        style={{ height: headerH, willChange: "height", zIndex: scrolled ? 50 : 20 }}
-      >
-        <div className="h-full px-6 flex items-center justify-between">
-          {/* LEFT: Logo */}
-          <div className="flex items-center">
-            <motion.img
-              src={fullLogo}
-              alt="Auction"
-              className="object-contain select-none h-28 w-auto"
-              style={{ opacity: logoFullOpacity, scale: logoFullScale }}
-            />
-            <motion.img
-              src={Logo}
-              alt="A"
-              className="object-contain select-none h-12 w-auto"
-              style={{ opacity: logoMarkOpacity }}
-            />
-          </div>
+    const renderSubPage = () => {
+        if (loading) {
+            return <p className="text-neutral-500 dark:text-neutral-400">Loading profile...</p>;
+        }
+        if (!profile) {
+            return <p className="text-red-500">Failed to load user data</p>;
+        }
 
-          {/* CENTER: Search */}
-          <div className="hidden md:flex flex-1 justify-center">
-            <motion.div style={{ width: searchWidth }}>
-              <motion.div
-                className="flex items-center justify-center w-full rounded-full bg-[#EAEAEA] px-4"
-                style={{ height: searchHeight }}
-              >
-                <Search className="w-4 h-4 text-[#828286] mr-2" />
-                <input
-                  type="text"
-                  placeholder="Search"
-                  className="flex-1 bg-transparent text-[#212121] placeholder:text-[#828286] text-center outline-none border-none"
-                />
-              </motion.div>
+        switch (activeSub) {
+            case "user":
+                return (
+                    <UserOverview
+                        profile={profile}
+                        email={email}
+                        isEditing={isEditing}
+                        setIsEditing={setIsEditing}
+                        updateProfile={updateProfile}
+                    />
+                );
+            case "file":
+                return <UserAttachment profile={profile} />;
+            case "wallet":
+                return (
+                    <>
+                        <h2 className="text-xl font-semibold mb-4">Wallet</h2>
+                        <div className="rounded-lg border border-neutral-200 dark:border-neutral-700 p-4">
+                            <p className="text-sm text-neutral-600 dark:text-neutral-400">Ghi chú trống…</p>
+                        </div>
+                    </>
+                );
+            case "chart":
+                return (
+                    <>
+                        <h2 className="text-xl font-semibold mb-4">Analytics</h2>
+                        <div className="rounded-lg border border-neutral-200 dark:border-neutral-700 p-4">
+                            <p className="text-sm text-neutral-600 dark:text-neutral-400">Biểu đồ (demo).</p>
+                        </div>
+                    </>
+                );
+            default:
+                return (
+                    <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                        Chọn mục ở sub sidebar.
+                    </p>
+                );
+        }
+    };
+
+    return (
+        <div className="min-h-screen w-full flex flex-col bg-neutral-50 dark:bg-[#111] text-neutral-900 dark:text-neutral-100">
+            {/* HEADER */}
+            <motion.div
+                className="sticky top-0 w-full z-20 bg-neutral-900 dark:bg-white"
+                style={{ height: headerH, willChange: "height", zIndex: scrolled ? 50 : 20 }}
+            >
+                <div className="h-full px-6 flex items-center justify-between">
+                    {/* LEFT: Logo */}
+                    <div className="flex items-center">
+                        <button
+                            onClick={() => {
+                                setLeftKey("auction");
+                                setAuctionView("Dashboard");
+                            }}
+                            className="bg-transparent p-0 m-0 flex items-center"
+                        >
+                            <motion.img
+                                src={fullLogo}
+                                alt="Auction"
+                                className="object-contain select-none h-28 w-auto"
+                                style={{ opacity: logoFullOpacity, scale: logoFullScale }}
+                            />
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                setLeftKey("auction");
+                                setAuctionView("Dashboard");
+                            }}
+                            className="bg-transparent p-0 m-0 flex items-center"
+                        >
+                            <motion.img
+                                src={Logo}
+                                alt="A"
+                                className="object-contain select-none h-12 w-auto"
+                                style={{ opacity: logoMarkOpacity }}
+                            />
+                        </button>
+                    </div>
+
+                    {/* CENTER: Search */}
+                    <div className="hidden md:flex flex-1 justify-center">
+                        <motion.div style={{ width: searchWidth }}>
+                            <motion.div
+                                className="flex items-center justify-center w-full rounded-full bg-neutral-200 dark:bg-neutral-800 px-4"
+                                style={{ height: searchHeight }}
+                            >
+                                <Search className="w-4 h-4 text-neutral-500 dark:text-neutral-400 mr-2" />
+                                <input
+                                    type="text"
+                                    placeholder="Search"
+                                    className="flex-1 bg-transparent text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-500 dark:placeholder:text-neutral-400 text-center outline-none border-none"
+                                />
+                            </motion.div>
+                        </motion.div>
+                    </div>
+
+                    {/* RIGHT: User chip + Lang switch */}
+                    <div className="flex items-center gap-4">
+                        {/* 🌐 Language switcher */}
+                        <div className="flex items-center gap-1">
+                            <Globe className="w-4 h-4 text-neutral-400" />
+                            <select
+                                value={i18n.language}
+                                onChange={(e) => changeLang(e.target.value)}
+                                className="bg-transparent text-sm text-neutral-200 dark:text-neutral-700 border border-neutral-700 dark:border-neutral-300 rounded-md px-2 py-1 hover:bg-neutral-800 dark:hover:bg-neutral-100 transition-colors duration-200"
+                            >
+                                <option value="vi">🇻🇳 VI</option>
+                                <option value="en">🇺🇸 EN</option>
+                            </select>
+                        </div>
+
+                        {/* 👤 User chip */}
+                        <UserProfileInfo
+                            variant="chip"
+                            profile={profile}
+                            email={email}
+                            onClick={() => {
+                                setLeftKey("user");
+                                setActiveSub("user");
+                            }}
+                        />
+                    </div>
+                </div>
             </motion.div>
-          </div>
 
-          {/* RIGHT: User chip -> avatar khi collapsed */}
-          <div className="flex items-center">
-            <UserProfileInfo variant={scrolled ? "avatar" : "chip"} />
-          </div>
+            {/* BODY */}
+            <div className="flex flex-1 min-h-0">
+                <motion.div
+                    className="hidden md:block shrink-0 sticky"
+                    style={{
+                        top: contentPadTop,
+                        willChange: "top",
+                        height: useTransform(scrollY, [0, 160], [
+                            `calc(100vh - ${EXPANDED_HEADER_VH}vh)`,
+                            `calc(100vh - ${COLLAPSED_HEADER_VH}px)`,
+                        ]),
+                    }}
+                >
+                    <LeftNav activeKey={leftKey} onChange={setLeftKey} />
+                </motion.div>
+
+                <main className="relative flex-1 min-h-0">
+                    <motion.div
+                        className="px-3 pb-4 min-w-0"
+                        style={{
+                            marginTop: scrolled ? headerH : cardOverlap,
+                            zIndex: scrolled ? 5 : 30,
+                            willChange: "margin-top",
+                        }}
+                    >
+                        {leftKey === "auction" ? (
+                            <CardShell
+                                variant="custom"
+                                customLeft={<AuctionSideBar active={auctionView} onSelect={setAuctionView} />}
+                                plClass="pl-0 md:pl-[11vw] lg:pl-[13vw]"
+                            >
+                                <AuctionView view={auctionView} />
+                            </CardShell>
+                        ) : leftKey === "user" ? (
+                            <CardShell
+                                subKey={activeSub}
+                                onSubChange={setActiveSub}
+                                plClass="pl-0 md:pl-[4%]"
+                                stickyTop={contentPadTop}
+                            >
+                                {renderSubPage()}
+                            </CardShell>
+                        ) : leftKey === "settings" ? (
+                            <CardShell plClass="pl-0 md:pl-[4%]" stickyTop={contentPadTop}>
+                                <Settings />
+                            </CardShell>
+                        ) : leftKey === "utils" ? (
+                            <CardShell variant="custom" plClass="pl-0 md:pl-[4%]">
+                                <Utilities />
+                            </CardShell>
+                        ) : leftKey === "about" ? (
+                            <CardShell variant="custom" plClass="pl-0 md:pl-[4%]" stickyTop={contentPadTop}>
+                                <AboutUs />
+                            </CardShell>
+                        ) : (
+                            <CardShell variant="custom" plClass="pl-0 md:pl-[4%]">
+                                <EmptyPage title={leftKey} />
+                            </CardShell>
+                        )}
+                    </motion.div>
+                </main>
+            </div>
+
+            <CalculatorWidget />
         </div>
-      </motion.div>
-
-      {/* BODY */}
-      <div className="flex flex-1 min-h-0">
-        <motion.div
-          className="hidden md:block shrink-0 sticky"
-          style={{
-            top: contentPadTop,
-            willChange: "top",
-            height: useTransform(scrollY, [0, 160], [
-              `calc(100vh - ${EXPANDED_HEADER_VH}vh)`,
-              `calc(100vh - ${COLLAPSED_HEADER_VH}px)`
-            ])
-          }}
-        >
-          {/* Left nav không có scroll riêng */}
-          <LeftNav activeKey={leftKey} onChange={setLeftKey} />
-        </motion.div>
-
-        <main className="relative flex-1 min-h-0">
-          {/* card: overlap -12vh -> 0; padTop 30vh -> 56px */}
-          <motion.div
-            className="px-3 pb-4"
-            style={{
-              marginTop: scrolled ? headerH : cardOverlap,
-              zIndex: scrolled ? 5 : 30,
-              willChange: "margin-top",
-            }}
-          >
-            {leftKey === "auction" ? (
-              <CardShell
-                variant="custom"
-                customLeft={<AuctionSideBar active={auctionView} onSelect={setAuctionView} />}
-                plClass="pl-0 md:pl-[20vw] lg:pl-[22vw]"
-              >
-                <AuctionView view={auctionView} />
-              </CardShell>
-            ) : leftKey === "user" ? (
-              <CardShell subKey={activeSub} onSubChange={setActiveSub} plClass="pl-0 md:pl-[4%]" stickyTop={contentPadTop}>
-                <InfoCardBody />
-                {renderSubPage()}
-              </CardShell>
-            ) : (
-              <CardShell variant="custom" plClass="pl-0 md:pl-[4%]">
-                <EmptyPage title={leftKey} />
-              </CardShell>
-            )}
-          </motion.div>
-        </main>
-      </div>
-    </div>
-  );
+    );
 }
