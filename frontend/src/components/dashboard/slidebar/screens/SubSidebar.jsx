@@ -1,5 +1,6 @@
 import React from "react";
 import { subSidebarItems } from "../lib/subSidebarItems";
+import {Icon} from "lucide-react";
 
 export default function SubSidebar({
   active,
@@ -12,7 +13,7 @@ export default function SubSidebar({
     <aside
       className={`
         absolute ${leftClass} ${topClass} ${bottomClass}
-        flex w-[72px] bg-white rounded-[15px]
+        flex w-[72px] 
         flex-col items-center py-8 space-y-8
         z-10
       `}
@@ -22,6 +23,7 @@ export default function SubSidebar({
       {subSidebarItems.map((it) => {
         const isActive = active === it.key;
         const isDisabled = it.disabled;
+        const Icon = it.icon;
 
         return (
           <button
@@ -47,17 +49,14 @@ export default function SubSidebar({
                           group-hover:bg-neutral-100
                           focus-visible:ring-2 focus-visible:ring-[#457DFB]/60`}
             >
-              <img
-                src={it.icon}
-                alt={it.title}
-                className={`
-                  ${it.key === "line" ? "w-[21px] h-[42px]" : ""}
-                  ${it.key === "user" ? "w-[31px] h-[30px]" : ""}
-                  ${it.key === "bell" ? "w-8 h-8" : ""}
-                  ${it.key === "note" ? "w-[15px] h-6" : ""}
-                  ${it.key === "chart" ? "w-[37px] h-[37px]" : ""}
-                `}
+              <Icon
+                  className={`
+                  w-6 h-6 transition 
+                  ${isActive ? "text-[#457DFB]" : "text-neutral-700 dark:text-neutral-200"} 
+                  group-hover:text-[#457DFB]
+                  `}
               />
+
             </span>
           </button>
         );
