@@ -1,7 +1,7 @@
 import { useState } from "react";
-import Header from "./Header.jsx";
-import Footer from "./Footer.jsx";
-import Body from "./Body.jsx";
+import Header from "../sections/Header.jsx";
+import Footer from "../sections/Footer.jsx";
+import Body from "../sections/Body.jsx";
 import AuthDialog from "../ui/AuthDialog.jsx";
 import { useNavigate } from "react-router-dom";
 
@@ -10,7 +10,7 @@ export default function Homepage() {
     const navigate = useNavigate();
 
     return (
-        <main className="bg-black min-h-screen w-full relative">
+        <main className="bg-black min-h-screen w-full relative overflow-x-hidden">
             <Header
                 active="home"
                 onLogin={() => navigate("/login")}

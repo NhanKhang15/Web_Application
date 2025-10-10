@@ -1,0 +1,332 @@
+// i18n.js
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
+
+const resources = {
+    en: {
+        translation: {
+            settings: "Settings",
+            theme: "Theme Customization",
+            security: "Security",
+            logout: "Logout",
+            change_password: "Change Password",
+            light_mode: "Light Mode",
+            dark_mode: "Dark Mode",
+            success: "Action Successful!",
+
+            // 🔻 thêm cho Header/nav
+            home: "Home",
+            ongoing: "On-going Auctions",
+            upcoming: "Upcoming Auctions",
+            login: "Login",
+            register: "Register",
+
+            check_auctions: "Check Auctions",
+            auction_categories: "Auction Categories",
+            key_features: "Key Features",
+            auction_highlights: "Auction Highlights",
+            bid_in_auction: "Bid In Auction",
+            featured_auctions: "Featured Auctions",
+
+            slides: [
+                {
+                    titleWhite: "Accelerate, Elevate, and ",
+                    titleRed: "Innovate!",
+                    description: "Bid on Dream Cars, Exotic Animals, and Cutting-Edge Electronics in Our Unique Auctions!",
+                },
+                {
+                    titleWhite: "Discover Rare ",
+                    titleRed: "Treasures!",
+                    description: "From luxury watches to fine art, bid on exclusive items every day!",
+                },
+                {
+                    titleWhite: "Join the Future of ",
+                    titleRed: "Auctions!",
+                    description: "Experience fast, secure, and exciting bidding like never before.",
+                },
+            ],
+
+            featured_slides: [
+                {
+                    titleWhite: "Classic 1985 Toyota ",
+                    titleRed: "Land Cruiser.",
+                    description:
+                        "This 1985 Toyota Land Cruiser is a testament to Toyota's legacy of engineering excellence. Perfect for collectors, adventurers.",
+                    features: ["Iconic Design: The 1985 model", "Off-Road Mastery: 4x4 capabilities"],
+                    highlights: ["Well Maintained", "Low Mileage", "Detailed Documentation"],
+                },
+                {
+                    titleWhite: "Luxury ",
+                    titleRed: "Rolex Watch.",
+                    description:
+                        "A rare collector's item, this Rolex combines timeless design with unmatched craftsmanship.",
+                    features: ["Gold bezel", "Water resistant"],
+                    highlights: ["Excellent Condition", "Original Papers"],
+                },
+                {
+                    titleWhite: "Exotic ",
+                    titleRed: "Animal Auction.",
+                    description:
+                        "Bid on rare and exotic animals, responsibly sourced with full documentation.",
+                    features: ["Unique Species", "Certified Health"],
+                    highlights: ["Rare Opportunity", "Exclusive Access"],
+                },
+                {
+                    titleWhite: "High-End ",
+                    titleRed: "Electronics.",
+                    description:
+                        "Experience cutting-edge technology with our exclusive range of electronic auctions.",
+                    features: ["Latest Models", "Warranty Included"],
+                    highlights: ["Trusted Sellers", "Great Deals"],
+                },
+            ],
+
+            categories: ["Car Auctions", "Animal Auctions", "Electronic Auctions", "Exotic Clothing Auction"],
+
+            footer: {
+                terms: "Terms & Conditions",
+                privacy: "Privacy Policy",
+                contact: "Contact Us",
+                social_accounts: "Social Accounts",
+                copyright: "Copyright ©{{year}}. All rights reserved.",
+            },
+
+            signup: "Sign up",
+            signup_free: "Sign up for free",
+            username: "Username",
+            password: "Password",
+            loading: "Loading...",
+            or_continue_with: "or continue with",
+            login_google: "Log in with Google",
+            login_facebook: "Log in with Facebook",
+            facebook_login_coming_soon: "Facebook login coming soon!",
+            forgot_password: "Forgot your password?",
+            welcome: "Welcome!!!",
+            first_time_here: "First time here?",
+            terms_agree: "You acknowledge that you read, and agree, to our",
+            terms: "Terms of Service",
+            privacy: "Privacy Policy",
+            and: "and",
+
+            // ✅ Messages
+            please_enter_username_password: "Please enter both username and password.",
+            login_success: "Login successful!",
+            login_failed: "Login failed.",
+            server_connection_error: "Cannot connect to the server.",
+
+            signup_title: "Start for free",
+            signup_heading: "Sign up",
+            email: "Email",
+            confirm_password: "Confirm Password",
+            processing: "Processing...",
+            signup_google: "Sign up with Google",
+            signup_facebook: "Sign up with Facebook",
+            agree_terms: "By signing up, you agree to our",
+            data_policies: "Data Policies",
+            cookies_policy: "Cookies Policy",
+            already_have_account: "Already have an account?",
+            password_too_short: "Password must be at least 6 characters.",
+            password_not_match: "Password and Confirm Password do not match.",
+            signup_success: "Account created successfully!",
+            signup_failed: "Signup failed.",
+            fill_all_fields: "Please fill in all fields.",
+
+            utilities_title: "Utilities",
+            utilities_description: "A collection of useful tools for administrators and sellers.",
+            system_tools_title: "System Tools",
+            system_tools_desc: "Tools that help with system maintenance, diagnostics, and optimization.",
+            quick_calculator_title: "Quick Calculator",
+            quick_calculator_desc: "A fast calculator that allows you to enter expressions and instantly see the result. This tool can also be enabled as a floating widget in the bottom-right corner of the screen.",
+            task_utilities_title: "Task Utilities",
+            task_utilities_desc: "Tools that help you track, jot down, and manage small daily tasks.",
+
+            about_us_title: "About Us",
+            about_us_intro:
+                "Welcome to AuctionHub — a smart, modern, and transparent online auction platform. Developed to help users easily join auctions, manage their accounts, transactions, and profiles within a unified system.",
+            about_mission_title: "Our Mission",
+            about_mission_desc:
+                "To build a fast, transparent, and secure online auction platform — helping sellers and buyers connect effectively.",
+            about_team_title: "Our Team",
+            about_team_desc:
+                "Developed by passionate IT students who love web technology and AI. We aim to bring the best user experience possible.",
+            about_vision_title: "Global Vision",
+            about_vision_desc:
+                "Our long-term goal is to expand internationally, integrating blockchain and AI to ensure absolute transparency in auctions.",
+            about_innovation_title: "Innovation",
+            about_innovation_desc:
+                "We constantly innovate, applying cutting-edge technologies to enhance user experience and optimize system performance.",
+            about_community_title: "Community",
+            about_community_desc:
+                "AuctionHub builds a strong, connected community where users grow together in a transparent and trustworthy environment.",
+            all_rights_reserved: "All rights reserved.",
+        },
+    },
+    vi: {
+        translation: {
+            settings: "Cài đặt",
+            theme: "Tuỳ chỉnh giao diện",
+            security: "Bảo mật",
+            logout: "Đăng xuất",
+            change_password: "Đổi mật khẩu",
+            light_mode: "Chế độ sáng",
+            dark_mode: "Chế độ tối",
+            success: "Thao tác thành công!",
+
+            // 🔻 thêm cho Header/nav
+            home: "Trang chủ",
+            ongoing: "Đấu giá đang diễn ra",
+            upcoming: "Đấu giá sắp tới",
+            login: "Đăng nhập",
+            register: "Đăng ký",
+
+            check_auctions: "Xem đấu giá",
+            auction_categories: "Danh mục đấu giá",
+            key_features: "Tính năng nổi bật",
+            auction_highlights: "Điểm nổi bật",
+            bid_in_auction: "Tham gia đấu giá",
+            featured_auctions: "Đấu giá nổi bật",
+
+            slides: [
+                {
+                    titleWhite: "Tăng tốc, Nâng tầm và ",
+                    titleRed: "Đổi mới!",
+                    description: "Đấu giá siêu xe, động vật quý hiếm và công nghệ tiên tiến ngay hôm nay!",
+                },
+                {
+                    titleWhite: "Khám phá ",
+                    titleRed: "Kho báu hiếm!",
+                    description: "Từ đồng hồ xa xỉ đến tác phẩm nghệ thuật, cơ hội độc quyền mỗi ngày!",
+                },
+                {
+                    titleWhite: "Tham gia kỷ nguyên mới của ",
+                    titleRed: "Đấu giá!",
+                    description: "Trải nghiệm đấu giá nhanh chóng, an toàn và đầy hứng khởi.",
+                },
+            ],
+
+            featured_slides: [
+                {
+                    titleWhite: "Toyota Land Cruiser ",
+                    titleRed: "1985 Cổ điển.",
+                    description:
+                        "Minh chứng cho di sản kỹ thuật bền bỉ của Toyota – lý tưởng cho nhà sưu tầm và người thích phiêu lưu.",
+                    features: ["Thiết kế biểu tượng (đời 1985)", "Khả năng off-road: dẫn động 4x4"],
+                    highlights: ["Bảo dưỡng tốt", "Odo thấp", "Hồ sơ/giấy tờ đầy đủ"],
+                },
+                {
+                    titleWhite: "Đồng hồ ",
+                    titleRed: "Rolex Sang trọng.",
+                    description:
+                        "Món sưu tầm hiếm, kết hợp thiết kế vượt thời gian và tay nghề đỉnh cao.",
+                    features: ["Viền vàng", "Chống nước"],
+                    highlights: ["Tình trạng xuất sắc", "Giấy tờ nguyên bản"],
+                },
+                {
+                    titleWhite: "Đấu giá ",
+                    titleRed: "Động vật quý hiếm.",
+                    description:
+                        "Đấu giá các loài độc đáo, nguồn gốc rõ ràng kèm chứng nhận sức khoẻ.",
+                    features: ["Loài độc nhất", "Chứng nhận sức khoẻ"],
+                    highlights: ["Cơ hội hiếm", "Quyền truy cập độc quyền"],
+                },
+                {
+                    titleWhite: "Thiết bị điện tử ",
+                    titleRed: "Cao cấp.",
+                    description:
+                        "Trải nghiệm công nghệ mới nhất với bộ sưu tập thiết bị độc quyền.",
+                    features: ["Mẫu đời mới", "Kèm bảo hành"],
+                    highlights: ["Người bán uy tín", "Giá tốt"],
+                },
+            ],
+
+            categories: ["Đấu giá xe hơi", "Đấu giá động vật", "Đấu giá điện tử", "Đấu giá quần áo cao cấp"],
+
+            footer: {
+                terms: "Điều khoản & Điều kiện",
+                privacy: "Chính sách bảo mật",
+                contact: "Liên hệ",
+                social_accounts: "Mạng xã hội",
+                copyright: "Bản quyền ©{{year}}. Mọi quyền được bảo lưu.",
+            },
+
+            signup: "Đăng ký",
+            signup_free: "Đăng ký miễn phí",
+            username: "Tên đăng nhập",
+            password: "Mật khẩu",
+            loading: "Đang tải...",
+            or_continue_with: "hoặc tiếp tục với",
+            login_google: "Đăng nhập với Google",
+            login_facebook: "Đăng nhập với Facebook",
+            facebook_login_coming_soon: "Tính năng đăng nhập Facebook sẽ có sớm!",
+            forgot_password: "Quên mật khẩu?",
+            welcome: "Chào mừng!!!",
+            first_time_here: "Lần đầu tới đây?",
+            terms_agree: "Bạn xác nhận rằng bạn đã đọc và đồng ý với",
+            terms: "Điều khoản dịch vụ",
+            privacy: "Chính sách bảo mật",
+            and: "và",
+
+            // ✅ Messages
+            please_enter_username_password: "Vui lòng nhập đủ tên đăng nhập và mật khẩu.",
+            login_success: "Đăng nhập thành công!",
+            login_failed: "Đăng nhập thất bại.",
+            server_connection_error: "Không thể kết nối với máy chủ.",
+
+            signup_title: "Bắt đầu miễn phí",
+            signup_heading: "Đăng ký",
+            email: "Email",
+            confirm_password: "Xác nhận mật khẩu",
+            processing: "Đang xử lý...",
+            signup_google: "Đăng ký với Google",
+            signup_facebook: "Đăng ký với Facebook",
+            agree_terms: "Khi đăng ký, bạn đồng ý với",
+            data_policies: "Chính sách dữ liệu",
+            cookies_policy: "Chính sách cookie",
+            already_have_account: "Đã có tài khoản?",
+            password_too_short: "Mật khẩu tối thiểu 6 ký tự.",
+            password_not_match: "Mật khẩu và xác nhận không khớp.",
+            signup_success: "Tạo tài khoản thành công!",
+            signup_failed: "Đăng ký thất bại.",
+            fill_all_fields: "Vui lòng điền đầy đủ thông tin.",
+
+            utilities_title: "Công cụ hỗ trợ",
+            utilities_description: "Tập hợp các công cụ hữu ích cho người quản trị và người bán.",
+            system_tools_title: "Công cụ hệ thống",
+            system_tools_desc: "Các công cụ hỗ trợ bảo trì, kiểm tra và tối ưu hệ thống.",
+            quick_calculator_title: "Máy tính nhanh",
+            quick_calculator_desc: "Máy tính nhanh cho phép nhập biểu thức và xem kết quả tức thì. Công cụ này có thể được bật ở góc phải màn hình dưới dạng widget.",
+            task_utilities_title: "Công cụ công việc",
+            task_utilities_desc: "Công cụ giúp theo dõi, ghi chú và quản lý các công việc nhỏ hằng ngày.",
+
+            about_us_title: "Về Chúng Tôi",
+            about_us_intro:
+                "Chào mừng bạn đến với nền tảng AuctionHub — nơi đấu giá thông minh, hiện đại và minh bạch. Dự án được phát triển nhằm giúp người dùng dễ dàng tham gia các phiên đấu giá, quản lý tài khoản, giao dịch và hồ sơ người dùng trong một hệ thống hợp nhất.",
+            about_mission_title: "Sứ Mệnh Của Chúng Tôi",
+            about_mission_desc:
+                "Xây dựng nền tảng đấu giá trực tuyến nhanh chóng, minh bạch và an toàn — giúp người bán và người mua kết nối hiệu quả.",
+            about_team_title: "Đội Ngũ Của Chúng Tôi",
+            about_team_desc:
+                "Được phát triển bởi nhóm sinh viên CNTT đam mê công nghệ web và trí tuệ nhân tạo. Chúng tôi luôn hướng đến việc mang lại trải nghiệm người dùng tốt nhất.",
+            about_vision_title: "Tầm Nhìn Toàn Cầu",
+            about_vision_desc:
+                "Mục tiêu dài hạn là mở rộng hệ thống ra quốc tế, tích hợp công nghệ blockchain và AI để đảm bảo minh bạch tuyệt đối trong đấu giá.",
+            about_innovation_title: "Đổi Mới",
+            about_innovation_desc:
+                "Chúng tôi không ngừng đổi mới, áp dụng công nghệ mới nhất để tối ưu trải nghiệm người dùng và tăng hiệu suất hệ thống.",
+            about_community_title: "Cộng Đồng",
+            about_community_desc:
+                "AuctionHub xây dựng cộng đồng người dùng mạnh mẽ, gắn kết và cùng nhau phát triển trong một môi trường minh bạch, đáng tin cậy.",
+            all_rights_reserved: "Mọi quyền được bảo lưu.",
+
+        },
+    },
+};
+
+i18n.use(initReactI18next).init({
+    resources,
+    lng: localStorage.getItem("lang") || "vi",
+    fallbackLng: "en",
+    interpolation: { escapeValue: false },
+});
+
+export default i18n;

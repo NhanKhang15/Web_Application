@@ -36,7 +36,7 @@ public class UserProfileController {
 
     // --- GET profile theo userId ---
     @GetMapping("/{userId}")
-    public ResponseEntity<?> getByUserId(@PathVariable Integer userId) {
+    public ResponseEntity<?> getProfileByUserId(@PathVariable Integer userId) {
         return profileRepo.findByUser_UserId(userId)
             .map(this::okProfile)
             .orElseGet(() -> ResponseEntity.ok(Map.of(
@@ -48,7 +48,7 @@ public class UserProfileController {
 
     // --- GET profile theo username (tiện debug) ---
     @GetMapping("/by-username/{username}")
-    public ResponseEntity<?> getByUsername(@PathVariable String username) {
+    public ResponseEntity<?> getProfileByUsername(@PathVariable String username) {
         return profileRepo.findByUser_Username(username)
             .map(this::okProfile)
             .orElse(ResponseEntity.status(404).body(Map.of(

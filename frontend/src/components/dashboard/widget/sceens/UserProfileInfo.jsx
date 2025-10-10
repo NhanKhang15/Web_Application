@@ -1,30 +1,44 @@
 import React, { memo } from "react";
 import Avatar from "./Avatar";
 
-export const userProfileData = {
-  src: "https://c.animaapp.com/mfm83o18SmdVol/img/8450-4933841266891-1589240822-n.png",
-  alt: "Mazen Pacha",
-  name: "Mazen Pacha",
-};
+function UserProfileInfo({ variant = "chip", profile, email, onClick }) {
+    const avatarUrl = profile?.avatarUrl || "https://via.placeholder.com/56";
+    const name = profile?.fullName || email || "User";
 
-// variant: "chip" = avatar + tên; "avatar" = chỉ avatar nhỏ
-function UserProfileInfo({ variant = "chip" }) {
-  if (variant === "avatar") {
+    // Kiểu hiển thị chỉ có avatar
+    if (variant === "avatar") {
+        return (
+            <div
+                className="flex items-center cursor-pointer transition-all duration-300 ease-out"
+                onClick={onClick}
+            >
+                <Avatar className="w-12 h-12" src={avatarUrl} alt={name} />
+            </div>
+        );
+    }
+
+    // Kiểu hiển thị avatar + tên
     return (
-      <div className="flex items-center transition-all duration-300 ease-out">
-        <Avatar className="w-12 h-12" src={userProfileData.src} alt={userProfileData.alt} />
-      </div>
+        <div
+            className="flex items-center cursor-pointer transition-all duration-300 ease-out"
+            onClick={onClick}
+        >
+            <Avatar className="w-16 h-16" src={avatarUrl} alt={name} />
+            <div className="ml-3">
+                <div
+                    className="text-[#e43137] dark:text-[#ff6b6f]
+                     text-sm font-bold leading-none transition-colors duration-300"
+                >
+                    {name}
+                </div>
+                <div
+                    className="text-gray-600 dark:text-gray-400 text-xs font-normal mt-0.5 transition-colors duration-300"
+                >
+                    {email}
+                </div>
+            </div>
+        </div>
     );
-  }
-
-  // chip bình thường (header chưa collapse)
-  return (
-    <div className="flex items-center transition-all duration-300 ease-out">
-      <Avatar className="w-16 h-16" src={userProfileData.src} alt={userProfileData.alt} />
-      <div className="text-[#59f5bc] text-sm font-medium leading-none">{userProfileData.name}</div>
-    </div>
-  );
 }
 
-// Memoize the component to prevent unnecessary re-renders during scroll
 export default memo(UserProfileInfo);
