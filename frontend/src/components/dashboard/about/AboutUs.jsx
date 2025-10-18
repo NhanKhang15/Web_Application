@@ -8,12 +8,46 @@ import {
     HeartHandshake,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { motion } from "framer-motion";
 
 export default function AboutUs() {
     const { t } = useTranslation();
 
+    const cards = [
+        {
+            icon: <Rocket className="w-5 h-5 text-pink-500" />,
+            title: t("about_mission_title"),
+            desc: t("about_mission_desc"),
+        },
+        {
+            icon: <Users className="w-5 h-5 text-green-500" />,
+            title: t("about_team_title"),
+            desc: t("about_team_desc"),
+        },
+        {
+            icon: <Globe className="w-5 h-5 text-indigo-500" />,
+            title: t("about_vision_title"),
+            desc: t("about_vision_desc"),
+        },
+        {
+            icon: <Sparkles className="w-5 h-5 text-yellow-500" />,
+            title: t("about_innovation_title"),
+            desc: t("about_innovation_desc"),
+        },
+        {
+            icon: <HeartHandshake className="w-5 h-5 text-red-500" />,
+            title: t("about_community_title"),
+            desc: t("about_community_desc"),
+        },
+    ];
+
     return (
-        <div className="flex flex-col gap-6">
+        <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="flex flex-col gap-8"
+        >
             {/* Header */}
             <div className="flex items-center gap-3">
                 <Info className="w-7 h-7 text-blue-600 dark:text-blue-400" />
@@ -22,86 +56,36 @@ export default function AboutUs() {
                 </h2>
             </div>
 
-            {/* Description */}
             <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed">
                 {t("about_us_intro")}
             </p>
 
-            {/* Row 1 — 3 sections */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Mission */}
-                <div className="flex flex-col gap-3 p-4 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 hover:shadow-md transition">
-                    <div className="flex items-center gap-2">
-                        <Rocket className="w-5 h-5 text-pink-500" />
-                        <span className="font-semibold text-neutral-800 dark:text-neutral-100">
-                            {t("about_mission_title")}
-                        </span>
-                    </div>
-                    <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                        {t("about_mission_desc")}
-                    </p>
-                </div>
-
-                {/* Team */}
-                <div className="flex flex-col gap-3 p-4 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 hover:shadow-md transition">
-                    <div className="flex items-center gap-2">
-                        <Users className="w-5 h-5 text-green-500" />
-                        <span className="font-semibold text-neutral-800 dark:text-neutral-100">
-                            {t("about_team_title")}
-                        </span>
-                    </div>
-                    <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                        {t("about_team_desc")}
-                    </p>
-                </div>
-
-                {/* Global Vision */}
-                <div className="flex flex-col gap-3 p-4 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 hover:shadow-md transition">
-                    <div className="flex items-center gap-2">
-                        <Globe className="w-5 h-5 text-indigo-500" />
-                        <span className="font-semibold text-neutral-800 dark:text-neutral-100">
-                            {t("about_vision_title")}
-                        </span>
-                    </div>
-                    <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                        {t("about_vision_desc")}
-                    </p>
-                </div>
-            </div>
-
-            {/* Row 2 — 2 sections */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Innovation */}
-                <div className="flex flex-col gap-3 p-4 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 hover:shadow-md transition">
-                    <div className="flex items-center gap-2">
-                        <Sparkles className="w-5 h-5 text-yellow-500" />
-                        <span className="font-semibold text-neutral-800 dark:text-neutral-100">
-                            {t("about_innovation_title")}
-                        </span>
-                    </div>
-                    <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                        {t("about_innovation_desc")}
-                    </p>
-                </div>
-
-                {/* Community */}
-                <div className="flex flex-col gap-3 p-4 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 hover:shadow-md transition">
-                    <div className="flex items-center gap-2">
-                        <HeartHandshake className="w-5 h-5 text-red-500" />
-                        <span className="font-semibold text-neutral-800 dark:text-neutral-100">
-                            {t("about_community_title")}
-                        </span>
-                    </div>
-                    <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                        {t("about_community_desc")}
-                    </p>
-                </div>
+            {/* Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {cards.map((item, index) => (
+                    <motion.div
+                        key={index}
+                        whileHover={{ scale: 1.03 }}
+                        transition={{ duration: 0.25 }}
+                        className="flex flex-col gap-3 p-4 rounded-xl bg-white dark:bg-neutral-900 shadow-sm hover:shadow-md transition"
+                    >
+                        <div className="flex items-center gap-2">
+                            {item.icon}
+                            <span className="font-semibold text-neutral-800 dark:text-neutral-100">
+                                {item.title}
+                            </span>
+                        </div>
+                        <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                            {item.desc}
+                        </p>
+                    </motion.div>
+                ))}
             </div>
 
             {/* Footer */}
             <div className="mt-6 text-center text-sm text-neutral-500 dark:text-neutral-400">
-                © {new Date().getFullYear()} AuctionHub Team — {t("all_rights_reserved")}
+                © {new Date().getFullYear()} AuctionHub — {t("all_rights_reserved")}
             </div>
-        </div>
+        </motion.div>
     );
 }

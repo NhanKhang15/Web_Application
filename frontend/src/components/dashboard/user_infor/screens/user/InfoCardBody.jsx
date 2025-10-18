@@ -1,24 +1,36 @@
 // src/user_infor/screens/InfoCardBody.jsx
-import React from "react";
+import React, { useEffect } from "react";
 import Avatar from "../../../widget/sceens/Avatar.jsx";
+import { motion } from "framer-motion";
+import AOS from "aos";
+import "aos/dist/aos.css";
+import { useTranslation } from "react-i18next";
 
 export default function InfoCardBody({ profile }) {
+    const { t } = useTranslation();
     if (!profile) return null;
 
     return (
         <>
             {/* Header */}
-            <div className="min-h-[84px] md:h-[100px] w-full flex items-center gap-4 md:gap-6 mb-6">
+            <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                className="min-h-[84px] md:h-[100px] w-full flex items-center gap-4 md:gap-6 mb-6"
+            >
                 <Avatar
                     size={56}
                     src={profile.avatarUrl || "https://via.placeholder.com/56"}
                     alt={profile.fullName || "User"}
                 />
                 <div className="leading-tight">
-                    <div className="text-lg md:text-xl font-semibold">{profile.fullName}</div>
-                    <div className="flex items-center gap-2">
+                    <div className="text-lg md:text-xl font-semibold text-neutral-900 dark:text-neutral-100">
+                        {profile.fullName || t("no_data")}
+                    </div>
+                    <div className="flex items-center gap-2 text-[#9296ad] text-sm">
                         <svg
-                            className="w-3 h-3 text-[#9296ad]"
+                            className="w-3 h-3"
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="currentColor"
@@ -26,64 +38,44 @@ export default function InfoCardBody({ profile }) {
                             <path d="M21 10c0 7-9 12-9 12S3 17 3 10a9 9 0 1 1 18 0Z" />
                             <circle cx="12" cy="10" r="3" />
                         </svg>
-                        <span className="text-[#9296ad] text-sm">
-                            {profile.address || "No address"}
-                        </span>
+                        <span>{profile.address || t("no_data")}</span>
                     </div>
                 </div>
-            </div>
+            </motion.div>
 
-            {/* User details */}
-            {/* 👇 chỉ tách 2 cột khi >= lg (1024px) */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-6 lg:gap-y-8 gap-x-8 mb-8">
-                {/* LEFT GROUP (Phone + DOB) */}
+            {/* Info grid */}
+            <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                className="grid grid-cols-1 lg:grid-cols-2 gap-y-6 lg:gap-y-8 gap-x-8 mb-8"
+            >
                 <div className="flex flex-col gap-6">
-                    {/* Phone */}
-                    <div className="flex flex-col lg:flex-row lg:items-center">
-                        <span className="font-medium text-neutral-800 dark:text-neutral-200 lg:w-40 xl:w-52">
-                            Phone:
-                        </span>
-                        <span className="text-neutral-600 dark:text-neutral-400 break-all">
-                            {profile.phone || "-"}
-                        </span>
-                    </div>
-
-                    {/* Date of Birth */}
-                    <div className="flex flex-col lg:flex-row lg:items-center">
-                        <span className="font-medium text-neutral-800 dark:text-neutral-200 lg:w-40 xl:w-52">
-                            Date of Birth:
-                        </span>
-                        <span className="text-neutral-600 dark:text-neutral-400 break-all">
-                            {profile.dateOfBirth || "-"}
-                        </span>
-                    </div>
+                    <InfoField label={t("phone")} value={profile.phone} />
+                    <InfoField label={t("date_of_birth")} value={profile.dateOfBirth} />
                 </div>
-
-                {/* RIGHT GROUP (Email + Bio) */}
                 <div className="flex flex-col gap-6">
-                    {/* Email */}
-                    <div className="flex flex-col lg:flex-row lg:items-center">
-                        <span className="font-medium text-neutral-800 dark:text-neutral-200 lg:w-40 xl:w-52">
-                            Email:
-                        </span>
-                        <span className="text-neutral-600 dark:text-neutral-400 break-all">
-                            {profile.email || "-"}
-                        </span>
-                    </div>
-
-                    {/* Bio */}
-                    <div className="flex flex-col lg:flex-row lg:items-center">
-                        <span className="font-medium text-neutral-800 dark:text-neutral-200 lg:w-40 xl:w-52">
-                            Bio:
-                        </span>
-                        <span className="text-neutral-600 dark:text-neutral-400 break-all">
-                            {profile.bio || "-"}
-                        </span>
-                    </div>
+                    <InfoField label={t("email")} value={profile.email} />
+                    <InfoField label={t("bio")} value={profile.bio} />
                 </div>
-            </div>
-
-            <div className="w-full h-px bg-[#95979f] mb-4 md:mb-6" />
+            </motion.div>
         </>
+    );
+}
+
+function InfoField({ label, value }) {
+    return (
+        <motion.div
+            whileHover={{ scale: 1.02 }}
+            transition={{ duration: 0.2 }}
+            className="flex flex-col lg:flex-row lg:items-center bg-transparent"
+        >
+            <span className="font-medium text-neutral-800 dark:text-neutral-200 lg:w-40 xl:w-52">
+                {label}
+            </span>
+            <span className="text-neutral-600 dark:text-neutral-400 break-all">
+                {value || "-"}
+            </span>
+        </motion.div>
     );
 }
