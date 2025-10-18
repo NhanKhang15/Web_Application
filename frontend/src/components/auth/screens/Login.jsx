@@ -5,6 +5,7 @@ import { Card, CardContent } from "../ui/Card";
 import { Input } from "../ui/Input";
 import { loginLocal, startGoogleLogin } from "../services/login_api";
 import { useTranslation } from "react-i18next"; // ✅ thêm i18n
+import {API_BASE_URL} from "../../../lib/api_url.js";
 
 export default function Login() {
     const navigate = useNavigate();
