@@ -12,7 +12,7 @@ function UserProfileInfo({ variant = "chip", profile, email, onClick }) {
                 className="flex items-center cursor-pointer transition-all duration-300 ease-out"
                 onClick={onClick}
             >
-                <Avatar className="w-12 h-12" src={avatarUrl} alt={name} />
+                <Avatar size={56} className="w-12 h-12" src={avatarUrl} alt={name} />
             </div>
         );
     }
@@ -23,7 +23,7 @@ function UserProfileInfo({ variant = "chip", profile, email, onClick }) {
             className="flex items-center cursor-pointer transition-all duration-300 ease-out"
             onClick={onClick}
         >
-            <Avatar className="w-16 h-16" src={avatarUrl} alt={name} />
+            <Avatar size={56} src={avatarUrl} alt={name} />
             <div className="ml-3">
                 <div
                     className="text-[#e43137] dark:text-[#ff6b6f]

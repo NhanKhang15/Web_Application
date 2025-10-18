@@ -159,6 +159,27 @@ const resources = {
             about_community_desc:
                 "AuctionHub builds a strong, connected community where users grow together in a transparent and trustworthy environment.",
             all_rights_reserved: "All rights reserved.",
+
+            auth_required: "Authentication Required",
+            auth_message_1: "You have to",
+            auth_message_2: "to make an action.",
+            auth_message_3: "If you don’t have an account,",
+            register_here: "register here",
+            close: "Close",
+
+            user_info: "User Information",
+            edit_user_info: "Edit Information",
+            phone: "Phone Number",
+            address: "Address",
+            bio: "Biography",
+            save_changes: "Save Changes",
+            cancel: "Cancel",
+            attachments: "Attachments",
+            no_data: "No data",
+            preview: "Preview",
+            date_of_birth: "Date of Birth",
+            full_name: "Full Name",
+
         },
     },
     vi: {
@@ -317,6 +338,26 @@ const resources = {
             about_community_desc:
                 "AuctionHub xây dựng cộng đồng người dùng mạnh mẽ, gắn kết và cùng nhau phát triển trong một môi trường minh bạch, đáng tin cậy.",
             all_rights_reserved: "Mọi quyền được bảo lưu.",
+
+            auth_required: "Yêu cầu xác thực",
+            auth_message_1: "Bạn cần phải",
+            auth_message_2: "để thực hiện hành động này.",
+            auth_message_3: "Nếu bạn chưa có tài khoản,",
+            register_here: "đăng ký tại đây",
+            close: "Đóng",
+
+            user_info: "Thông tin người dùng",
+            edit_user_info: "Chỉnh sửa thông tin",
+            phone: "Số điện thoại",
+            address: "Địa chỉ",
+            bio: "Giới thiệu",
+            save_changes: "Lưu thay đổi",
+            cancel: "Hủy",
+            attachments: "Tệp đính kèm",
+            no_data: "Không có dữ liệu",
+            preview: "Xem trước",
+            date_of_birth: "Ngày sinh",
+            full_name: "Họ và tên",
 
         },
     },

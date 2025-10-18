@@ -1,3 +1,4 @@
+// src/settings/Settings.jsx
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import * as Toast from "@radix-ui/react-toast";
@@ -5,11 +6,11 @@ import { Separator } from "@radix-ui/react-separator";
 import { Sun, Moon, LogOut, Globe } from "lucide-react";
 import { useTheme } from "../../theme/ThemeProvider";
 import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next"; // ✅ Thêm i18n hook
+import { useTranslation } from "react-i18next";
 
 export default function Settings() {
     const { theme, toggleTheme } = useTheme();
-    const { t, i18n } = useTranslation(); // ✅ Hook dịch
+    const { t, i18n } = useTranslation();
     const [toastOpen, setToastOpen] = useState(false);
     const [form, setForm] = useState({
         currentPassword: "",
@@ -22,7 +23,7 @@ export default function Settings() {
     const handlePasswordChange = (e) => {
         e.preventDefault();
         if (form.newPassword !== form.confirmPassword) {
-            alert("❌ Passwords do not match!");
+            alert("❌ " + t("password_not_match"));
             return;
         }
         setToastOpen(true);
@@ -32,7 +33,7 @@ export default function Settings() {
     const handleLogout = () => {
         localStorage.removeItem("userToken");
         localStorage.removeItem("userData");
-        alert("🚪 Đăng xuất thành công!");
+        alert("🚪 " + t("logout") + " thành công!");
         navigate("/");
     };
 
@@ -44,12 +45,12 @@ export default function Settings() {
 
     return (
         <Toast.Provider>
-            <div className="min-h-screen dark:bg-[#111] text-neutral-900 dark:text-neutral-100 p-8 transition-colors">
+            <div className="p-6 md:p-10 text-neutral-900 dark:text-neutral-100 transition-colors">
                 <motion.div
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
-                    className="max-w-3xl mx-auto bg-white dark:bg-neutral-900 rounded-2xl shadow-lg p-8 space-y-10"
+                    className="max-w-3xl mx-auto space-y-10"
                 >
                     {/* Header */}
                     <div>
@@ -64,43 +65,48 @@ export default function Settings() {
                     {/* Theme Section */}
                     <section>
                         <h2 className="text-lg font-medium mb-4">🎨 {t("theme")}</h2>
-                        <div className="flex items-center gap-6">
-                            <button
-                                onClick={() => {
-                                    toggleTheme();
-                                    setToastOpen(true);
-                                }}
-                                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition"
-                            >
-                                {theme === "light" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                                {theme === "light" ? t("light_mode") : t("dark_mode")}
-                            </button>
-                        </div>
+                        <button
+                            onClick={() => {
+                                toggleTheme();
+                                setToastOpen(true);
+                            }}
+                            className="flex items-center gap-2 px-4 py-2 rounded-lg
+               border border-neutral-300 dark:border-neutral-700
+               hover:bg-neutral-100 dark:hover:bg-neutral-800 transition"
+                        >
+                            {theme === "light" ? (
+                                <Sun className="w-5 h-5 text-yellow-500" />
+                            ) : (
+                                <Moon className="w-5 h-5 text-blue-400" />
+                            )}
+                            {theme === "light" ? t("light_mode") : t("dark_mode")}
+                        </button>
                     </section>
 
                     <Separator className="bg-neutral-200 dark:bg-neutral-700 h-[1px]" />
 
                     {/* Language Section 🌐 */}
                     <section>
-                        <h2 className="text-lg font-medium mb-4">🌍 Language</h2>
-                        <div className="flex gap-4">
+                        <h2 className="text-lg font-medium mb-4">🌍 Ngôn ngữ</h2>
+                        <div className="flex gap-4 ">
                             <button
                                 onClick={() => handleLanguageChange("en")}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition ${
-                                    i18n.language === "en"
-                                        ? "bg-blue-600 text-white"
-                                        : "border-neutral-300 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                                }`}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg border 
+                                ${i18n.language === "en"
+                                    ? "bg-blue-600 text-white border-blue-600"
+                                    : "border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                                } transition`}
                             >
                                 <Globe className="w-5 h-5" /> English
                             </button>
+
                             <button
                                 onClick={() => handleLanguageChange("vi")}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition ${
-                                    i18n.language === "vi"
-                                        ? "bg-blue-600 text-white"
-                                        : "border-neutral-300 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                                }`}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg border
+                                ${i18n.language === "vi"
+                                    ? "bg-blue-600 text-white border-blue-600"
+                                    : "border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                                } transition`}
                             >
                                 <Globe className="w-5 h-5" /> Tiếng Việt
                             </button>
@@ -115,24 +121,24 @@ export default function Settings() {
                         <form onSubmit={handlePasswordChange} className="space-y-4">
                             <input
                                 type="password"
-                                placeholder="Current Password"
+                                placeholder={t("current_password") || "Mật khẩu hiện tại"}
                                 value={form.currentPassword}
                                 onChange={(e) => setForm({ ...form, currentPassword: e.target.value })}
-                                className="w-full p-3 border rounded-lg bg-transparent focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full p-3 rounded-lg bg-transparent border border-neutral-300 dark:border-neutral-700 focus:ring-2 focus:ring-blue-500 outline-none"
                             />
                             <input
                                 type="password"
-                                placeholder="New Password"
+                                placeholder={t("new_password") || "Mật khẩu mới"}
                                 value={form.newPassword}
                                 onChange={(e) => setForm({ ...form, newPassword: e.target.value })}
-                                className="w-full p-3 border rounded-lg bg-transparent focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full p-3 rounded-lg bg-transparent border border-neutral-300 dark:border-neutral-700 focus:ring-2 focus:ring-blue-500 outline-none"
                             />
                             <input
                                 type="password"
-                                placeholder="Confirm New Password"
+                                placeholder={t("confirm_password") || "Xác nhận mật khẩu mới"}
                                 value={form.confirmPassword}
                                 onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
-                                className="w-full p-3 border rounded-lg bg-transparent focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full p-3 rounded-lg bg-transparent border border-neutral-300 dark:border-neutral-700 focus:ring-2 focus:ring-blue-500 outline-none"
                             />
                             <button
                                 type="submit"
@@ -158,7 +164,7 @@ export default function Settings() {
                     </section>
                 </motion.div>
 
-                {/* Toast Notification */}
+                {/* ✅ Toast thông báo */}
                 <Toast.Root
                     className="fixed bottom-5 right-5 bg-green-600 text-white px-5 py-3 rounded-lg shadow-lg"
                     open={toastOpen}
