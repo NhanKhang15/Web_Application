@@ -6,6 +6,8 @@ import ProfileSetup from "./components/user_profile_setup/screens/ProfileSetup";
 import MerchantProfile from "./components/dashboard/pages/MerchantProfile";
 import Homepage from "./components/cover_page/page/Homepage.jsx";
 import {ThemeProvider} from "./components/theme/ThemeProvider.jsx";
+import AuctionDetail from "./components/dashboard/auction/screen/AuctionDetail.jsx";
+import AuctionView from "./components/dashboard/auction/screen/AuctionView.jsx";
 
 function getUser() {
     const u = sessionStorage.getItem("user");
@@ -56,7 +58,6 @@ export default function App() {
                             </RequireAuth>
                         }
                     />
-
                     <Route path="*" element={<Homepage />} />
                 </Routes>
             </BrowserRouter>

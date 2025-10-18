@@ -16,7 +16,7 @@ import {
 import { useUserProfile } from "../user_infor/lib/useUserProfile.js";
 import UserOverview from "../user_infor/screens/user/UserOverview.jsx";
 import UserAttachment from "../user_infor/screens/attachment/UserAttachment.jsx";
-import AuctionView from "../auction/AuctionView.jsx";
+import AuctionView from "../auction/screen/AuctionView.jsx";
 import Settings from "../settings/Settings.jsx";
 import Utilities from "../utils/Utilities.jsx";
 import AboutUs from "../about/AboutUs.jsx";
@@ -276,7 +276,6 @@ export default function MerchantProfile() {
                     </motion.div>
                 </main>
             </div>
-
             <CalculatorWidget />
         </div>
     );
