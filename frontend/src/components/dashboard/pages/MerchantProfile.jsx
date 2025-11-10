@@ -21,6 +21,8 @@ import Settings from "../settings/Settings.jsx";
 import Utilities from "../utils/Utilities.jsx";
 import AboutUs from "../about/AboutUs.jsx";
 import CalculatorWidget from "../widget/sceens/CalculatorWidget.jsx";
+import {searchAuction, SearchDropdown } from "../widget/sceens/searchAuction.jsx";
+import PostAuction from "../postAuction/screen/PostAuction.jsx";
 
 // 🌍 import i18n
 import { useTranslation } from "react-i18next";
@@ -62,6 +64,10 @@ export default function MerchantProfile() {
     const searchWidth = useTransform(scrollY, [0, 80], ["min(640px,60vw)", "min(420px,40vw)"]);
     const searchHeight = useTransform(scrollY, [0, 80], ["40px", "34px"]);
 
+    const [query, setQuery] = React.useState("");
+    const [results, setResults] = React.useState([]);
+    const searchRef = React.useRef(null);
+
     useMotionValueEvent(scrollY, "change", (y) => {
         const thresholdHigh = 80;
         const thresholdLow = 40;
@@ -73,7 +79,7 @@ export default function MerchantProfile() {
     });
 
     // 🌍 i18next setup
-    const { i18n } = useTranslation();
+    const { t , i18n} = useTranslation();
     const changeLang = (lng) => {
         i18n.changeLanguage(lng);
         localStorage.setItem("lang", lng);
@@ -169,19 +175,43 @@ export default function MerchantProfile() {
                     </div>
 
                     {/* CENTER: Search */}
-                    <div className="hidden md:flex flex-1 justify-center">
+                    <div className="hidden md:flex flex-1 justify-center relative">
                         <motion.div style={{ width: searchWidth }}>
                             <motion.div
-                                className="flex items-center justify-center w-full rounded-full bg-neutral-200 dark:bg-neutral-800 px-4"
+                                ref={searchRef}
+                                className="flex items-center justify-center w-full rounded-full
+                                bg-neutral-200 dark:bg-neutral-800 px-4 relative overflow-visible"
                                 style={{ height: searchHeight }}
                             >
                                 <Search className="w-4 h-4 text-neutral-500 dark:text-neutral-400 mr-2" />
                                 <input
                                     type="text"
-                                    placeholder="Search"
-                                    className="flex-1 bg-transparent text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-500 dark:placeholder:text-neutral-400 text-center outline-none border-none"
+                                    placeholder={t("search_placeholder")}
+                                    value={query}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        setQuery(val);
+                                        const res = searchAuction(val);
+                                        console.log("🔍 Search:", val, "=>", res);
+                                        setResults(res);
+                                    }}
+                                    className="flex-1 bg-transparent text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-500 text-center outline-none"
                                 />
                             </motion.div>
+
+                            {results.length > 0 && (
+                                <SearchDropdown
+                                    anchorRef={searchRef}
+                                    results={results}
+                                    onSelect={(r) => {
+                                        alert(`Bạn đã chọn ${r.name}`);
+                                        setResults([]); // ẩn dropdown khi chọn
+                                    }}
+                                    onClose={() => setResults([])} // đóng khi click ra ngoài
+                                />
+                            )}
+
+                            {results.length === 0 && <p>{t("search_no_results")}</p>}
                         </motion.div>
                     </div>
 
@@ -191,7 +221,7 @@ export default function MerchantProfile() {
                         <div className="flex items-center gap-1">
                             <Globe className="w-4 h-4 text-neutral-400" />
                             <select
-                                value={i18n.language}
+                                value={i18n.language ? i18n.language.split('-')[0] : "vi"}
                                 onChange={(e) => changeLang(e.target.value)}
                                 className="bg-transparent text-sm text-neutral-200 dark:text-neutral-700 border border-neutral-700 dark:border-neutral-300 rounded-md px-2 py-1 hover:bg-neutral-800 dark:hover:bg-neutral-100 transition-colors duration-200"
                             >
@@ -247,7 +277,11 @@ export default function MerchantProfile() {
                             >
                                 <AuctionView view={auctionView} />
                             </CardShell>
-                        ) : leftKey === "user" ? (
+                        ) : leftKey === "post" ? (
+                            <CardShell variant="custom" plClass="pl-0 md:pl-[4%]" stickyTop={contentPadTop}>
+                                <PostAuction />
+                            </CardShell>
+                        ): leftKey === "user" ? (
                             <CardShell
                                 subKey={activeSub}
                                 onSubChange={setActiveSub}

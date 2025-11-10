@@ -31,10 +31,9 @@ export default function Settings() {
     };
 
     const handleLogout = () => {
-        localStorage.removeItem("userToken");
-        localStorage.removeItem("userData");
+        sessionStorage.removeItem("user");
         alert("🚪 " + t("logout") + " thành công!");
-        navigate("/");
+        navigate("/", { replace: true });
     };
 
     const handleLanguageChange = (lang) => {
@@ -70,9 +69,7 @@ export default function Settings() {
                                 toggleTheme();
                                 setToastOpen(true);
                             }}
-                            className="flex items-center gap-2 px-4 py-2 rounded-lg
-               border border-neutral-300 dark:border-neutral-700
-               hover:bg-neutral-100 dark:hover:bg-neutral-800 transition"
+                            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition"
                         >
                             {theme === "light" ? (
                                 <Sun className="w-5 h-5 text-yellow-500" />
@@ -92,7 +89,7 @@ export default function Settings() {
                             <button
                                 onClick={() => handleLanguageChange("en")}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-lg border 
-                                ${i18n.language === "en"
+                                ${i18n.language.startsWith("en")
                                     ? "bg-blue-600 text-white border-blue-600"
                                     : "border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800"
                                 } transition`}
@@ -103,7 +100,7 @@ export default function Settings() {
                             <button
                                 onClick={() => handleLanguageChange("vi")}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-lg border
-                                ${i18n.language === "vi"
+                                ${i18n.language.startsWith("vi")
                                     ? "bg-blue-600 text-white border-blue-600"
                                     : "border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800"
                                 } transition`}
