@@ -6,15 +6,20 @@ import ProfileSetup from "./components/user_profile_setup/screens/ProfileSetup";
 import MerchantProfile from "./components/dashboard/pages/MerchantProfile";
 import Homepage from "./components/cover_page/page/Homepage.jsx";
 import {ThemeProvider} from "./components/theme/ThemeProvider.jsx";
+import AuctionView from "./components/dashboard/auction/screen/AuctionView.jsx";
+import AuctionDetail from "./components/dashboard/auction/screen/AuctionDetail.jsx";
 
 function getUser() {
     const u = sessionStorage.getItem("user");
     try { return u ? JSON.parse(u) : null; } catch { return null; }
 }
-function isAuthed() { return !!getUser()?.userId; }
 
 function RequireAuth({ children }) {
-    return isAuthed() ? children : <Navigate to="/login" replace />;
+    const user = getUser();
+    if (!user || !user.userId) {
+        return <Navigate to="/" replace />;
+    }
+    return children;
 }
 
 function RedirectHome() {
@@ -52,10 +57,15 @@ export default function App() {
                         path="/dashboard"
                         element={
                             <RequireAuth>
-                                <MerchantProfile />
+                                <MerchantProfile /> {/* có <Outlet /> bên trong */}
                             </RequireAuth>
                         }
-                    />
+                    >
+                        <Route index element={<AuctionView />} />
+                        <Route path=":category" element={<AuctionView />} />
+                        <Route path=":category/:slug" element={<AuctionDetail />} /> {/* hoặc ItemDetail */}
+                    </Route>
+
                     <Route path="*" element={<Homepage />} />
                 </Routes>
             </BrowserRouter>

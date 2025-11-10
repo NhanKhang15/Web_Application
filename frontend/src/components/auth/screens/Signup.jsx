@@ -5,6 +5,7 @@ import { Card, CardContent } from "../ui/Card";
 import { Input } from "../ui/Input";
 import { signup } from "../services/signup_api";
 import { useTranslation } from "react-i18next";
+import {PasswordInput} from "../ui/PasswordInput.jsx";
 
 export default function Signup() {
     const { t, i18n } = useTranslation();
@@ -117,19 +118,50 @@ export default function Signup() {
                 <Card className="bg-transparent border-0 shadow-none p-0">
                     <CardContent className="p-0">
                         <form className="space-y-4" onSubmit={onSubmit}>
-                            <Input name="username" placeholder={t("username")} value={form.username}
-                                   onChange={onChange} disabled={loading} autoComplete="username" />
-                            <Input name="email" placeholder={t("email")} value={form.email}
-                                   onChange={onChange} disabled={loading} autoComplete="email" />
-                            <Input name="password" type="password" placeholder={t("password")} value={form.password}
-                                   onChange={onChange} disabled={loading} autoComplete="new-password" />
-                            <Input name="confirm" type="password" placeholder={t("confirm_password")} value={form.confirm}
-                                   onChange={onChange} disabled={loading} autoComplete="new-password" />
+                            <div className="text-sm text-neutral-300 text-center mt-4">
+                                {t("already_have_account")}{" "}
+                                <button type="button" onClick={() => navigate("/login")} className="text-white hover:underline">
+                                    {t("login")}
+                                </button>
+                            </div>
 
-                            <Button type="submit" disabled={loading}
-                                    className="w-full h-[50px] rounded-[20px] text-[21px] font-semibold">
-                                {loading ? t("processing") : t("signup_heading")}
-                            </Button>
+                            <Input
+                                name="username"
+                                placeholder={t("username")}
+                                value={form.username}
+                                onChange={onChange}
+                                disabled={loading}
+                                autoComplete="username"
+                            />
+
+                            {/* 👁 Password field with toggle */}
+                            <Input
+                                name="email"
+                                placeholder={t("email")}
+                                value={form.email}
+                                onChange={onChange}
+                                disabled={loading}
+                                autoComplete="email"
+                            />
+
+                            {/* 👁 Confirm Password */}
+                            <PasswordInput
+                                name="password"
+                                value={form.password}
+                                onChange={onChange}
+                                disabled={loading}
+                                placeholder={t("password")}
+                                autoComplete="new-password"
+                            />
+
+                            <PasswordInput
+                                name="confirm"
+                                value={form.confirm}
+                                onChange={onChange}
+                                disabled={loading}
+                                placeholder={t("confirm_password")}
+                                autoComplete="new-password"
+                            />
 
                             {(err || msg) && (
                                 <div className="text-center text-sm">
@@ -138,13 +170,18 @@ export default function Signup() {
                                 </div>
                             )}
 
+                            <Button type="submit" disabled={loading}
+                                    className="w-full h-[50px] rounded-[20px] text-[21px] font-semibold">
+                                {loading ? t("processing") : t("signup_heading")}
+                            </Button>
+
+                            {/* OAuth buttons */}
                             <div className="flex items-center justify-between text-xs text-neutral-500 mt-1">
                                 <span className="h-px w-24 bg-white/10" />
                                 <span>{t("or_continue_with")}</span>
                                 <span className="h-px w-24 bg-white/10" />
                             </div>
 
-                            {/* OAuth buttons */}
                             <Button type="button" variant="outline"
                                     className="w-full h-[50px] rounded-[20px] flex items-center justify-center gap-2"
                                     onClick={() => alert("Google OAuth chưa cắm.")}>
@@ -168,13 +205,6 @@ export default function Signup() {
                                 {t("and")}{" "}
                                 <a className="underline hover:text-neutral-300" href="#">{t("cookies_policy")}</a>.
                             </p>
-
-                            <div className="text-sm text-neutral-300 text-center mt-4">
-                                {t("already_have_account")}{" "}
-                                <button type="button" onClick={() => navigate("/login")} className="text-white hover:underline">
-                                    {t("login")}
-                                </button>
-                            </div>
                         </form>
                     </CardContent>
                 </Card>

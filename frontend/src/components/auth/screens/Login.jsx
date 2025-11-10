@@ -6,6 +6,7 @@ import { Input } from "../ui/Input";
 import { loginLocal, startGoogleLogin } from "../services/login_api";
 import { useTranslation } from "react-i18next"; // ✅ thêm i18n
 import {API_BASE_URL} from "../../../lib/api_url.js";
+import { PasswordInput } from "../ui/PasswordInput";
 
 export default function Login() {
     const navigate = useNavigate();
@@ -14,6 +15,7 @@ export default function Login() {
     const [loading, setLoading] = useState(false);
     const [msg, setMsg] = useState(null);
     const [err, setErr] = useState(null);
+    const [showPassword, setShowPassword] = useState(false);
 
     const onChange = (e) => {
         const { name, value } = e.target;
@@ -154,13 +156,12 @@ export default function Login() {
                                 disabled={loading}
                                 autoComplete="username"
                             />
-                            <Input
+                            <PasswordInput
                                 name="password"
-                                type="password"
-                                placeholder={t("password")}
                                 value={form.password}
                                 onChange={onChange}
                                 disabled={loading}
+                                placeholder={t("password")}
                                 autoComplete="current-password"
                             />
 

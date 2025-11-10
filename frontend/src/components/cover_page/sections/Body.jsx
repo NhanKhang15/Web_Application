@@ -16,7 +16,6 @@ import { SLIDES, FEATURED_SLIDES, CATEGORIES, HERO_BG } from "../lib/auctionData
 
 export default function Body({ onRequireAuth }) {
     const { t } = useTranslation();
-    const sectionSpacing = "pt-12 sm:pt-16 lg:pt-20";
 
     const heroSettings = {
         dots: true,
@@ -62,7 +61,7 @@ export default function Body({ onRequireAuth }) {
 
     // --- Auction categories section ---
     const AuctionCategoriesSection = () => (
-        <section className={"w-full px-4 py-4 " + sectionSpacing}>
+        <section className={"w-full px-4 py-4"}>
             <h2 className="font-semibold text-white text-xl sm:text-2xl mb-6 sm:mb-8 text-center md:text-left">
                 {t("auction_categories")}
             </h2>
@@ -145,7 +144,7 @@ export default function Body({ onRequireAuth }) {
     return (
         <div className="w-full overflow-x-hidden">
             {/* Hero + Slider */}
-            <section className="relative w-full min-h-[500px]">
+            <section className="relative w-full min-h-[480px]">
                 <Slider {...heroSettings}>
                     {t("slides", { returnObjects: true }).map((s, i) => (
                         <div key={i}>
@@ -163,19 +162,18 @@ export default function Body({ onRequireAuth }) {
                 </Slider>
             </section>
 
-
-            <Separator className="my-10" />
+            <Separator className="my-4" />
             <AuctionCategoriesSection />
-            <Separator className="my-10" />
+            <Separator className="my-4" />
 
             {/* Featured auctions */}
-            <div className={"w-full px-4 " + sectionSpacing}>
-                <h2 className="font-semibold text-white text-3xl mb-6 sm:mb-8 text-center md:text-left">
+            <div className={"w-full px-4"}>
+                <h2 className="font-semibold text-white text-xl sm:text-2xl mb-6 sm:mb-8 text-center md:text-left">
                     {t("featured_auctions")}
                 </h2>
             </div>
 
-            <section className="w-full pb-12 px-4">
+            <section className="w-full px-4 py-4">
                 <Slider {...featuredSettings}>
                     {t("featured_slides", { returnObjects: true }).map((slide, i) => (
                         <div key={i}>
