@@ -65,13 +65,16 @@ export function useAuction({
 
     const placeBid = useCallback((amount, bidder = "You") => {
         const amountNum = Number(amount);
-        if (!Number.isFinite(amountNum)) throw new Error("Invalid number");
-        if (isEnded) throw new Error("Auction ended");
-        if (amountNum < nextMinBid) throw new Error(`Bid must be ≥ ${nextMinBid.toLocaleString()}`);
-
+        if (!Number.isFinite(amountNum)) throw new Error("ERR_INVALID_NUMBER");
+        if (isEnded) throw new Error("ERR_AUCTION_ENDED");
+        if (amountNum < nextMinBid) {
+            // Ném lỗi với key và biến
+            const error = new Error("ERR_BID_TOO_LOW");
+            error.context = { minBid: nextMinBid.toLocaleString() }; // Truyền biến
+            throw error;
+        }
 
         setBids((prev) => [{id: crypto.randomUUID(), bidder, amount: amountNum, time: Date.now()}, ...prev]);
-
 
 // soft close: extend if in last softCloseSeconds
         const secs = Math.floor((endsAt - Date.now()) / 1000);
