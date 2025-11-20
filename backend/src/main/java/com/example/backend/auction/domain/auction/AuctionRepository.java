@@ -45,7 +45,7 @@ public interface AuctionRepository extends JpaRepository<Auction, Integer> {
                     -- Item Info
                     ai.ItemID AS itemId,
                     ai.SellerID AS sellerId,
-                    ai.CategoryID AS categoryId,
+                    c.CategoryName AS categoryName,
                     ai.Title AS title,
                     ai.Slug AS slug,
                     ai.Description AS description,
@@ -70,6 +70,7 @@ public interface AuctionRepository extends JpaRepository<Auction, Integer> {
                 FROM AuctionItems ai
                 JOIN Auctions a ON ai.ItemID = a.ItemID
                 JOIN Users u ON ai.SellerID = u.UserID
+                JOIN Categories c ON ai.CategoryID = c.CategoryID
                 LEFT JOIN ItemImages img ON ai.ItemID = img.ItemID AND img.IsMain = 1
                 WHERE ai.Slug = :slug
                 ORDER BY a.StartDate DESC
