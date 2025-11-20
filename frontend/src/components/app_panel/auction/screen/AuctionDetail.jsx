@@ -19,6 +19,15 @@ export default function AuctionDetail() {
     const [images, setImages] = useState([]);
     const [modalInitialIndex, setModalInitialIndex] = useState(null);
 
+    // Tự động cuộn lên đầu trang mỗi khi slug thay đổi (chuyển sang sản phẩm khác)
+    useEffect(() => {
+        // Cuộn cửa sổ lên toạ độ (0, 0) - Tức là đầu trang
+        window.scrollTo({
+            top: 0,
+            behavior: "instant" // "instant" để nhảy ngay lập tức, "smooth" nếu muốn trượt từ từ
+        });
+    }, [slug]);
+
     // ====== Fetch Data ======
     useEffect(() => {
         let alive = true;

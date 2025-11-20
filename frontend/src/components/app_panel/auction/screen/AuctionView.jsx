@@ -134,7 +134,7 @@ export default function AuctionView() {
         return (
             <div className="p-6">
                 <button
-                    onClick={() => navigate(`/dashboard`)}
+                    onClick={() => navigate(`/dashboard/auctions`)}
                     className="flex items-center gap-2 text-sm text-gray-500 hover:text-blue-500 mb-4"
                 >
                     <ArrowLeft className="w-4 h-4" /> {t('Back_to_Auctions')}
@@ -158,8 +158,7 @@ export default function AuctionView() {
                 onReset={resetFilters}
             />
 
-            <div className={`transition-[padding] duration-300 ease-out ${openFilter ? "pt-[28vh]" : "pt-0"}`}>
-                {/* Header (Date + Filter button) */}
+            <div className={`flex flex-col h-full transition-[padding] duration-300 ease-out ${openFilter ? "pt-[28vh]" : "pt-0"}`}>                {/* Header (Date + Filter button) */}
                 <div
                     className="flex flex-wrap items-center justify-between gap-4 mb-4 px-6 pt-6 flex-shrink-0"
                     data-aos="fade-down"
