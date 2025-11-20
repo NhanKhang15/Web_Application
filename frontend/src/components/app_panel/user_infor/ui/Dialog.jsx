@@ -16,13 +16,12 @@ export function Dialog({ open, onOpenChange, children }) {
             {/* Modal wrapper */}
             <div
                 className="
-          relative w-full max-w-lg mx-auto p-6
-          bg-white dark:bg-neutral-900
-          text-neutral-900 dark:text-neutral-100
-          rounded-xl shadow-2xl
-          border border-neutral-200 dark:border-neutral-800
-          transition-all duration-300
-        "
+                relative w-full max-w-lg mx-auto p-6
+                bg-white dark:bg-neutral-900
+                text-neutral-900 dark:text-neutral-100
+                rounded-xl shadow-2xl
+                border border-neutral-200 dark:border-neutral-800
+                transition-all duration-300"
             >
                 {/* Close button */}
                 <button

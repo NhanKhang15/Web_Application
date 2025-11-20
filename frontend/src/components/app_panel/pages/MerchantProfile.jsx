@@ -1,5 +1,5 @@
 // src/pages/MerchantProfile.jsx
-import React from "react";
+import React, {useEffect} from "react";
 import LeftNav from "../slidebar/screens/LeftNav";
 import CardShell from "../widget/sceens/CardShell";
 import AuctionSideBar from "../slidebar/screens/AuctionSideBar";
@@ -24,6 +24,10 @@ import CalculatorWidget from "../widget/sceens/CalculatorWidget.jsx";
 import {searchAuction, SearchDropdown } from "../widget/sceens/searchAuction.jsx";
 import PostAuction from "../postAuction/screen/PostAuction.jsx";
 
+import {useNavigate, useParams} from "react-router-dom";
+
+import {NAV_URL_MAPPING} from "../slidebar/lib/NAV_URL_MAPPING.js";
+
 // 🌍 import i18n
 import { useTranslation } from "react-i18next";
 
@@ -42,6 +46,13 @@ export default function MerchantProfile() {
     const [leftKey, setLeftKey] = React.useState("user");
     const [activeSub, setActiveSub] = React.useState("user");
     const [auctionView, setAuctionView] = React.useState("Dashboard");
+
+    const navigate = useNavigate();
+    const params = useParams();
+    const category = params?.category
+
+    const [auctionSidebarOpen, setAuctionSidebarOpen] = React.useState(false);
+
     const [scrolled, setScrolled] = React.useState(false);
     const [isEditing, setIsEditing] = React.useState(false);
 
@@ -67,6 +78,29 @@ export default function MerchantProfile() {
     const [query, setQuery] = React.useState("");
     const [results, setResults] = React.useState([]);
     const searchRef = React.useRef(null);
+
+    useEffect(() => {
+        if (category) {
+            // Reverse lookup: Find which key maps to this URL path
+            const mapping = NAV_URL_MAPPING || {};
+            const foundEntry = Object.entries(mapping).find(([k, v]) => v === category);
+            const key = foundEntry ? foundEntry[0] : "user";
+            setLeftKey(key);
+        } else if (!category) {
+            // If no category (e.g. /dashboard root)
+            setLeftKey("user");
+        }
+    }, [category]);
+
+    const handleNavigation = (key) => {
+        if (navigate) {
+            const path = NAV_URL_MAPPING?.[key] || key;
+            navigate(`/dashboard/${path}`);
+        } else {
+            // Fallback for preview mode
+            setLeftKey(key);
+        }
+    };
 
     useMotionValueEvent(scrollY, "change", (y) => {
         const thresholdHigh = 80;
@@ -145,7 +179,7 @@ export default function MerchantProfile() {
                     <div className="flex items-center">
                         <button
                             onClick={() => {
-                                setLeftKey("auction");
+                                handleNavigation("auction");
                                 setAuctionView("Dashboard");
                             }}
                             className="bg-transparent p-0 m-0 flex items-center"
@@ -160,7 +194,7 @@ export default function MerchantProfile() {
 
                         <button
                             onClick={() => {
-                                setLeftKey("auction");
+                                handleNavigation("auction");
                                 setAuctionView("Dashboard");
                             }}
                             className="bg-transparent p-0 m-0 flex items-center"
@@ -192,7 +226,6 @@ export default function MerchantProfile() {
                                         const val = e.target.value;
                                         setQuery(val);
                                         const res = searchAuction(val);
-                                        console.log("🔍 Search:", val, "=>", res);
                                         setResults(res);
                                     }}
                                     className="flex-1 bg-transparent text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-500 text-center outline-none"
@@ -211,7 +244,7 @@ export default function MerchantProfile() {
                                 />
                             )}
 
-                            {results.length === 0 && <p>{t("search_no_results")}</p>}
+                            {results.length === 0 && query && <p className="absolute top-12 bg-white p-2 shadow rounded text-sm text-black">{t("search_no_results")}</p>}
                         </motion.div>
                     </div>
 
@@ -236,7 +269,7 @@ export default function MerchantProfile() {
                             profile={profile}
                             email={email}
                             onClick={() => {
-                                setLeftKey("user");
+                                handleNavigation("user");
                                 setActiveSub("user");
                             }}
                         />
@@ -272,8 +305,16 @@ export default function MerchantProfile() {
                         {leftKey === "auction" ? (
                             <CardShell
                                 variant="custom"
-                                customLeft={<AuctionSideBar active={auctionView} onSelect={setAuctionView} />}
-                                plClass="pl-0 md:pl-[11vw] lg:pl-[13vw]"
+                                customLeft={
+                                    <AuctionSideBar
+                                        active={auctionView}
+                                        onSelect={setAuctionView}
+                                        isOpen={auctionSidebarOpen}
+                                        onToggle={() => setAuctionSidebarOpen(!auctionSidebarOpen)}
+                                    />
+                                }
+                                // Class padding thay đổi dựa trên trạng thái open/close
+                                plClass={`transition-all duration-500 ${auctionSidebarOpen ? "!pl-[220px]" : "!pl-4"}`}
                             >
                                 <AuctionView view={auctionView} />
                             </CardShell>
