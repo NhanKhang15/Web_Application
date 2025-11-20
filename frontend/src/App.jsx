@@ -3,11 +3,11 @@ import Login from "./components/auth/screens/Login";
 import Signup from "./components/auth/screens/Signup";
 import AuthCallback from "./components/auth/screens/AuthCallback";
 import ProfileSetup from "./components/user_profile_setup/screens/ProfileSetup";
-import MerchantProfile from "./components/dashboard/pages/MerchantProfile";
+import MerchantProfile from "./components/app_panel/pages/MerchantProfile";
 import Homepage from "./components/cover_page/page/Homepage.jsx";
-import {ThemeProvider} from "./components/theme/ThemeProvider.jsx";
-import AuctionView from "./components/dashboard/auction/screen/AuctionView.jsx";
-import AuctionDetail from "./components/dashboard/auction/screen/AuctionDetail.jsx";
+import { ThemeProvider } from "./components/theme/ThemeProvider.jsx";
+import AuctionView from "./components/app_panel/auction/screen/AuctionView.jsx";
+import AuctionDetail from "./components/app_panel/auction/screen/AuctionDetail.jsx";
 
 function getUser() {
     const u = sessionStorage.getItem("user");
