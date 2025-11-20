@@ -68,6 +68,7 @@ body {
   animation: var(--animate-spin);
 }
 
+
 @keyframes spin {
   to {
     transform: rotate(1turn);

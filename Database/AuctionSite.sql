@@ -18,19 +18,19 @@ DROP TABLE IF EXISTS Users;
 
 -- USERS (credential only)
 CREATE TABLE IF NOT EXISTS Users (
-                                     UserID             INT AUTO_INCREMENT PRIMARY KEY,
-                                     Username           VARCHAR(50)  NOT NULL UNIQUE,
-    Email              VARCHAR(100) NULL,
-    PasswordHashed     VARBINARY(255) NULL,
-    SocialProvider     ENUM('google','facebook') NULL,
-    SocialUID          VARCHAR(255) NULL,
-    AuthPrimary        ENUM('local','google','facebook') NOT NULL DEFAULT 'local',
-    Status             ENUM('active','disabled','banned') NOT NULL DEFAULT 'active',
-    CreatedAt          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    profile_completed  TINYINT(1) DEFAULT 0,
+	UserID             INT AUTO_INCREMENT PRIMARY KEY,
+	Username           VARCHAR(50)  NOT NULL UNIQUE,
+	Email              VARCHAR(100) NULL,
+	PasswordHashed     VARBINARY(255) NULL,
+	SocialProvider     ENUM('google','facebook') NULL,
+	SocialUID          VARCHAR(255) NULL,
+	AuthPrimary        ENUM('local','google','facebook') NOT NULL DEFAULT 'local',
+	Status             ENUM('active','disabled','banned') NOT NULL DEFAULT 'active',
+	CreatedAt          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	profile_completed  TINYINT(1) DEFAULT 0,
 
-    CONSTRAINT uq_email  UNIQUE (Email),
-    CONSTRAINT uq_social UNIQUE (SocialProvider, SocialUID),
+	CONSTRAINT uq_email  UNIQUE (Email),
+	CONSTRAINT uq_social UNIQUE (SocialProvider, SocialUID),
 
     CONSTRAINT chk_credentials CHECK (
 (AuthPrimary = 'local'
@@ -47,9 +47,9 @@ CREATE TABLE IF NOT EXISTS Users (
 
 -- USER PROFILES
 CREATE TABLE IF NOT EXISTS UserProfiles (
-                                            ProfileID   INT AUTO_INCREMENT PRIMARY KEY,
-                                            UserID      INT NOT NULL UNIQUE,
-                                            FullName    VARCHAR(100),
+	ProfileID   INT AUTO_INCREMENT PRIMARY KEY,
+	UserID      INT NOT NULL UNIQUE,
+	FullName    VARCHAR(100),
     Phone       VARCHAR(20),
     Address     VARCHAR(200),
     Bio         VARCHAR(500),
@@ -67,10 +67,10 @@ CREATE TABLE IF NOT EXISTS Categories (
 
 -- ITEMS (thông tin cố định)
 CREATE TABLE IF NOT EXISTS AuctionItems (
-                                            ItemID       INT AUTO_INCREMENT PRIMARY KEY,
-                                            SellerID     INT NOT NULL,
-                                            CategoryID   INT NOT NULL,
-                                            Title        VARCHAR(200) NOT NULL,
+	ItemID       INT AUTO_INCREMENT PRIMARY KEY,
+	SellerID     INT NOT NULL,
+	CategoryID   INT NOT NULL,
+	Title        VARCHAR(200) NOT NULL,
     Slug VARCHAR(255) UNIQUE,
     Description  MEDIUMTEXT,
     Location     VARCHAR(200),
@@ -81,13 +81,13 @@ CREATE TABLE IF NOT EXISTS AuctionItems (
     ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS ItemImages (
-                                          ImageID   INT AUTO_INCREMENT PRIMARY KEY,
-                                          ItemID    INT NOT NULL,
-                                          ImgUrl    VARCHAR(500) NOT NULL,
-    IsMain    BOOLEAN DEFAULT FALSE,
-    CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (ItemID) REFERENCES AuctionItems(ItemID)
-    ON DELETE CASCADE
+	ImageID   INT AUTO_INCREMENT PRIMARY KEY,
+	ItemID    INT NOT NULL,
+	ImgUrl    VARCHAR(500) NOT NULL,
+	IsMain    BOOLEAN DEFAULT FALSE,
+	CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	FOREIGN KEY (ItemID) REFERENCES AuctionItems(ItemID)
+	ON DELETE CASCADE
     ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- helpful indexes
@@ -96,9 +96,9 @@ CREATE INDEX idx_items_seller   ON AuctionItems(SellerID);
 
 -- AUCTIONS (phiên đấu)
 CREATE TABLE IF NOT EXISTS Auctions (
-                                        AuctionID      INT AUTO_INCREMENT PRIMARY KEY,
-                                        ItemID         INT NOT NULL,
-                                        StartingPrice  DECIMAL(18,2) NOT NULL,
+	AuctionID      INT AUTO_INCREMENT PRIMARY KEY,
+	ItemID         INT NOT NULL,
+	StartingPrice  DECIMAL(18,2) NOT NULL,
     MinStep        DECIMAL(18,2) NOT NULL,
     CurrentPrice   DECIMAL(18,2) NOT NULL DEFAULT 0.00,
     ReservePrice   DECIMAL(18,2) NULL,
