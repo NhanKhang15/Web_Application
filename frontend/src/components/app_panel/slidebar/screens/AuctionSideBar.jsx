@@ -1,46 +1,101 @@
 import React from "react";
 import { auctionMenu } from "../lib/auctionMenu";
+import { Menu, X, ChevronRight } from "lucide-react";
 
-export default function AuctionSideBar({ active, onSelect }) {
+export default function AuctionSideBar({ active, onSelect, isOpen, onToggle }) {
     return (
-        <aside
-            className="
-        fixed
-        top-[170px]
-        left-[150px]
-        w-[240px]
-        rounded-[12px]
-        shadow-lg ring-1
-        ring-black/10 dark:ring-white/10
-        bg-white text-neutral-900
-        dark:bg-[#1f1f21] dark:text-white
-        transition-colors duration-300
-        z-[1000]
-      "
-            role="navigation"
-            aria-label="Auction navigation"
+        <div
+            className={`
+                absolute top-0 left-0 h-full z-[50]
+                transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)]
+                ${isOpen ? "w-[280px]" : "w-[72px]"}
+            `}
         >
-            <ul className="py-3">
-                {auctionMenu.map((label) => {
-                    const isActive = active === label;
-                    return (
-                        <li key={label}>
-                            <button
-                                role="menuitem"
-                                onClick={() => onSelect?.(label)}
-                                className={`w-full text-left px-4 py-2 text-sm rounded-md outline-none transition
-                  ${
-                                    isActive
-                                        ? "bg-neutral-900/10 dark:bg-white/15 text-neutral-900 dark:text-white"
-                                        : "text-neutral-700 hover:bg-neutral-100 dark:text-white/80 dark:hover:bg-white/10"
-                                }`}
-                            >
-                                {label}
-                            </button>
-                        </li>
-                    );
-                })}
-            </ul>
-        </aside>
+            {/* Transparent Background */}
+            <div className="absolute inset-0 w-full h-full bg-transparent" />
+
+            {/* Content Wrapper */}
+            <div className="relative w-full h-full flex flex-col">
+                {/* Header / Toggle Area */}
+                <div className="h-24 flex items-center justify-center px-4">
+                    <button
+                        onClick={onToggle}
+                        className={`
+                            relative group flex items-center justify-center
+                            w-12 h-12 rounded-2xl
+                            bg-white/50 dark:bg-[#1A1F25]/50
+                            text-neutral-600 dark:text-neutral-400
+                            backdrop-blur-md
+                            shadow-[0_8px_30px_rgb(0,0,0,0.04)]
+                            hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]
+                            hover:bg-white dark:hover:bg-[#252A30]
+                            hover:text-neutral-900 dark:hover:text-white
+                            hover:scale-105
+                            transition-all duration-300 ease-out
+                            ${isOpen ? "ml-auto mr-2" : "mx-auto"}
+                        `}
+                        aria-label="Toggle menu"
+                    >
+                        <div className="relative z-10">
+                            {isOpen ? <X size={22} /> : <Menu size={22} />}
+                        </div>
+                        {/* Glow effect on hover */}
+                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-neutral-100 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 dark:from-white/5" />
+                    </button>
+                </div>
+
+                {/* Menu Items */}
+                <div className={`flex-1 overflow-y-auto py-4 px-3 space-y-2 transition-opacity duration-300 ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
+                    {isOpen && (
+                        <>
+                            <div className="px-3 mb-4">
+                                <h3 className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
+                                    Auction Menu
+                                </h3>
+                            </div>
+                            <ul className="space-y-1">
+                                {auctionMenu.map((label) => {
+                                    const isActive = active === label;
+                                    return (
+                                        <li key={label}>
+                                            <button
+                                                onClick={() => onSelect?.(label)}
+                                                className={`
+                                                    group relative w-full flex items-center justify-between
+                                                    px-4 py-3 rounded-xl text-sm font-medium
+                                                    transition-all duration-200
+                                                    ${isActive
+                                                    ? "bg-neutral-900 dark:bg-white text-white dark:text-black shadow-lg shadow-neutral-900/20 dark:shadow-white/10"
+                                                    : "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-[#1A1F25] hover:text-neutral-900 dark:hover:text-white"
+                                                }
+                                                `}
+                                            >
+                                                <span>{label}</span>
+                                                {isActive && (
+                                                    <ChevronRight size={16} className="opacity-100" />
+                                                )}
+                                                {!isActive && (
+                                                    <ChevronRight size={16} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-neutral-400" />
+                                                )}
+                                            </button>
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                        </>
+                    )}
+                </div>
+
+                {/* Collapsed State Icons (Optional - if we want to show icons when collapsed) */}
+                {!isOpen && (
+                    <div className="absolute top-24 left-0 w-full flex flex-col items-center gap-4 opacity-50 pointer-events-none">
+                        {/* Placeholder for collapsed icons if we had them mapped */}
+                        <div className="w-1 h-1 rounded-full bg-neutral-300 dark:bg-neutral-700" />
+                        <div className="w-1 h-1 rounded-full bg-neutral-300 dark:bg-neutral-700" />
+                        <div className="w-1 h-1 rounded-full bg-neutral-300 dark:bg-neutral-700" />
+                    </div>
+                )}
+            </div>
+        </div>
     );
 }

@@ -13,6 +13,7 @@ const resources = {
             light_mode: "Light Mode",
             dark_mode: "Dark Mode",
             success: "Action Successful!",
+            language: "Language",
 
             // 🔻 thêm cho Header/nav
             home: "Home",
@@ -271,7 +272,10 @@ const resources = {
             Max_10_images: "Maximum 10 images allowed",
             Auction_created_success: "Auction created successfully! Item ID: {{itemId}}",
             Failed_to_create_auction: "Failed to create auction. Please try again.",
-            Failed_to_load_categories: "Failed to load categories"
+            Failed_to_load_categories: "Failed to load categories",
+
+            Main_Image: "Main Image",
+            Set_as_Thumbnail: "Set as Thumbnail"
         },
     },
     vi: {
@@ -284,6 +288,7 @@ const resources = {
             light_mode: "Chế độ sáng",
             dark_mode: "Chế độ tối",
             success: "Thao tác thành công!",
+            language: "Ngôn ngữ",
 
             // 🔻 thêm cho Header/nav
             home: "Trang chủ",
@@ -542,7 +547,10 @@ const resources = {
             Max_10_images: "Chỉ được phép tải tối đa 10 ảnh",
             Auction_created_success: "Tạo phiên đấu giá thành công! ID Vật phẩm: {{itemId}}",
             Failed_to_create_auction: "Tạo phiên đấu giá thất bại. Vui lòng thử lại.",
-            Failed_to_load_categories: "Không thể tải danh mục"
+            Failed_to_load_categories: "Không thể tải danh mục",
+
+            Main_Image: "Ảnh bìa",
+            Set_as_Thumbnail: "Đặt làm ảnh bìa"
         },
     },
 };
