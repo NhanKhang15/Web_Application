@@ -24,8 +24,9 @@ public class AuctionsController {
     @GetMapping("/active")
     public ResponseEntity<Page<ActiveAuctionDto>> getActiveList(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(service.listActiveAuctions(PageRequest.of(page, size)));
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Integer categoryId) {
+        return ResponseEntity.ok(service.listActiveAuctions(categoryId, PageRequest.of(page, size)));
     }
 
     // API 2: Xem chi tiết

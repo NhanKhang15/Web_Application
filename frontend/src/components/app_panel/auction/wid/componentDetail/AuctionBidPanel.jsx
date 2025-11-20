@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useAuction } from "../../hook/useAuction.jsx"; // Import hook
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
 // --- Các hàm helper (Đã di chuyển từ AuctionDetail sang đây) ---
 const fmt = (n) => Number(n ?? 0).toLocaleString();
@@ -25,6 +26,7 @@ const hhmmss = (s) => {
  */
 export default function AuctionBidPanel({ product }) {
     const { t } = useTranslation();
+    const navigate = useNavigate();
 
     // --- Toàn bộ logic đấu giá đã được di chuyển vào đây ---
     const {
@@ -217,25 +219,40 @@ export default function AuctionBidPanel({ product }) {
             </div>
 
             {/* Similar Items */}
-            {Array.isArray(product.similar) && product.similar.length > 0 && (
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                    <h2 className="text-md font-semibold mb-3 uppercase">{t('Similar_Items')}</h2>
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                <h2 className="text-md font-semibold mb-3 uppercase text-gray-500 tracking-wider text-xs">
+                    {t('Similar_Items')}
+                </h2>
+
+                {Array.isArray(product.similar) && product.similar.length > 0 ? (
                     <div className="space-y-3">
                         {product.similar.map((s) => (
                             <div
                                 key={s.id}
-                                className="flex items-center gap-3 bg-gray-50 dark:bg-[#1A1F25] rounded-md p-2 hover:bg-gray-100 dark:hover:bg-[#222831] cursor-pointer"
+                                onClick={() => {
+                                    if (s.slug) {
+                                        // Dùng window.location để ép tải lại trang nếu navigate không ăn
+                                        // hoặc dùng navigate nếu đã import hook
+                                        window.location.href = `/dashboard/auctions/main/${s.slug}`;
+                                    }
+                                }}
+                                className="flex items-center gap-3 bg-gray-50 dark:bg-[#1A1F25] rounded-md p-2 hover:bg-gray-100 dark:hover:bg-[#222831] cursor-pointer transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
                             >
                                 <img src={s.img} alt={s.name} className="w-14 h-10 object-cover rounded" />
                                 <div>
-                                    <p className="font-medium text-sm">{s.name}</p>
+                                    <p className="font-medium text-sm line-clamp-1 text-gray-900 dark:text-gray-200">{s.name}</p>
                                     {s.year && <p className="text-xs text-gray-500">{s.year}</p>}
                                 </div>
                             </div>
                         ))}
                     </div>
-                </div>
-            )}
+                ) : (
+                    // 👇 Hiển thị thông báo này nếu không tìm thấy sản phẩm
+                    <div className="text-sm text-gray-400 italic py-2 text-center bg-gray-50 dark:bg-[#1A1F25] rounded-md">
+                        {t('No_similar_items_found') || "Không có sản phẩm tương tự"}
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

@@ -1,6 +1,6 @@
 import React from "react";
 import { X } from "lucide-react";
-import {useTranslation} from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 export default function FilterSheet({
                                         open,
@@ -11,18 +11,21 @@ export default function FilterSheet({
                                         setSort,
                                         onApply,
                                         onReset,
+                                        // Nếu bạn muốn truyền danh sách category động từ cha xuống thì thêm prop này
+                                        categoryOptions = ["Electronics", "Clothing", "Accessories", "Art", "Vehicles"]
                                     }) {
     const { t } = useTranslation();
 
     const toggleSet = (key, value) => {
         setFilters((prev) => {
-            const next = new Set(prev[key]);
+            // Lưu ý: Đảm bảo initial state của filters ở component cha phải có { categories: new Set() }
+            const next = new Set(prev[key] || []);
             next.has(value) ? next.delete(value) : next.add(value);
             return { ...prev, [key]: next };
         });
     };
 
-    const     Chip = ({ active, children, onClick }) => (
+    const Chip = ({ active, children, onClick }) => (
         <button
             onClick={onClick}
             className={`px-[1vw] py-[0.7vh] rounded-md text-[clamp(11px,1vw,12px)] font-medium border transition
@@ -61,14 +64,14 @@ export default function FilterSheet({
                 aria-modal="true"
                 className={[
                     "absolute left-0 right-0 top-0 z-[60]",
-                    "h-[28vh] w-full",
+                    "h-auto min-h-[35vh] w-full", // Tăng chiều cao một chút để chứa thêm dòng Category
                     "bg-white dark:bg-neutral-900",
                     "border-b border-neutral-200 dark:border-neutral-800",
                     "transform-gpu will-change-transform transition-transform duration-300 ease-out",
                     translateClass,
                 ].join(" ")}
             >
-                <div className="h-full flex flex-col">
+                <div className="h-full flex flex-col pb-4">
                     {/* Header */}
                     <div
                         style={headerInlineStyle}
@@ -87,11 +90,9 @@ export default function FilterSheet({
                     </div>
 
                     {/* Body */}
-                    <div
-                        className="flex-1 overflow-visible px-[2vw] py-[1.2vh]"
-                    >
-                        <div className="space-y-[1.2vh]">
-                            {/* Row 1 */}
+                    <div className="flex-1 overflow-visible px-[2vw] py-[1.2vh]">
+                        <div className="space-y-[1.5vh]">
+                            {/* Row 1: Branch & Date & Time */}
                             <div className="grid w-full gap-x-[2vw] gap-y-[1vh] grid-cols-[repeat(auto-fit,minmax(220px,1fr))]">
                                 {/* Branch */}
                                 <div className="flex items-center flex-wrap gap-[0.6vw]">
@@ -101,7 +102,7 @@ export default function FilterSheet({
                                     {["Dubai", "Abu Dhabi", "Sharjah"].map((b) => (
                                         <Chip
                                             key={b}
-                                            active={filters.branches.has(b)}
+                                            active={filters.branches?.has(b)}
                                             onClick={() => toggleSet("branches", b)}
                                         >
                                             {b}
@@ -158,24 +159,43 @@ export default function FilterSheet({
                                 </div>
                             </div>
 
-                            {/* Row 2 */}
-                            <div className="flex flex-wrap items-center gap-x-[0.6vw] gap-y-[1vh]">
-                                <span className="text-[clamp(12px,1vw,14px)] text-[#122025] dark:text-neutral-100 font-semibold mr-[0.6vw]">
-                                    {t('Type')}
-                                </span>
-                                {["Live", "Inventory", "Deal", "Corporate"].map((t) => (
-                                    <Chip
-                                        key={t}
-                                        active={filters.types.has(t)}
-                                        onClick={() => toggleSet("types", t)}
-                                    >
-                                        {t}
-                                    </Chip>
-                                ))}
+                            {/* Row 2: Category (MỚI) & Type */}
+                            <div className="flex flex-col gap-[1vh]">
+                                {/* --- NEW CATEGORY SECTION --- */}
+                                <div className="flex flex-wrap items-center gap-x-[0.6vw] gap-y-[1vh]">
+                                    <span className="text-[clamp(12px,1vw,14px)] text-[#122025] dark:text-neutral-100 font-semibold mr-[0.6vw]">
+                                        {t('Category')}
+                                    </span>
+                                    {categoryOptions.map((cat) => (
+                                        <Chip
+                                            key={cat}
+                                            active={filters.categories?.has(cat)}
+                                            onClick={() => toggleSet("categories", cat)}
+                                        >
+                                            {cat}
+                                        </Chip>
+                                    ))}
+                                </div>
+
+                                {/* Type (Giữ nguyên) */}
+                                <div className="flex flex-wrap items-center gap-x-[0.6vw] gap-y-[1vh]">
+                                    <span className="text-[clamp(12px,1vw,14px)] text-[#122025] dark:text-neutral-100 font-semibold mr-[0.6vw]">
+                                        {t('Type')}
+                                    </span>
+                                    {["Live", "Inventory", "Deal", "Corporate"].map((t) => (
+                                        <Chip
+                                            key={t}
+                                            active={filters.types?.has(t)}
+                                            onClick={() => toggleSet("types", t)}
+                                        >
+                                            {t}
+                                        </Chip>
+                                    ))}
+                                </div>
                             </div>
 
-                            {/* Row 3 */}
-                            <div className="flex flex-wrap items-center gap-x-[3vw] gap-y-[1vh]">
+                            {/* Row 3: Negotiated, Sort, Actions */}
+                            <div className="flex flex-wrap items-center gap-x-[3vw] gap-y-[1vh] pt-1 border-t border-neutral-100 dark:border-neutral-800">
                                 {/* Negotiated */}
                                 <div className="flex items-center gap-[0.6vw]">
                                     <span className="text-[clamp(12px,1vw,14px)] text-[#122025] dark:text-neutral-100 font-semibold">

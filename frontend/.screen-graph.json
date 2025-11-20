@@ -30,20 +30,6 @@
       "routes": [
         "/auth/callback"
       ]
-    },
-    {
-      "id": "src/components/app_panel/auction/screen/AuctionView.jsx",
-      "label": "AuctionView",
-      "routes": [
-        ":category"
-      ]
-    },
-    {
-      "id": "src/components/app_panel/auction/screen/AuctionDetail.jsx",
-      "label": "AuctionDetail",
-      "routes": [
-        ":category/:slug"
-      ]
     }
   ],
   "edges": [

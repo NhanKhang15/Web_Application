@@ -25,7 +25,11 @@ public class ActiveItemsService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ActiveAuctionDto> listActiveAuctions(Pageable pageable) {
+    public Page<ActiveAuctionDto> listActiveAuctions(Integer categoryId, Pageable pageable) {
+        if (categoryId != null) {
+            return auctionRepo.findActiveAuctionsByCategory(categoryId, pageable);
+        }
+        // Nếu không thì gọi hàm lấy tất cả như cũ
         return auctionRepo.findActiveAuctionsCustom(pageable);
     }
 
@@ -44,6 +48,7 @@ public class ActiveItemsService {
                 proj.getItemId(),
                 proj.getSellerId(),
                 proj.getCategoryName(),
+                proj.getCategoryId(),
                 proj.getTitle(),
                 proj.getSlug(),
                 proj.getDescription(),
