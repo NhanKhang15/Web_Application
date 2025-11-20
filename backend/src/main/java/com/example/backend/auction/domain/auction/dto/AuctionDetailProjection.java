@@ -9,7 +9,7 @@ public interface AuctionDetailProjection {
 
     Integer getSellerId();
 
-    Integer getCategoryId();
+    String getCategoryName();
 
     String getTitle();
 
