@@ -188,12 +188,21 @@ export class PostAuctionApi {
     static generateSlug(title) {
         if (!title) return "";
 
-        return title
+        // 1. Tạo slug cơ bản từ tiêu đề
+        const baseSlug = title
             .toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/(^-|-$)/g, "");
+            .normalize("NFD") // Tách dấu ra khỏi ký tự
+            .replace(/[\u0300-\u036f]/g, "") // Xóa các dấu
+            .replace(/[^a-z0-9]+/g, "-") // Thay ký tự đặc biệt bằng dấu gạch ngang
+            .replace(/(^-|-$)/g, ""); // Xóa gạch ngang ở đầu/cuối
+
+        // 2. Tạo hậu tố duy nhất (Kết hợp thời gian + random)
+        // Date.now().toString(36): Chuyển thời gian hiện tại sang hệ cơ số 36 (ngắn gọn)
+        // Math.random(): Thêm chút ngẫu nhiên để chắc chắn không trùng kể cả khi tạo cùng mili-giây
+        const uniqueSuffix = Date.now().toString(36) + Math.random().toString(36).substr(2, 4);
+
+        // Kết quả: iphone-15-pro-max-lz9x3k2a
+        return `${baseSlug}-${uniqueSuffix}`;
     }
 }
 

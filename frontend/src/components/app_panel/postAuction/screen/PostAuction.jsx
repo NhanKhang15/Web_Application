@@ -116,6 +116,30 @@ export default function PostAuction() {
         }));
     };
 
+    const setAsMain = (index) => {
+        if (index === 0) return; // Nếu đang là ảnh chính rồi thì không làm gì
+
+        // 1. Cập nhật mảng Previews (hiển thị)
+        const newPreviews = [...imagePreviews];
+        const selectedPreview = newPreviews[index];
+        // Xóa ảnh ở vị trí cũ và chèn vào đầu
+        newPreviews.splice(index, 1);
+        newPreviews.unshift(selectedPreview);
+        setImagePreviews(newPreviews);
+
+        // 2. Cập nhật mảng Files (dữ liệu gửi đi)
+        const newImages = [...formData.images];
+        const selectedFile = newImages[index];
+        // Xóa file ở vị trí cũ và chèn vào đầu
+        newImages.splice(index, 1);
+        newImages.unshift(selectedFile);
+
+        setFormData(prev => ({
+            ...prev,
+            images: newImages
+        }));
+    };
+
     const resetForm = () => {
         // Clean up preview URLs
         imagePreviews.forEach(url => URL.revokeObjectURL(url));
@@ -388,24 +412,44 @@ export default function PostAuction() {
                     {imagePreviews.length > 0 && (
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                             {imagePreviews.map((preview, index) => (
-                                <div key={index} className="relative group">
+                                <div key={index} className="relative group aspect-video"> {/* Thêm aspect-video để khung hình đều nhau */}
                                     <img
                                         src={preview}
                                         alt={`Preview ${index + 1}`}
-                                        className="w-full h-32 object-cover rounded-lg border border-neutral-300 dark:border-neutral-700"
+                                        className={`w-full h-full object-cover rounded-lg border transition-all duration-200 ${
+                                            index === 0
+                                                ? "border-[#e43137] ring-2 ring-[#e43137]/20"
+                                                : "border-neutral-300 dark:border-neutral-700 group-hover:border-neutral-400"
+                                        }`}
                                     />
-                                    {index === 0 && (
-                                        <span className="absolute top-2 left-2 bg-[#e43137] text-white text-xs px-2 py-1 rounded">
-                                            {t('Main')}
-                                        </span>
-                                    )}
+
+                                    {/* Nút xóa (Giữ nguyên, chỉ chỉnh lại style một chút cho đẹp) */}
                                     <button
                                         type="button"
                                         onClick={() => removeImage(index)}
-                                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                        className="absolute top-2 right-2 bg-black/50 hover:bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 z-20"
+                                        title={t('Remove')}
                                     >
                                         ×
                                     </button>
+
+                                    {/* Logic hiển thị Thumbnail / Nút chọn Thumbnail */}
+                                    {index === 0 ? (
+                                        <span className="absolute top-2 left-2 bg-[#e43137] text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm z-10 uppercase tracking-wider">
+                                            {t('Main_Image')}
+                                        </span>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            onClick={() => setAsMain(index)}
+                                            className="absolute top-2 left-2 bg-black/60 hover:bg-[#e43137] text-white text-[10px] font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-all duration-200 z-10 backdrop-blur-sm"
+                                        >
+                                            {t('Set_as_Thumbnail')}
+                                        </button>
+                                    )}
+
+                                    {/* Lớp phủ mờ khi hover để làm nổi bật các nút */}
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200 rounded-lg pointer-events-none" />
                                 </div>
                             ))}
                         </div>

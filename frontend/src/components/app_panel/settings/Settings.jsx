@@ -84,7 +84,7 @@ export default function Settings() {
 
                     {/* Language Section 🌐 */}
                     <section>
-                        <h2 className="text-lg font-medium mb-4">🌍 Ngôn ngữ</h2>
+                        <h2 className="text-lg font-medium mb-4">🌍 {t('language')}</h2>
                         <div className="flex gap-4 ">
                             <button
                                 onClick={() => handleLanguageChange("en")}

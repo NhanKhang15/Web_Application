@@ -210,6 +210,19 @@ export default function AuctionView() {
                     loading={loading}
                     error={error}
                 />
+
+                {/* --- MỚI: Toolbar dưới --- */}
+                {/* Toolbar này sẽ nằm cố định ở đáy màn hình (dưới Grid) */}
+                <div className="flex-shrink-0 border-t border-neutral-200 dark:border-neutral-800 pt-2 bg-gray-50 dark:bg-[#0B0F13]">
+                    <AuctionToolbar
+                        sort={sort}
+                        setSort={setSort} // Vẫn cần truyền dù bị ẩn để tránh lỗi props
+                        pageData={data}
+                        setPage={setPage}
+                        loading={loading}
+                        hideSort={true} // Ẩn nút sort đi
+                    />
+                </div>
             </div>
         </div>
     );
