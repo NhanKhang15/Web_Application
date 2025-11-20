@@ -21,10 +21,13 @@ public interface AuctionRepository extends JpaRepository<Auction, Integer> {
                     ai.Title AS title,
                     ai.Slug AS slug,
                     COALESCE(img.ImgUrl, ai.Thumbnail) AS thumbnail, -- Ưu tiên ảnh Main, nếu không có lấy thumbnail gốc
-                    u.Username AS sellerName
+                    u.Username AS sellerName,
+                    ai.CategoryID AS categoryId,
+                    c.CategoryName AS categoryName
                 FROM Auctions a
                 JOIN AuctionItems ai ON a.ItemID = ai.ItemID
                 JOIN Users u ON ai.SellerID = u.UserID
+                JOIN Categories c ON ai.CategoryID = c.CategoryID
                 LEFT JOIN ItemImages img ON ai.ItemID = img.ItemID AND img.IsMain = 1
                 WHERE a.Status = 'Open'
                 ORDER BY a.StartDate DESC
@@ -42,10 +45,40 @@ public interface AuctionRepository extends JpaRepository<Auction, Integer> {
 
     @Query(value = """
                 SELECT
+                    a.AuctionID AS auctionId,
+                    a.ItemID AS itemId,
+                    a.CurrentPrice AS currentPrice,
+                    a.BuyNowPrice AS buyNowPrice,
+                    ai.Title AS title,
+                    ai.Slug AS slug,
+                    COALESCE(img.ImgUrl, ai.Thumbnail) AS thumbnail,
+                    u.Username AS sellerName,
+                    ai.CategoryID AS categoryId
+                FROM Auctions a
+                JOIN AuctionItems ai ON a.ItemID = ai.ItemID
+                JOIN Users u ON ai.SellerID = u.UserID
+                LEFT JOIN ItemImages img ON ai.ItemID = img.ItemID AND img.IsMain = 1
+                WHERE a.Status = 'Open'
+                  AND ai.CategoryID = :categoryId  -- 👈 ĐIỀU KIỆN LỌC Ở ĐÂY
+                ORDER BY a.StartDate DESC
+            """,
+            // Câu lệnh đếm tổng số trang cũng phải join bảng AuctionItems để lọc đúng
+            countQuery = """
+                SELECT COUNT(*)
+                FROM Auctions a
+                JOIN AuctionItems ai ON a.ItemID = ai.ItemID
+                WHERE a.Status = 'Open' AND ai.CategoryID = :categoryId
+            """,
+            nativeQuery = true)
+    Page<ActiveAuctionDto> findActiveAuctionsByCategory(@Param("categoryId") Integer categoryId, Pageable pageable);
+
+    @Query(value = """
+                SELECT
                     -- Item Info
                     ai.ItemID AS itemId,
                     ai.SellerID AS sellerId,
                     c.CategoryName AS categoryName,
+                    ai.CategoryID AS categoryId,
                     ai.Title AS title,
                     ai.Slug AS slug,
                     ai.Description AS description,

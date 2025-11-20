@@ -1,0 +1,194 @@
+// src/components/app_panel/auction/screen/AuctionDetail.jsx
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import ItemsApi from "../../lib/itemDetail.js";
+import { PostAuctionApi } from "../../../postAuction/lib/PostAuctionApi.js";
+import { fetchAuctionItems } from "../../lib/auctionItems";
+import AuctionBidPanel from "../../wid/componentDetail/AuctionBidPanel.jsx";
+import AuctionImageGallery from "../../wid/componentDetail/AuctionImageGallery.jsx";
+import AuctionInfo from "../../wid/componentDetail/AuctionInfo.jsx";
+import ImageGalleryModal from "../../wid/componentDetail/ImageGalleryModal.jsx";
+import { useTranslation } from "react-i18next";
+
+export default function AuctionDetail() {
+    const { category, slug, itemSlug } = useParams();
+    const { t } = useTranslation();
+
+    // Ưu tiên dùng itemSlug (cho route mới), fallback về slug cũ
+    const realProductSlug = itemSlug || slug;
+
+    const [raw, setRaw] = useState(null);
+    const [state, setState] = useState({ loading: true, error: null, notFound: false });
+    const [images, setImages] = useState([]);
+    const [modalInitialIndex, setModalInitialIndex] = useState(null);
+
+    const [categories, setCategories] = useState({});
+    const [similarItems, setSimilarItems] = useState([]);
+
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: "instant" });
+    }, [realProductSlug]);
+
+    useEffect(() => {
+        let alive = true;
+        setState({ loading: true, error: null, notFound: false });
+        setImages([]);
+        setSimilarItems([])
+
+        if (!realProductSlug) return;
+
+        ItemsApi.getBySlug(realProductSlug)
+            .then((data) => {
+                if (!alive) return;
+                if (!data) return setState({ loading: false, error: null, notFound: true });
+                setRaw(data);
+                setState({ loading: false, error: null, notFound: false });
+            })
+            .catch((err) => {
+                if (!alive) return;
+                if (err?.status === 404) setState({ loading: false, error: null, notFound: true });
+                else setState({ loading: false, error: err, notFound: false });
+            });
+
+        return () => { alive = false; };
+    }, [realProductSlug]);
+
+    // ====== Fetch Categories (Để lấy tên danh mục) ======
+    useEffect(() => {
+        PostAuctionApi.getCategories()
+            .then((cats) => {
+                // Chuyển mảng categories thành Object { id: name } để tra cứu cho nhanh
+                const catMap = {};
+                cats.forEach(c => {
+                    // API có thể trả về CategoryID hoặc categoryId
+                    const id = c.categoryId || c.CategoryID;
+                    const name = c.categoryName || c.CategoryName;
+                    if (id) catMap[id] = name;
+                });
+                setCategories(catMap);
+            })
+            .catch(console.error);
+    }, []);
+
+    // ====== Fetch Similar Items (Sản phẩm cùng loại) ======
+    useEffect(() => {
+        if (!raw || !raw.categoryId) return;
+
+        // ✅ CÁCH MỚI: Truyền thẳng categoryId vào API để Backend lọc giúp
+        fetchAuctionItems({
+            page: 0,
+            size: 5, // Chỉ cần lấy 5 cái
+            sort: "createdAt,desc",
+            categoryId: raw.categoryId // 👈 QUAN TRỌNG: Lọc theo danh mục ngay từ API
+        })
+            .then((res) => {
+                const allItems = res.content || [];
+
+                // Vẫn cần lọc Client-side một lần nữa để loại bỏ chính sản phẩm đang xem
+                const filtered = allItems.filter(item => item.itemId !== raw.itemId);
+
+                // Lấy tối đa 4 item để hiển thị
+                setSimilarItems(filtered.slice(0, 4));
+            })
+            .catch(err => {
+                // Nếu API chưa hỗ trợ lọc categoryId, nó sẽ trả về tất cả (fallback về logic cũ)
+                // Ta vẫn lọc lại ở client để đảm bảo an toàn
+                console.warn("API might not support category filtering yet", err);
+            });
+
+    }, [raw]);
+
+    const product = useMemo(() => {
+        if (!raw) return null;
+
+        const catName = categories[raw.categoryId] || raw.categoryName || "Unknown Category";
+
+        return {
+            id: raw.itemId,
+            name: raw.title || "Untitled Item",
+            model: raw.slug || "",
+            price: raw.currentPrice || raw.startingPrice || 0,
+            buyNowPrice: raw.buyNowPrice,
+            minStep: raw.minStep,
+            startingPrice: raw.startingPrice,
+            reservePrice: raw.reservePrice,
+            startDate: raw.startDate,
+            endDate: raw.endDate,
+            sellerId: raw.sellerId,
+            sellerName: raw.sellerName,
+            description: raw.description,
+            location: raw.location,
+            images: raw.imageUrls ? raw.imageUrls.map(url => PostAuctionApi.getFullImageUrl(url)) : [],
+            fallbackImages: raw.thumbnail ? [PostAuctionApi.getFullImageUrl(raw.thumbnail)] : [],
+            features: {
+                Location: raw.location || "—",
+                Seller: raw.sellerName || "—",
+                Category: catName || "—",
+                Created: raw.createdAt ? new Date(raw.createdAt).toLocaleDateString() : "—",
+            },
+            shipping: {
+                Method: "Standard Shipping",
+                Fee: "Calculated at checkout",
+                Payment: "Card, Bank Transfer",
+                Returns: "No returns",
+            },
+            similar: similarItems.map(s => ({
+                id: s.itemId,
+                name: s.title,
+                slug: s.slug || s.Slug, // ✅ Thêm cái này để biết đường link
+                img: s.thumbnail ? PostAuctionApi.getFullImageUrl(s.thumbnail) : "https://via.placeholder.com/150",
+                year: s.createdAt ? new Date(s.createdAt).getFullYear() : ""
+            }))
+        };
+    }, [raw, categories, similarItems]);
+
+    useEffect(() => {
+        if (product?.images?.length > 0) setImages(product.images);
+        else if (product?.fallbackImages?.length > 0) setImages(product.fallbackImages);
+        else setImages([]);
+    }, [product]);
+
+    if (state.loading) return <div className="p-10 text-center text-gray-500 animate-pulse">Loading product data...</div>;
+    if (state.notFound) return <div className="p-10 text-center text-red-500 font-medium">Product not found</div>;
+    if (state.error) return <div className="p-10 text-center text-red-500">Error: {state.error.message}</div>;
+    if (!product) return null;
+
+    return (
+        <div className="max-w-[1400px] mx-auto px-4 py-6 lg:py-8 text-[#212121] dark:text-gray-200">
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+
+                {/* --- LEFT COLUMN (7/12) --- */}
+                <div className="lg:col-span-7 flex flex-col gap-6">
+
+                    {/* 1. Image Gallery Card */}
+                    <div className="bg-white dark:bg-[#14191F] rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
+                        <AuctionImageGallery
+                            images={images}
+                            onImageClick={(index) => setModalInitialIndex(index)}
+                        />
+                    </div>
+
+                    {/* 2. Info Card (Mô tả + Features) */}
+                    <AuctionInfo product={product} />
+                </div>
+
+                {/* --- RIGHT COLUMN (5/12) --- */}
+                <div className="lg:col-span-5 relative">
+                    {/* Sticky Wrapper: Giữ cho cột phải chạy theo khi cuộn */}
+                    <div className="sticky top-6">
+                        {/* AuctionBidPanel đã bao gồm: Giá, Bid Input, Lịch sử, Shipping */}
+                        <AuctionBidPanel product={product} />
+                    </div>
+                </div>
+            </div>
+
+            {/* --- MODAL --- */}
+            <ImageGalleryModal
+                images={images}
+                initialIndex={modalInitialIndex}
+                onClose={() => setModalInitialIndex(null)}
+            />
+        </div>
+    );
+}
