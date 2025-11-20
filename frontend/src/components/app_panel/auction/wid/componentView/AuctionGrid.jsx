@@ -30,7 +30,14 @@ export default function AuctionGrid({ list, goItem, loading, error }) {
 
     // Grid
     return (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 flex-1 overflow-y-auto px-6 pb-6 min-h-0 max-h-full">
+        <div className="
+        grid grid-cols-1 md:grid-cols-4 gap-6
+        flex-1
+        overflow-y-auto
+        [&::-webkit-scrollbar]:hidden
+            [-ms-overflow-style:'none']
+            [scrollbar-width:'none']
+        px-6 pb-6 min-h-0 max-h-full">
             {list.map((item, i) => (
                 <AuctionCard
                     key={item.itemId}

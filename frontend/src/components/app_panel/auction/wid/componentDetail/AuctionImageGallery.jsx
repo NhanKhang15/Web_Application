@@ -1,92 +1,151 @@
-import React, { useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Slider from "react-slick";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import {useTranslation} from "react-i18next";
+import { useTranslation } from "react-i18next";
 
-// --- Định nghĩa Arrow (Chỉ dùng cho component này) ---
-function NextArrow({ onClick }) {
+// --- Custom Arrows cho Thumbnails (Giữ nguyên) ---
+function ThumbNextArrow({ onClick, className }) {
+    const isDisabled = className && className.includes("slick-disabled");
     return (
         <button
             type="button"
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-gray-800/60 hover:bg-gray-800 text-white rounded-full p-2 z-10"
-            onClick={onClick} aria-label="Next"
+            className={`absolute -right-3 top-1/2 -translate-y-1/2 z-10 p-1 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white shadow-sm transition-all ${isDisabled ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+            onClick={onClick}
         >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-4 h-4" />
         </button>
     );
 }
-function PrevArrow({ onClick }) {
+
+function ThumbPrevArrow({ onClick, className }) {
+    const isDisabled = className && className.includes("slick-disabled");
     return (
         <button
             type="button"
-            className="absolute left-2 top-1/2 -translate-y-1/2 bg-gray-800/60 hover:bg-gray-800 text-white rounded-full p-2 z-10"
-            onClick={onClick} aria-label="Previous"
+            className={`absolute -left-3 top-1/2 -translate-y-1/2 z-10 p-1 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white shadow-sm transition-all ${isDisabled ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+            onClick={onClick}
         >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-4 h-4" />
         </button>
     );
 }
 
 export default function AuctionImageGallery({ images, onImageClick }) {
     const { t } = useTranslation();
-    const mainSliderRef = useRef(null);
 
-    const settings = {
-        dots: true,
-        infinite: true,
-        speed: 400,
-        slidesToShow: 1,
-        slidesToScroll: 1,
-        nextArrow: <NextArrow />,
-        prevArrow: <PrevArrow />,
+    // State để đồng bộ swipe (lướt)
+    const [nav1, setNav1] = useState(null);
+    const [nav2, setNav2] = useState(null);
+
+    // Ref để điều khiển thủ công
+    const sliderRef1 = useRef(null);
+    const sliderRef2 = useRef(null);
+
+    // Khởi tạo đồng bộ
+    useEffect(() => {
+        setNav1(sliderRef1.current);
+        setNav2(sliderRef2.current);
+    }, []);
+
+    // Hàm xử lý khi bấm vào thumbnail (FIX LỖI KHÔNG ĐỒNG BỘ)
+    const handleThumbnailClick = (index) => {
+        // 1. Ép slider chính nhảy đến ảnh đó
+        sliderRef1.current?.slickGoTo(index);
     };
 
+    const mainSettings = {
+        dots: false,
+        infinite: true,
+        speed: 500,
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        autoplay: true,
+        autoplaySpeed: 4000,
+        asNavFor: nav2,
+        arrows: false,
+    };
+
+    const thumbSettings = {
+        slidesToShow: 5,
+        slidesToScroll: 1,
+        asNavFor: nav1,
+        dots: false,
+        centerMode: true,
+        focusOnSelect: true, // Vẫn giữ để hỗ trợ library
+        centerPadding: "0px",
+        swipeToSlide: true,
+        nextArrow: <ThumbNextArrow />,
+        prevArrow: <ThumbPrevArrow />,
+        responsive: [
+            { breakpoint: 1024, settings: { slidesToShow: 4 } },
+            { breakpoint: 600, settings: { slidesToShow: 3 } }
+        ]
+    };
+
+    if (!images || images.length === 0) {
+        return (
+            <div className="w-full h-[400px] grid place-items-center bg-gray-200/60 dark:bg-gray-800 rounded-lg text-gray-500">
+                {t('No_image')}
+            </div>
+        );
+    }
+
     return (
-        <>
-            {/* SLIDER CHÍNH */}
-            <div className="relative mb-6 rounded-lg shadow-md w-full max-w-[800px] mx-auto overflow-visible">
-                {images.length > 0 ? (
-                    <Slider ref={mainSliderRef} {...settings}>
+        <div className="w-full max-w-[800px] mx-auto">
+            {/* --- SLIDER CHÍNH --- */}
+            <div className="relative mb-4 rounded-lg overflow-hidden shadow-sm border border-gray-200 dark:border-gray-800">
+                <Slider
+                    {...mainSettings}
+                    ref={sliderRef1}
+                >
+                    {images.map((src, i) => (
+                        <div key={i} className="outline-none">
+                            <img
+                                src={src}
+                                alt={`slide-${i}`}
+                                onClick={() => onImageClick && onImageClick(i)}
+                                className="w-full h-[400px] object-cover cursor-zoom-in"
+                            />
+                        </div>
+                    ))}
+                </Slider>
+            </div>
+
+            {/* --- THUMBNAILS SLIDER --- */}
+            {images.length > 1 && (
+                <div className="px-4">
+                    <Slider
+                        {...thumbSettings}
+                        ref={sliderRef2}
+                        className="thumb-slider"
+                    >
                         {images.map((src, i) => (
-                            <div key={i}>
-                                <img
-                                    src={src}
-                                    alt={`slide-${i}`}
-                                    className="w-full h-[400px] object-cover rounded-lg"
-                                />
+                            <div
+                                key={i}
+                                className="px-1 outline-none"
+                                // 👇 QUAN TRỌNG: Bắt sự kiện click thủ công ở đây
+                                onClick={() => handleThumbnailClick(i)}
+                            >
+                                <div className="relative aspect-[4/3] group">
+                                    <img
+                                        src={src}
+                                        alt={`thumb-${i}`}
+                                        className="w-full h-full object-cover rounded-md border border-gray-200 dark:border-gray-700 cursor-pointer opacity-60 hover:opacity-100 transition-opacity ui-selected:opacity-100"
+                                    />
+                                    <div className="absolute inset-0 ring-2 ring-[#e43137] rounded-md opacity-0 group-[.slick-current_&]:opacity-100 transition-opacity pointer-events-none" />
+                                </div>
                             </div>
                         ))}
                     </Slider>
-                ) : (
-                    <div className="w-full h-[400px] grid place-items-center bg-gray-200/60 rounded-lg text-gray-500">
-                        {t('No_image')}
-                    </div>
-                )}
-            </div>
+                </div>
+            )}
 
-            {/* THUMBNAILS */}
-            <div className="flex flex-wrap gap-3 mb-8 max-w-[800px] mx-auto">
-                {images.slice(0, 7).map((src, i) => (
-                    <img
-                        key={i}
-                        src={src}
-                        alt={`thumb-${i}`}
-                        className="w-24 h-20 rounded-lg border border-gray-300 dark:border-gray-700 object-cover cursor-pointer hover:opacity-80"
-                        // Gọi hàm prop từ cha, truyền index (vị trí)
-                        onClick={() => onImageClick(i)}
-                    />
-                ))}
-                {images.length > 7 && (
-                    <button
-                        type="button"
-                        // Mở modal tại vị trí ảnh thứ 8 (index = 7)
-                        onClick={() => onImageClick(7)}
-                        className="w-24 h-20 flex items-center justify-center bg-gray-200 dark:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300 font-medium cursor-pointer hover:bg-gray-300"
-                    >
-                        +{images.length - 7}
-                    </button>
-                )}
-            </div>
-        </>
+            <style>{`
+                .thumb-slider .slick-current img {
+                    opacity: 1 !important;
+                    border-color: #e43137;
+                }
+            `}</style>
+        </div>
     );
 }
