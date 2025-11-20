@@ -48,25 +48,25 @@
   ],
   "edges": [
     {
-      "id": "src\\components\\cover_page\\page\\Homepage.jsx:16:31-to-src\\components\\auth\\screens\\Login.jsx",
-      "source": "src\\components\\cover_page\\page\\Homepage.jsx",
+      "id": "src\\components\\cover_page\\sections\\Body.jsx:149:35-to-src\\components\\auth\\screens\\Login.jsx",
+      "source": "src\\components\\cover_page\\sections\\Homepage.jsx",
       "target": "src\\components\\auth\\screens\\Login.jsx",
       "data": {
         "viaRoute": "/login",
         "trigger": {
           "element": "navigate(\"/login\")",
-          "line": 16,
-          "endLine": 16,
-          "column": 31,
-          "endColumn": 49,
-          "sourceFile": "src\\components\\cover_page\\page\\Homepage.jsx"
+          "line": 149,
+          "endLine": 149,
+          "column": 35,
+          "endColumn": 53,
+          "sourceFile": "src\\components\\cover_page\\sections\\Body.jsx"
         }
       }
     },
     {
-      "id": "src\\components\\cover_page\\page\\Homepage.jsx:17:34-to-src\\components\\auth\\screens\\Signup.jsx",
-      "source": "src\\components\\cover_page\\page\\Homepage.jsx",
-      "target": "src\\components\\auth\\screens\\Signup.jsx",
+      "id": "src\\components\\cover_page\\sections\\Body.jsx:166:39-to-src\\components\\auth\\screens\\Login.jsx",
+      "source": "src\\components\\cover_page\\sections\\Homepage.jsx",
+      "target": "src\\components\\auth\\screens\\Login.jsx",
       "data": {
         "viaRoute": "/signup",
         "trigger": {
@@ -75,7 +75,7 @@
           "endLine": 17,
           "column": 34,
           "endColumn": 53,
-          "sourceFile": "src\\components\\cover_page\\page\\Homepage.jsx"
+          "sourceFile": "src\\components\\cover_page\\sections\\Body.jsx"
         }
       }
     },
