@@ -16,17 +16,16 @@ import {
 import { useUserProfile } from "../user_infor/lib/useUserProfile.js";
 import UserOverview from "../user_infor/screens/user/UserOverview.jsx";
 import UserAttachment from "../user_infor/screens/attachment/UserAttachment.jsx";
-import AuctionView from "../auction/screen/AuctionView.jsx";
+import AuctionView from "../auction/screen/main/AuctionView.jsx";
 import Settings from "../settings/Settings.jsx";
 import Utilities from "../utils/Utilities.jsx";
 import AboutUs from "../about/AboutUs.jsx";
 import CalculatorWidget from "../widget/sceens/CalculatorWidget.jsx";
 import {searchAuction, SearchDropdown } from "../widget/sceens/searchAuction.jsx";
 import PostAuction from "../postAuction/screen/PostAuction.jsx";
-
 import {useNavigate, useParams} from "react-router-dom";
-
 import {NAV_URL_MAPPING} from "../slidebar/lib/NAV_URL_MAPPING.js";
+import { auctionMenu } from "../slidebar/lib/auctionMenu.js";
 
 // 🌍 import i18n
 import { useTranslation } from "react-i18next";
@@ -50,6 +49,7 @@ export default function MerchantProfile() {
     const navigate = useNavigate();
     const params = useParams();
     const category = params?.category
+    const slug = params?.slug;
 
     const [auctionSidebarOpen, setAuctionSidebarOpen] = React.useState(false);
 
@@ -92,13 +92,47 @@ export default function MerchantProfile() {
         }
     }, [category]);
 
+    useEffect(() => {
+        if (leftKey === "auction") {
+            if (!slug) {
+                // 👇 MỚI: Nếu vào /dashboard/auctions mà không có slug
+                // -> Tự động chuyển hướng sang /dashboard/auctions/main
+                navigate("/dashboard/auctions/main", { replace: true });
+            } else {
+                // Logic cũ: Tìm tên menu để highlight
+                const foundItem = auctionMenu.find(item => item.path === slug);
+                if (foundItem) {
+                    setAuctionView(foundItem.label);
+                }
+                // Nếu slug là 'main' hoặc tên sản phẩm, set mặc định là Dashboard
+                else {
+                    setAuctionView("Dashboard");
+                }
+            }
+        }
+    }, [slug, leftKey, navigate]);
+
     const handleNavigation = (key) => {
         if (navigate) {
-            const path = NAV_URL_MAPPING?.[key] || key;
+            let path = NAV_URL_MAPPING?.[key] || key;
+
+            // 👇 MỚI: Nếu bấm vào tab 'auction', ép buộc vào đường dẫn 'main'
+            if (key === "auction") {
+                path = "auctions/main";
+            }
+
             navigate(`/dashboard/${path}`);
         } else {
-            // Fallback for preview mode
             setLeftKey(key);
+        }
+    };
+
+    const handleAuctionMenuSelect = (label) => {
+        const item = auctionMenu.find(i => i.label === label);
+        if (item) {
+            navigate(`/dashboard/auctions/${item.path}`);
+        } else {
+            setAuctionView(label);
         }
     };
 
@@ -308,7 +342,7 @@ export default function MerchantProfile() {
                                 customLeft={
                                     <AuctionSideBar
                                         active={auctionView}
-                                        onSelect={setAuctionView}
+                                        onSelect={handleAuctionMenuSelect}
                                         isOpen={auctionSidebarOpen}
                                         onToggle={() => setAuctionSidebarOpen(!auctionSidebarOpen)}
                                     />

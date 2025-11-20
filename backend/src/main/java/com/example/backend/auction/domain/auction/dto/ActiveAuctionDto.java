@@ -18,4 +18,8 @@ public interface ActiveAuctionDto {
     String getSellerName();
 
     String getSlug();
+
+    Integer getCategoryId();
+
+    String getCategoryName();
 }
