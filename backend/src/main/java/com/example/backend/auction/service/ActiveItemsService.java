@@ -33,32 +33,33 @@ public class ActiveItemsService {
     public AuctionDetailDto getAuctionDetailBySlug(String slug) {
         // 1. Tìm thông tin chính
         AuctionDetailProjection proj = auctionRepo.findDetailBySlug(slug)
-            .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm hoặc phiên đấu giá với slug: " + slug));
+                .orElseThrow(
+                        () -> new RuntimeException("Không tìm thấy sản phẩm hoặc phiên đấu giá với slug: " + slug));
 
         // 2. Lấy danh sách ảnh dựa trên ItemID vừa tìm được
         List<String> images = imgRepo.findAllImgUrlsByItemId(proj.getItemId());
 
         // 3. Map sang DTO
         return new AuctionDetailDto(
-            proj.getItemId(),
-            proj.getSellerId(),
-            proj.getCategoryId(),
-            proj.getTitle(),
-            proj.getSlug(),
-            proj.getDescription(),
-            proj.getLocation(),
-            proj.getStartingPrice(),
-            proj.getMinStep(),
-            proj.getCurrentPrice(),
-            proj.getReservePrice(),
-            proj.getBuyNowPrice(),
-            proj.getStatus(),
-            proj.getStartDate(),
-            proj.getEndDate(),
-            proj.getCreatedAt(),
-            proj.getUpdatedAt(),
-            proj.getSellerName(), // Tên người bán
-            images                // List ảnh
+                proj.getItemId(),
+                proj.getSellerId(),
+                proj.getCategoryName(),
+                proj.getTitle(),
+                proj.getSlug(),
+                proj.getDescription(),
+                proj.getLocation(),
+                proj.getStartingPrice(),
+                proj.getMinStep(),
+                proj.getCurrentPrice(),
+                proj.getReservePrice(),
+                proj.getBuyNowPrice(),
+                proj.getStatus(),
+                proj.getStartDate(),
+                proj.getEndDate(),
+                proj.getCreatedAt(),
+                proj.getUpdatedAt(),
+                proj.getSellerName(), // Tên người bán
+                images // List ảnh
         );
     }
 }
