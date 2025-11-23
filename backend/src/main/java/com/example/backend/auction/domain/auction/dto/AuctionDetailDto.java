@@ -9,6 +9,7 @@ public record AuctionDetailDto(
         Integer itemId,
         Integer sellerId,
         String categoryName,
+        Integer categoryId,
         String title,
         String slug,
         String description,

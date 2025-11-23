@@ -1,0 +1,416 @@
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import ItemsApi from "../../lib/itemDetail.js";
+import { PostAuctionApi } from "../../../postAuction/lib/PostAuctionApi.js";
+import { fetchAuctionItems } from "../../lib/auctionItems";
+import AuctionBidPanel from "../../wid/componentDetail/AuctionBidPanel.jsx";
+import AuctionImageGallery from "../../wid/componentDetail/AuctionImageGallery.jsx";
+import ImageGalleryModal from "../../wid/componentDetail/ImageGalleryModal.jsx";
+import { useTranslation } from "react-i18next";
+import SockJS from 'sockjs-client';
+import { Stomp } from '@stomp/stompjs';
+import { getToken } from "../../../../../lib/api_url.js";
+
+export default function AuctionDetail() {
+    const { category, slug, itemSlug } = useParams();
+    const realProductSlug = itemSlug || slug;
+
+    const navigate = useNavigate();
+    const { t } = useTranslation();
+    const authHeaders = () => {
+        const token = getToken();
+        return token ? { 'Authorization': `Bearer ${token}` } : {};
+    };
+
+    // --- State ---
+    const [raw, setRaw] = useState(null);
+    const [state, setState] = useState({ loading: true, error: null, notFound: false });
+    const [images, setImages] = useState([]);
+    const [modalInitialIndex, setModalInitialIndex] = useState(null);
+    const [bids, setBids] = useState([]);
+
+    const [categories, setCategories] = useState({});
+    const [similarItems, setSimilarItems] = useState([]);
+
+    // Tự động cuộn lên đầu trang mỗi khi slug thay đổi (chuyển sang sản phẩm khác)
+    useEffect(() => {
+        window.scrollTo({
+            top: 0,
+            behavior: "instant"
+        });
+    }, [realProductSlug]);
+
+    // ====== Fetch Data ======
+    useEffect(() => {
+        let alive = true;
+        setState({ loading: true, error: null, notFound: false });
+        setImages([]);
+        setBids([]);
+        setSimilarItems([]);
+
+        ItemsApi.getBySlug(realProductSlug)
+            .then((data) => {
+                if (!alive) return;
+                if (!data) return setState({ loading: false, error: null, notFound: true });
+                setRaw(data);
+                setState({ loading: false, error: null, notFound: false });
+
+                // Fetch initial bids
+                const auctionId = data.auctionId ?? data.itemId;
+                if (auctionId) {
+                    fetch(`/api/bids/history/${auctionId}`, {
+                        headers: {
+                            ...authHeaders()
+                        },
+                        credentials: 'include'
+                    })
+                        .then(res => res.ok ? res.json() : [])
+                        .then(bidData => {
+                            if (!alive) return;
+                            const mappedBids = Array.isArray(bidData) ? bidData.map((b, index) => ({
+                                bidID: index,
+                                bidAmount: b.bidAmount,
+                                bidTime: b.bidTime,
+                                bidderName: b.username
+                            })) : [];
+                            setBids(mappedBids);
+                        })
+                        .catch(err => console.error("Failed to fetch bids:", err));
+                }
+            })
+            .catch((err) => {
+                if (!alive) return;
+                if (err?.status === 404)
+                    setState({ loading: false, error: null, notFound: true });
+                else setState({ loading: false, error: err, notFound: false });
+            });
+
+        return () => { alive = false; };
+    }, [realProductSlug]);
+
+    // ====== Fetch Categories (Để lấy tên danh mục) ======
+    useEffect(() => {
+        PostAuctionApi.getCategories()
+            .then((cats) => {
+                // Chuyển mảng categories thành Object { id: name } để tra cứu cho nhanh
+                const catMap = {};
+                cats.forEach(c => {
+                    // API có thể trả về CategoryID hoặc categoryId
+                    const id = c.categoryId || c.CategoryID;
+                    const name = c.categoryName || c.CategoryName;
+                    if (id) catMap[id] = name;
+                });
+                setCategories(catMap);
+            })
+            .catch(console.error);
+    }, []);
+
+    // ====== Fetch Similar Items (Sản phẩm cùng loại) ======
+    useEffect(() => {
+        if (!raw || !raw.categoryId) return;
+
+        // ✅ CÁCH MỚI: Truyền thẳng categoryId vào API để Backend lọc giúp
+        fetchAuctionItems({
+            page: 0,
+            size: 5, // Chỉ cần lấy 5 cái
+            sort: "createdAt,desc",
+            categoryId: raw.categoryId // 👈 QUAN TRỌNG: Lọc theo danh mục ngay từ API
+        })
+            .then((res) => {
+                const allItems = res.content || [];
+
+                // Vẫn cần lọc Client-side một lần nữa để loại bỏ chính sản phẩm đang xem
+                const filtered = allItems.filter(item => item.itemId !== raw.itemId);
+
+                // Lấy tối đa 4 item để hiển thị
+                setSimilarItems(filtered.slice(0, 4));
+            })
+            .catch(err => {
+                // Nếu API chưa hỗ trợ lọc categoryId, nó sẽ trả về tất cả (fallback về logic cũ)
+                // Ta vẫn lọc lại ở client để đảm bảo an toàn
+                console.warn("API might not support category filtering yet", err);
+            });
+
+    }, [raw]);
+
+    // ====== WebSocket ======
+    useEffect(() => {
+        if (!raw?.auctionId && !raw?.itemId) return;
+
+        // Use the correct URL for SockJS
+        const socketFactory = () => new SockJS('http://localhost:8081/ws');
+        const stompClient = Stomp.over(socketFactory);
+
+        // Disable debug logs to reduce console noise
+        stompClient.debug = () => { };
+
+        stompClient.connect({}, () => {
+            const auctionId = raw?.auctionId ?? raw?.itemId;
+            if (!auctionId) return;
+            stompClient.subscribe(`/topic/auctions/${auctionId}`, (message) => {
+                const event = JSON.parse(message.body);
+
+                // Update current price
+                setRaw(prev => prev ? {
+                    ...prev,
+                    currentPrice: event.currentPrice
+                } : prev);
+
+                // Add new bid to history
+                const newBid = {
+                    bidID: `ws-${Date.now()}-${Math.random()}`, // Ensure unique ID
+                    bidAmount: event.currentPrice,
+                    bidTime: event.updateTime,
+                    bidderName: event.highestBidderName
+                };
+                setBids(prev => [newBid, ...prev]);
+            });
+        });
+
+        return () => {
+            if (stompClient && stompClient.connected) {
+                stompClient.disconnect();
+            }
+        };
+    }, [raw?.itemId]);
+
+    // ====== Data Mapping (AuctionDetailProjection -> UI Product) ======
+    const product = useMemo(() => {
+        if (!raw) return null;
+
+        const catName = categories[raw.categoryId] || raw.categoryName || "Unknown Category";
+
+        return {
+            id: raw.auctionId ?? raw.itemId,
+            auctionId: raw.auctionId ?? raw.itemId,
+            name: raw.title || "Untitled Item",
+            model: raw.slug || "",
+            price: raw.currentPrice || raw.startingPrice || 0,
+            buyNowPrice: raw.buyNowPrice,
+            minStep: raw.minStep,
+            startingPrice: raw.startingPrice,
+            reservePrice: raw.reservePrice,
+            startDate: raw.startDate,
+            endDate: raw.endDate,
+            sellerId: raw.sellerId,
+            sellerName: raw.sellerName,
+            description: raw.description,
+            location: raw.location,
+            images: raw.images ? raw.images.map(url => PostAuctionApi.getFullImageUrl(url)) : [],
+            fallbackImages: raw.thumbnail ? [PostAuctionApi.getFullImageUrl(raw.thumbnail)] : [],
+            features: {
+                Location: raw.location || "—",
+                Seller: raw.sellerName || "—",
+                Category: catName || "—",
+                Created: raw.createdAt ? new Date(raw.createdAt).toLocaleDateString() : "—",
+            },
+            shipping: {
+                Method: "Standard Shipping",
+                Fee: "Calculated at checkout",
+                Payment: "Card, Bank Transfer",
+                Returns: "No returns",
+            },
+            similar: similarItems.map(s => ({
+                id: s.itemId,
+                name: s.title,
+                slug: s.slug || s.Slug, // ✅ Thêm cái này để biết đường link
+                img: s.thumbnail ? PostAuctionApi.getFullImageUrl(s.thumbnail) : "https://via.placeholder.com/150",
+                year: s.createdAt ? new Date(s.createdAt).getFullYear() : ""
+            }))
+        };
+    }, [raw, categories, similarItems]);
+
+    // ====== Initialize Images ======
+    useEffect(() => {
+        if (product?.images?.length > 0) {
+            setImages(product.images);
+        } else if (product?.fallbackImages?.length > 0) {
+            setImages(product.fallbackImages);
+        } else {
+            setImages([]);
+        }
+    }, [product]);
+
+    const displayImages = images;
+
+    // ====== SEO ======
+    useEffect(() => {
+        if (product?.name) document.title = `${product.name} • Auction Detail`;
+    }, [product?.name]);
+
+    // ====== Place Bid ======
+    const handlePlaceBid = async (amount) => {
+        try {
+            const response = await fetch('/api/bids', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...authHeaders()
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    auctionId: raw.auctionId ?? raw.itemId,
+                    amount: amount
+                })
+            });
+
+            if (!response.ok) {
+                const rawError = await response.text();
+                let message = rawError;
+                try {
+                    const parsed = rawError ? JSON.parse(rawError) : {};
+                    message = parsed?.message || parsed?.error || message;
+                } catch { /* noop */ }
+                throw new Error(message || 'Bid failed');
+            }
+
+            // Success is handled via WebSocket update
+            return { ok: true };
+        } catch (error) {
+            console.error("Bid error:", error);
+            throw error;
+        }
+    };
+
+    // ====== User Check ======
+    const [currentUserId, setCurrentUserId] = useState(null);
+
+    useEffect(() => {
+        const fetchUserId = async () => {
+            try {
+                const token = getToken();
+                if (!token) return;
+
+                const res = await fetch('http://localhost:8081/api/profile/id', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success) {
+                        setCurrentUserId(data.userId);
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to fetch user ID", err);
+            }
+        };
+        fetchUserId();
+    }, []);
+
+    const isOwner = currentUserId === product?.sellerId;
+
+    // ====== Render ======
+    if (state.loading) return <div className="p-10 text-center text-gray-500">{t('Loading_product_data')}...</div>;
+    if (state.notFound) return <div className="p-10 text-center text-red-500">{t('Product_not_found')}</div>;
+    if (state.error) return <div className="p-10 text-center text-red-500">{t('Error')}: {state.error.message}</div>;
+    if (!product) return null;
+
+    return (
+        <div className="max-w-[1400px] mx-auto px-4 py-6 lg:py-8 text-[#212121] dark:text-gray-200">
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+
+                {/* --- LEFT COLUMN (7/12) --- */}
+                <div className="lg:col-span-7 flex flex-col gap-6">
+
+                    {/* 1. Image Gallery Card */}
+                    <div className="bg-white dark:bg-[#14191F] rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
+                        <AuctionImageGallery
+                            images={displayImages}
+                            onImageClick={(index) => setModalInitialIndex(index)}
+                        />
+                    </div>
+
+                    {/* 2. Info Card (Mô tả + Features) */}
+                    <div className="bg-white dark:bg-[#14191F] rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-800">
+                        <h2 className="text-xl font-bold mb-4 border-b pb-2 dark:border-gray-700">{t('Description')}</h2>
+                        <div className="prose dark:prose-invert max-w-none mb-6 text-sm text-gray-600 dark:text-gray-300">
+                            {product.description || t('No_description')}
+                        </div>
+
+                        <h3 className="text-lg font-semibold mb-3">{t('Features')}</h3>
+                        <div className="grid grid-cols-2 gap-y-2 text-sm">
+                            {Object.entries(product.features).map(([k, v]) => (
+                                <div key={k} className="flex justify-between border-b border-gray-100 dark:border-gray-800 py-1">
+                                    <span className="font-medium text-gray-500">{k}</span>
+                                    <span>{v}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* --- RIGHT COLUMN (5/12) --- */}
+                <div className="lg:col-span-5 relative">
+                    {/* Sticky Wrapper: Giữ cho cột phải chạy theo khi cuộn */}
+                    <div className="sticky top-6">
+                        {/* AuctionBidPanel đã bao gồm: Giá, Bid Input, Lịch sử, Shipping */}
+                        <AuctionBidPanel
+                            product={product}
+                            bids={bids}
+                            onPlaceBid={handlePlaceBid}
+                            isOwner={isOwner}
+                        />
+
+                        {/* Shipping & Payment Info Block */}
+                        <div className="mt-6 bg-gray-50 dark:bg-[#14191F] rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+                            <h3 className="font-bold text-purple-600 dark:text-purple-400 mb-3 uppercase text-sm tracking-wider">
+                                {t('Shipping_and_Payment')}
+                            </h3>
+                            <div className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                    <span className="text-gray-500">{t('Shipping')}</span>
+                                    <span className="font-medium">{product.shipping.Method}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-500">{t('Item_location')}</span>
+                                    <span className="font-medium">{product.location}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-500">{t('Payment')}</span>
+                                    <span className="font-medium">{product.shipping.Payment}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-500">{t('Returns')}</span>
+                                    <span className="font-medium">{product.shipping.Returns}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Similar Items */}
+                        <div className="mt-6">
+                            <h3 className="font-semibold mb-3 text-gray-500 uppercase text-xs tracking-wider">{t('Similar_Items')}</h3>
+                            {product.similar && product.similar.length > 0 ? (
+                                <div className="grid grid-cols-2 gap-3">
+                                    {product.similar.map((item) => (
+                                        <div
+                                            key={item.id}
+                                            className="bg-white dark:bg-[#14191F] rounded-lg p-2 border border-gray-100 dark:border-gray-800 cursor-pointer hover:shadow-md transition-shadow"
+                                            onClick={() => navigate(`/auction/detail/${item.slug}`)}
+                                        >
+                                            <div className="aspect-square rounded-md overflow-hidden mb-2 bg-gray-100">
+                                                <img src={item.img} alt={item.name} className="w-full h-full object-cover" />
+                                            </div>
+                                            <h4 className="text-xs font-medium line-clamp-2 mb-1">{item.name}</h4>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="bg-gray-100 dark:bg-[#1A1F25] rounded-lg p-4 text-center text-sm text-gray-500">
+                                    {t('No_similar_items')}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* --- MODAL --- */}
+            <ImageGalleryModal
+                images={displayImages}
+                initialIndex={modalInitialIndex}
+                onClose={() => setModalInitialIndex(null)}
+            />
+        </div>
+    );
+}
