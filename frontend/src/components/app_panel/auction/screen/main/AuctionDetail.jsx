@@ -18,6 +18,7 @@ export default function AuctionDetail() {
 
     const navigate = useNavigate();
     const { t } = useTranslation();
+
     const authHeaders = () => {
         const token = getToken();
         return token ? { 'Authorization': `Bearer ${token}` } : {};
@@ -206,10 +207,10 @@ export default function AuctionDetail() {
                 Created: raw.createdAt ? new Date(raw.createdAt).toLocaleDateString() : "—",
             },
             shipping: {
-                Method: "Standard Shipping",
-                Fee: "Calculated at checkout",
-                Payment: "Card, Bank Transfer",
-                Returns: "No returns",
+                Method: t("std_shipping"),
+                Fee: t("calc_checkout"),
+                Payment: t("payment_methods"),
+                Returns: t("no_returns"),
             },
             similar: similarItems.map(s => ({
                 id: s.itemId,

@@ -1,6 +1,6 @@
 // src/user_infor/screens/InfoCardBody.jsx
 import React, { useEffect } from "react";
-import Avatar from "../../../widget/sceens/Avatar.jsx";
+import Avatar from "../../../widget/screens/Avatar.jsx";
 import { motion } from "framer-motion";
 import AOS from "aos";
 import "aos/dist/aos.css";

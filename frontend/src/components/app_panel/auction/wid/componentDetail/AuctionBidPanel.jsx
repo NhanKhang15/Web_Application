@@ -131,7 +131,7 @@ export default function AuctionBidPanel({ product, bids = [], onPlaceBid, isOwne
                     <div className="mt-4">
                         <button
                             className="w-full py-2 bg-red-600 hover:bg-red-700 text-white rounded-md font-bold text-sm uppercase tracking-wide"
-                            onClick={() => alert("Buy Now functionality coming soon!")}
+                            onClick={() => alert(t("buy_now_alert"))}
                         >
                             {t('Buy_Now')} - ${fmt(product.buyNowPrice)}
                         </button>
@@ -192,7 +192,12 @@ export default function AuctionBidPanel({ product, bids = [], onPlaceBid, isOwne
                 <h2 className="text-md font-semibold mb-3 uppercase flex items-center gap-2">
                     <History className="w-4 h-4" /> {t('Bid_History')}
                 </h2>
-                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-1
+                [&::-webkit-scrollbar]:w-[5px]
+                [&::-webkit-scrollbar-track]:bg-transparent
+                [&::-webkit-scrollbar-thumb]:bg-gray-300
+                [&::-webkit-scrollbar-thumb]:rounded-full
+                dark:[&::-webkit-scrollbar-thumb]:bg-gray-700">
                     {bids.length === 0 && <p className="text-xs text-gray-500">{t('No_bids_yet')}</p>}
                     {bids.map((b) => (
                         <div
