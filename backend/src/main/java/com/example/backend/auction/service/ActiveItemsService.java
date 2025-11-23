@@ -3,7 +3,9 @@ package com.example.backend.auction.service;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,15 +15,11 @@ import com.example.backend.auction.domain.auction.dto.AuctionDetailProjection;
 import com.example.backend.auction.domain.auction.dto.AuctionDto;
 import com.example.backend.auction.domain.item.AuctionImgRepository;
 
-
-import com.example.backend.category.CategoryRepository; 
+import com.example.backend.category.CategoryRepository;
 import com.example.backend.category.Category;
 import com.example.backend.auction.domain.auction.dto.FilterOptionsDto;
 import com.example.backend.auction.domain.auction.dto.CategoryDto;
 import com.example.backend.auction.domain.item.AuctionItemsRepository;
-
-import java.util.Collections;
-import java.util.List;
 
 @Service
 public class ActiveItemsService {
@@ -31,8 +29,8 @@ public class ActiveItemsService {
     private final AuctionItemsRepository itemRepo;
     private final CategoryRepository categoryRepo;
 
-
-    public ActiveItemsService(AuctionRepository auctionRepo, AuctionImgRepository imgRepo, AuctionItemsRepository itemRepo, CategoryRepository categoryRepo) {
+    public ActiveItemsService(AuctionRepository auctionRepo, AuctionImgRepository imgRepo,
+            AuctionItemsRepository itemRepo, CategoryRepository categoryRepo) {
         this.auctionRepo = auctionRepo;
         this.imgRepo = imgRepo;
         this.itemRepo = itemRepo;
@@ -41,6 +39,10 @@ public class ActiveItemsService {
 
     @Transactional(readOnly = true)
     public Page<AuctionDto> listActiveAuctions(Pageable pageable) {
+        if (pageable.getSort().isUnsorted()) {
+            pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
+                    Sort.by(Sort.Direction.DESC, "endDate"));
+        }
         return auctionRepo.findAuctionsByStatus("Open", pageable);
     }
 
@@ -91,8 +93,7 @@ public class ActiveItemsService {
                 proj.getCreatedAt(),
                 proj.getUpdatedAt(),
                 proj.getSellerName(),
-                images 
-        );
+                images);
     }
 
     @Transactional(readOnly = true)
@@ -121,6 +122,10 @@ public class ActiveItemsService {
         String defaultTo = "2099-12-31 23:59:59";
 
         // Gọi repository để tìm kiếm theo title
+        if (pageable.getSort().isUnsorted()) {
+            pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
+                    Sort.by(Sort.Direction.DESC, "startDate"));
+        }
         return auctionRepo.searchAuctionsByTitle(defaultFrom, defaultTo, keyword.trim(), pageable);
     }
 }
