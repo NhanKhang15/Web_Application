@@ -9,7 +9,8 @@ import ImageGalleryModal from "../../wid/componentDetail/ImageGalleryModal.jsx";
 import { useTranslation } from "react-i18next";
 import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
-import { getToken } from "../../../../../lib/api_url.js";
+import { getToken, API_BASE_URL } from "../../../../../lib/api_url.js";
+import AuctionInfo from "../../wid/componentDetail/AuctionInfo.jsx";
 
 export default function AuctionDetail() {
     const { category, slug, itemSlug } = useParams();
@@ -138,7 +139,7 @@ export default function AuctionDetail() {
         if (!raw?.auctionId && !raw?.itemId) return;
 
         // Use the correct URL for SockJS
-        const socketFactory = () => new SockJS('http://localhost:8081/ws');
+        const socketFactory = () => new SockJS(`${API_BASE_URL}/ws`);
         const stompClient = Stomp.over(socketFactory);
 
         // Disable debug logs to reduce console noise
@@ -281,7 +282,7 @@ export default function AuctionDetail() {
                 const token = getToken();
                 if (!token) return;
 
-                const res = await fetch('http://localhost:8081/api/profile/id', {
+                const res = await fetch(`${API_BASE_URL}/api/profile/id`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {
@@ -321,23 +322,7 @@ export default function AuctionDetail() {
                         />
                     </div>
 
-                    {/* 2. Info Card (Mô tả + Features) */}
-                    <div className="bg-white dark:bg-[#14191F] rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-800">
-                        <h2 className="text-xl font-bold mb-4 border-b pb-2 dark:border-gray-700">{t('Description')}</h2>
-                        <div className="prose dark:prose-invert max-w-none mb-6 text-sm text-gray-600 dark:text-gray-300">
-                            {product.description || t('No_description')}
-                        </div>
-
-                        <h3 className="text-lg font-semibold mb-3">{t('Features')}</h3>
-                        <div className="grid grid-cols-2 gap-y-2 text-sm">
-                            {Object.entries(product.features).map(([k, v]) => (
-                                <div key={k} className="flex justify-between border-b border-gray-100 dark:border-gray-800 py-1">
-                                    <span className="font-medium text-gray-500">{k}</span>
-                                    <span>{v}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                    <AuctionInfo product={product} />
                 </div>
 
                 {/* --- RIGHT COLUMN (5/12) --- */}
@@ -351,56 +336,6 @@ export default function AuctionDetail() {
                             onPlaceBid={handlePlaceBid}
                             isOwner={isOwner}
                         />
-
-                        {/* Shipping & Payment Info Block */}
-                        <div className="mt-6 bg-gray-50 dark:bg-[#14191F] rounded-xl p-5 border border-gray-200 dark:border-gray-700">
-                            <h3 className="font-bold text-purple-600 dark:text-purple-400 mb-3 uppercase text-sm tracking-wider">
-                                {t('Shipping_and_Payment')}
-                            </h3>
-                            <div className="space-y-2 text-sm">
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">{t('Shipping')}</span>
-                                    <span className="font-medium">{product.shipping.Method}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">{t('Item_location')}</span>
-                                    <span className="font-medium">{product.location}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">{t('Payment')}</span>
-                                    <span className="font-medium">{product.shipping.Payment}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">{t('Returns')}</span>
-                                    <span className="font-medium">{product.shipping.Returns}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Similar Items */}
-                        <div className="mt-6">
-                            <h3 className="font-semibold mb-3 text-gray-500 uppercase text-xs tracking-wider">{t('Similar_Items')}</h3>
-                            {product.similar && product.similar.length > 0 ? (
-                                <div className="grid grid-cols-2 gap-3">
-                                    {product.similar.map((item) => (
-                                        <div
-                                            key={item.id}
-                                            className="bg-white dark:bg-[#14191F] rounded-lg p-2 border border-gray-100 dark:border-gray-800 cursor-pointer hover:shadow-md transition-shadow"
-                                            onClick={() => navigate(`/auction/detail/${item.slug}`)}
-                                        >
-                                            <div className="aspect-square rounded-md overflow-hidden mb-2 bg-gray-100">
-                                                <img src={item.img} alt={item.name} className="w-full h-full object-cover" />
-                                            </div>
-                                            <h4 className="text-xs font-medium line-clamp-2 mb-1">{item.name}</h4>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="bg-gray-100 dark:bg-[#1A1F25] rounded-lg p-4 text-center text-sm text-gray-500">
-                                    {t('No_similar_items')}
-                                </div>
-                            )}
-                        </div>
                     </div>
                 </div>
             </div>
