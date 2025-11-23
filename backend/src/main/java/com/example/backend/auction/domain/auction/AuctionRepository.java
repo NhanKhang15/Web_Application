@@ -1,5 +1,6 @@
 package com.example.backend.auction.domain.auction;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -23,16 +24,19 @@ public interface AuctionRepository extends JpaRepository<Auction, Integer> {
                     COALESCE(img.ImgUrl, ai.Thumbnail) AS thumbnail, -- Ưu tiên ảnh Main, nếu không có lấy thumbnail gốc
                     u.Username AS sellerName,
                     ai.CategoryID AS categoryId,
-                    c.CategoryName AS categoryName
+                    c.CategoryName AS categoryName,
+                    ai.Location AS location
                 FROM Auctions a
                 JOIN AuctionItems ai ON a.ItemID = ai.ItemID
                 JOIN Users u ON ai.SellerID = u.UserID
                 JOIN Categories c ON ai.CategoryID = c.CategoryID
                 LEFT JOIN ItemImages img ON ai.ItemID = img.ItemID AND img.IsMain = 1
                 WHERE a.Status = 'Open'
+                    AND (:fromDate IS NULL OR a.StartDate >= CAST(:fromDate AS DATETIME))
+                    AND (:toDate IS NULL OR a.StartDate <= CAST(:toDate AS DATETIME))
                 ORDER BY a.StartDate DESC
             """, countQuery = "SELECT COUNT(*) FROM Auctions a WHERE a.Status = 'Open'", nativeQuery = true)
-    Page<ActiveAuctionDto> findActiveAuctionsCustom(Pageable pageable);
+    Page<ActiveAuctionDto> findActiveAuctionsCustom(@Param("fromDate") String fromDate, @Param("toDate") String toDate, Pageable pageable);
 
     @Query("""
             SELECT COUNT(a) > 0
@@ -53,13 +57,16 @@ public interface AuctionRepository extends JpaRepository<Auction, Integer> {
                     ai.Slug AS slug,
                     COALESCE(img.ImgUrl, ai.Thumbnail) AS thumbnail,
                     u.Username AS sellerName,
-                    ai.CategoryID AS categoryId
+                    ai.CategoryID AS categoryId,
+                    ai.Location AS location
                 FROM Auctions a
                 JOIN AuctionItems ai ON a.ItemID = ai.ItemID
                 JOIN Users u ON ai.SellerID = u.UserID
                 LEFT JOIN ItemImages img ON ai.ItemID = img.ItemID AND img.IsMain = 1
                 WHERE a.Status = 'Open'
-                  AND ai.CategoryID = :categoryId  -- 👈 ĐIỀU KIỆN LỌC Ở ĐÂY
+                    AND ai.CategoryID = :categoryId
+                    AND (:fromDate IS NULL OR a.StartDate >= CAST(:fromDate AS DATETIME))
+                    AND (:toDate IS NULL OR a.StartDate <= CAST(:toDate AS DATETIME))
                 ORDER BY a.StartDate DESC
             """,
             // Câu lệnh đếm tổng số trang cũng phải join bảng AuctionItems để lọc đúng
@@ -70,7 +77,43 @@ public interface AuctionRepository extends JpaRepository<Auction, Integer> {
                 WHERE a.Status = 'Open' AND ai.CategoryID = :categoryId
             """,
             nativeQuery = true)
-    Page<ActiveAuctionDto> findActiveAuctionsByCategory(@Param("categoryId") Integer categoryId, Pageable pageable);
+    Page<ActiveAuctionDto> findActiveAuctionsByCategory(@Param("fromDate") String fromDate, @Param("toDate") String toDate, @Param("categoryId") Integer categoryId, Pageable pageable);
+
+    @Query(value = """
+                SELECT
+                    a.AuctionID AS auctionId,
+                    a.ItemID AS itemId,
+                    a.CurrentPrice AS currentPrice,
+                    a.BuyNowPrice AS buyNowPrice,
+                    ai.Title AS title,
+                    ai.Slug AS slug,
+                    COALESCE(img.ImgUrl, ai.Thumbnail) AS thumbnail,
+                    u.Username AS sellerName,
+                    ai.CategoryID AS categoryId,
+                    c.CategoryName AS categoryName,
+                    ai.Location AS location
+                FROM Auctions a
+                JOIN AuctionItems ai ON a.ItemID = ai.ItemID
+                JOIN Users u ON ai.SellerID = u.UserID
+                JOIN Categories c ON ai.CategoryID = c.CategoryID
+                LEFT JOIN ItemImages img ON ai.ItemID = img.ItemID AND img.IsMain = 1
+                WHERE a.Status = 'Open'
+                    AND ai.Title LIKE CONCAT('%', :keyword, '%')  -- 🔍 Tìm gần đúng (LIKE)
+                    AND (:fromDate IS NULL OR a.StartDate >= CAST(:fromDate AS DATETIME))
+                    AND (:toDate IS NULL OR a.StartDate <= CAST(:toDate AS DATETIME))
+                ORDER BY a.StartDate DESC
+           """,
+            // 👇 BẮT BUỘC THÊM countQuery
+            countQuery = """
+                SELECT COUNT(*)
+                FROM Auctions a
+                JOIN AuctionItems ai ON a.ItemID = ai.ItemID
+                WHERE a.Status = 'Open'
+                AND ai.Title LIKE CONCAT('%', :keyword, '%')
+                AND (:fromDate IS NULL OR a.StartDate >= CAST(:fromDate AS DATETIME))
+                AND (:toDate IS NULL OR a.StartDate <= CAST(:toDate AS DATETIME))
+           """, nativeQuery = true)
+    Page<ActiveAuctionDto> searchAuctionsByTitle(@Param("fromDate") String fromDate, @Param("toDate") String toDate, @Param("keyword") String keyword, Pageable pageable);
 
     @Query(value = """
                 SELECT

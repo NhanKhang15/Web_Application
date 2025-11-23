@@ -11,14 +11,14 @@ export default function FilterSheet({
                                         setSort,
                                         onApply,
                                         onReset,
-                                        // Nếu bạn muốn truyền danh sách category động từ cha xuống thì thêm prop này
-                                        categoryOptions = ["Electronics", "Clothing", "Accessories", "Art", "Vehicles"]
+                                        // 👇 1. Nhận props dữ liệu động (Mặc định mảng rỗng)
+                                        locationOptions = [],
+                                        categoryOptions = []
                                     }) {
     const { t } = useTranslation();
 
     const toggleSet = (key, value) => {
         setFilters((prev) => {
-            // Lưu ý: Đảm bảo initial state của filters ở component cha phải có { categories: new Set() }
             const next = new Set(prev[key] || []);
             next.has(value) ? next.delete(value) : next.add(value);
             return { ...prev, [key]: next };
@@ -28,18 +28,17 @@ export default function FilterSheet({
     const Chip = ({ active, children, onClick }) => (
         <button
             onClick={onClick}
-            className={`px-[1vw] py-[0.7vh] rounded-md text-[clamp(11px,1vw,12px)] font-medium border transition
-        shadow-sm hover:shadow-md
-        ${
-                active
-                    ? "bg-[#111] text-white border-[#111] dark:bg-white dark:text-black dark:border-white"
-                    : "bg-white text-[#6B7280] border-neutral-200 hover:bg-neutral-100 dark:bg-neutral-800 dark:text-neutral-200 dark:border-neutral-700 dark:hover:bg-neutral-700"
-            }`}
+            // CSS GIỮ NGUYÊN
+            className={`px-3 py-1.5 rounded-md text-xs font-medium border transition shadow-sm hover:shadow-md
+            ${active
+                ? "bg-black text-white border-black dark:bg-white dark:text-black dark:border-white"
+                : "bg-white text-gray-600 border-gray-200 hover:bg-gray-100 dark:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-700"}`}
         >
             {children}
         </button>
     );
 
+    // CSS GIỮ NGUYÊN
     const translateClass = open ? "translate-x-0" : "translate-x-full";
     const headerInlineStyle = { ["--hdr-h"]: "48px" };
 
@@ -51,20 +50,20 @@ export default function FilterSheet({
 
     return (
         <>
-            {/* backdrop */}
+            {/* backdrop GIỮ NGUYÊN */}
             <div
                 onClick={onClose}
                 className={`fixed left-0 right-0 top-0 h-[25vh] z-[58] bg-black/10 dark:bg-white/5 transition-opacity duration-200
-        ${open ? "opacity-0 pointer-events-auto" : "opacity-0 pointer-events-none"} hidden md:block`}
+                ${open ? "opacity-0 pointer-events-auto" : "opacity-0 pointer-events-none"} hidden md:block`}
             />
 
-            {/* Panel */}
+            {/* Panel GIỮ NGUYÊN */}
             <aside
                 role="dialog"
                 aria-modal="true"
                 className={[
                     "absolute left-0 right-0 top-0 z-[60]",
-                    "h-auto min-h-[35vh] w-full", // Tăng chiều cao một chút để chứa thêm dòng Category
+                    "h-auto min-h-[35vh] w-full",
                     "bg-white dark:bg-neutral-900",
                     "border-b border-neutral-200 dark:border-neutral-800",
                     "transform-gpu will-change-transform transition-transform duration-300 ease-out",
@@ -72,7 +71,7 @@ export default function FilterSheet({
                 ].join(" ")}
             >
                 <div className="h-full flex flex-col pb-4">
-                    {/* Header */}
+                    {/* Header GIỮ NGUYÊN */}
                     <div
                         style={headerInlineStyle}
                         className="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800"
@@ -89,17 +88,18 @@ export default function FilterSheet({
                         </button>
                     </div>
 
-                    {/* Body */}
+                    {/* Body GIỮ NGUYÊN */}
                     <div className="flex-1 overflow-visible px-[2vw] py-[1.2vh]">
                         <div className="space-y-[1.5vh]">
-                            {/* Row 1: Branch & Date & Time */}
+                            {/* Row 1 */}
                             <div className="grid w-full gap-x-[2vw] gap-y-[1vh] grid-cols-[repeat(auto-fit,minmax(220px,1fr))]">
-                                {/* Branch */}
+                                {/* Branch - SỬA LOGIC MAP DỮ LIỆU */}
                                 <div className="flex items-center flex-wrap gap-[0.6vw]">
                                     <span className="text-[clamp(12px,1vw,14px)] text-[#122025] dark:text-neutral-100 font-semibold mr-[0.6vw]">
                                         {t('Branch')}
                                     </span>
-                                    {["Dubai", "Abu Dhabi", "Sharjah"].map((b) => (
+                                    {/* 👇 Sửa: Map từ locationOptions thay vì mảng cứng */}
+                                    {locationOptions.length > 0 ? locationOptions.map((b) => (
                                         <Chip
                                             key={b}
                                             active={filters.branches?.has(b)}
@@ -107,10 +107,13 @@ export default function FilterSheet({
                                         >
                                             {b}
                                         </Chip>
-                                    ))}
+                                    )) : (
+                                        // Fallback nếu chưa có dữ liệu
+                                        <span className="text-xs text-gray-400 italic">Loading...</span>
+                                    )}
                                 </div>
 
-                                {/* Date */}
+                                {/* Date GIỮ NGUYÊN */}
                                 <div className="flex items-center flex-wrap gap-[0.6vw]">
                                     <span className="text-[clamp(12px,1vw,14px)] text-[#122025] dark:text-neutral-100 font-semibold">
                                         {t('Date')}
@@ -134,7 +137,7 @@ export default function FilterSheet({
                                     />
                                 </div>
 
-                                {/* Time */}
+                                {/* Time GIỮ NGUYÊN */}
                                 <div className="flex items-center flex-wrap gap-[0.6vw]">
                                     <span className="text-[clamp(12px,1vw,14px)] text-[#122025] dark:text-neutral-100 font-semibold">
                                         {t('Time')}
@@ -159,25 +162,32 @@ export default function FilterSheet({
                                 </div>
                             </div>
 
-                            {/* Row 2: Category (MỚI) & Type */}
+                            {/* Row 2 */}
                             <div className="flex flex-col gap-[1vh]">
-                                {/* --- NEW CATEGORY SECTION --- */}
+                                {/* Category - SỬA LOGIC MAP DỮ LIỆU */}
                                 <div className="flex flex-wrap items-center gap-x-[0.6vw] gap-y-[1vh]">
                                     <span className="text-[clamp(12px,1vw,14px)] text-[#122025] dark:text-neutral-100 font-semibold mr-[0.6vw]">
                                         {t('Category')}
                                     </span>
-                                    {categoryOptions.map((cat) => (
-                                        <Chip
-                                            key={cat}
-                                            active={filters.categories?.has(cat)}
-                                            onClick={() => toggleSet("categories", cat)}
-                                        >
-                                            {cat}
-                                        </Chip>
-                                    ))}
+                                    {/* 👇 Sửa: Map từ categoryOptions. Xử lý cả object {id, name} lẫn string */}
+                                    {categoryOptions.length > 0 ? categoryOptions.map((cat) => {
+                                        const val = typeof cat === 'object' ? cat.name : cat;
+                                        const key = typeof cat === 'object' ? cat.id : cat;
+                                        return (
+                                            <Chip
+                                                key={key}
+                                                active={filters.categories?.has(val)}
+                                                onClick={() => toggleSet("categories", val)}
+                                            >
+                                                {val}
+                                            </Chip>
+                                        );
+                                    }) : (
+                                        <span className="text-xs text-gray-400 italic">Loading...</span>
+                                    )}
                                 </div>
 
-                                {/* Type (Giữ nguyên) */}
+                                {/* Type - Tạm giữ cứng hoặc thêm typeOptions sau này */}
                                 <div className="flex flex-wrap items-center gap-x-[0.6vw] gap-y-[1vh]">
                                     <span className="text-[clamp(12px,1vw,14px)] text-[#122025] dark:text-neutral-100 font-semibold mr-[0.6vw]">
                                         {t('Type')}
@@ -194,7 +204,7 @@ export default function FilterSheet({
                                 </div>
                             </div>
 
-                            {/* Row 3: Negotiated, Sort, Actions */}
+                            {/* Row 3 GIỮ NGUYÊN */}
                             <div className="flex flex-wrap items-center gap-x-[3vw] gap-y-[1vh] pt-1 border-t border-neutral-100 dark:border-neutral-800">
                                 {/* Negotiated */}
                                 <div className="flex items-center gap-[0.6vw]">
