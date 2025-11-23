@@ -6,7 +6,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import org.springframework.scheduling.annotation.EnableScheduling;
+
 @SpringBootApplication
+@EnableScheduling
 public class BackendApplication {
 
 	public static void main(String[] args) {
@@ -15,15 +18,15 @@ public class BackendApplication {
 
 	@Bean
 	public WebMvcConfigurer corsConfigurer() {
-	  	return new WebMvcConfigurer() {
+		return new WebMvcConfigurer() {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
 				registry.addMapping("/**")
-					.allowedOrigins("*")
-					.allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
-					.allowedHeaders("*");
+						.allowedOrigins("*")
+						.allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+						.allowedHeaders("*");
 			}
-	  	};
+		};
 	}
-	
+
 }

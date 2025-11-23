@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record AuctionDetailDto(
-        // --- Thông tin từ AuctionItems ---
+        Integer auctionId,
         Integer itemId,
         Integer sellerId,
         String categoryName,
@@ -13,8 +13,6 @@ public record AuctionDetailDto(
         String slug,
         String description,
         String location,
-
-        // --- Thông tin từ Auctions ---
         BigDecimal startingPrice,
         BigDecimal minStep,
         BigDecimal currentPrice,
@@ -26,7 +24,5 @@ public record AuctionDetailDto(
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         String sellerName,
-
-        // --- Danh sách tất cả ảnh ---
-        List<String> imageUrls) {
+        List<String> images) {
 }

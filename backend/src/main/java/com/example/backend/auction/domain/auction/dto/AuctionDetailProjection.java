@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public interface AuctionDetailProjection {
+    Integer getAuctionId();
     // Item info
     Integer getItemId();
 

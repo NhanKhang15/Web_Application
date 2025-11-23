@@ -1,18 +1,5 @@
 package com.example.backend.auction.service;
 
-import com.example.backend.auction.domain.auction.Auction;
-import com.example.backend.auction.domain.auction.AuctionRepository;
-import com.example.backend.auction.domain.item.AuctionImg;
-import com.example.backend.auction.domain.item.AuctionImgRepository;
-import com.example.backend.auction.domain.item.AuctionItems;
-import com.example.backend.auction.domain.item.AuctionItemsRepository;
-import com.example.backend.auction.domain.item.AuctionStatus;
-import com.example.backend.auction.domain.auction.dto.CreateAuctionRequest;
-import com.example.backend.utils.SlugUtils;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,6 +7,20 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.example.backend.auction.domain.auction.Auction;
+import com.example.backend.auction.domain.auction.AuctionRepository;
+import com.example.backend.auction.domain.auction.dto.CreateAuctionRequest;
+import com.example.backend.auction.domain.item.AuctionImg;
+import com.example.backend.auction.domain.item.AuctionImgRepository;
+import com.example.backend.auction.domain.item.AuctionItems;
+import com.example.backend.auction.domain.item.AuctionItemsRepository;
+import com.example.backend.auction.domain.item.AuctionStatus;
+import com.example.backend.utils.SlugUtils;
 
 @Service
 public class AuctionWriteService {
@@ -40,6 +41,32 @@ public class AuctionWriteService {
 
     @Transactional(rollbackFor = Exception.class) // Nếu lỗi bất kỳ bước nào thì rollback sạch
     public Auction createAuction(CreateAuctionRequest request, MultipartFile[] files) throws IOException {
+
+        // Validate Prices
+        if (request.getStartingPrice() == null) {
+            throw new IllegalArgumentException("Starting price is required");
+        }
+
+        // 1. Reserve Price >= Starting Price
+        if (request.getReservePrice() != null) {
+            if (request.getReservePrice().compareTo(request.getStartingPrice()) < 0) {
+                throw new IllegalArgumentException("Reserve Price must be greater than or equal to Starting Price");
+            }
+        }
+
+        // 2. Buy Now Price > Starting Price
+        if (request.getBuyNowPrice() != null) {
+            if (request.getBuyNowPrice().compareTo(request.getStartingPrice()) <= 0) {
+                throw new IllegalArgumentException("Buy Now Price must be greater than Starting Price");
+            }
+
+            // 3. Buy Now Price >= Reserve Price
+            if (request.getReservePrice() != null) {
+                if (request.getBuyNowPrice().compareTo(request.getReservePrice()) < 0) {
+                    throw new IllegalArgumentException("Buy Now Price must be greater than or equal to Reserve Price");
+                }
+            }
+        }
 
         // BƯỚC 1: Tạo và lưu AuctionItems
         AuctionItems newItem = new AuctionItems();
@@ -110,11 +137,16 @@ public class AuctionWriteService {
         // Mặc định giá hiện tại = giá khởi điểm
         newAuction.setCurrentPrice(request.getStartingPrice());
 
-        newAuction.setStartDate(request.getStartDate());
-        newAuction.setEndDate(request.getEndDate());
+        // Assign start/end directly from request (frontend sends naive LocalDateTime from datetime-local)
+        if (request.getStartDate() != null) {
+            newAuction.setStartDate(request.getStartDate());
+        }
+        if (request.getEndDate() != null) {
+            newAuction.setEndDate(request.getEndDate());
+        }
 
         // Tự động set trạng thái dựa vào thời gian bắt đầu
-        if (newAuction.getStartDate().isBefore(LocalDateTime.now())) {
+        if (newAuction.getStartDate() != null && newAuction.getStartDate().isBefore(LocalDateTime.now())) {
             newAuction.setStatus(AuctionStatus.Open);
         } else {
             newAuction.setStatus(AuctionStatus.Scheduled);

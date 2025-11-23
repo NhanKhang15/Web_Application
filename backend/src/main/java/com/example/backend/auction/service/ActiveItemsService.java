@@ -1,17 +1,17 @@
 package com.example.backend.auction.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.backend.auction.domain.auction.dto.ActiveAuctionDto;
+import com.example.backend.auction.domain.auction.AuctionRepository;
 import com.example.backend.auction.domain.auction.dto.AuctionDetailDto;
 import com.example.backend.auction.domain.auction.dto.AuctionDetailProjection;
-import com.example.backend.auction.domain.auction.AuctionRepository;
+import com.example.backend.auction.domain.auction.dto.AuctionDto;
 import com.example.backend.auction.domain.item.AuctionImgRepository;
-
-import java.util.List;
 
 @Service
 public class ActiveItemsService {
@@ -25,8 +25,23 @@ public class ActiveItemsService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ActiveAuctionDto> listActiveAuctions(Pageable pageable) {
-        return auctionRepo.findActiveAuctionsCustom(pageable);
+    public Page<AuctionDto> listActiveAuctions(Pageable pageable) {
+        return auctionRepo.findAuctionsByStatus("Open", pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<AuctionDto> listEndedAuctions(Pageable pageable) {
+        return auctionRepo.findAuctionsByStatus("Ended", pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<AuctionDto> listClosedAuctions(Pageable pageable) {
+        return auctionRepo.findAuctionsByStatus("Closed", pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<AuctionDto> listScheduledAuctions(Pageable pageable) {
+        return auctionRepo.findAuctionsByStatus("Scheduled", pageable);
     }
 
     @Transactional(readOnly = true)
@@ -41,6 +56,7 @@ public class ActiveItemsService {
 
         // 3. Map sang DTO
         return new AuctionDetailDto(
+                proj.getAuctionId(),
                 proj.getItemId(),
                 proj.getSellerId(),
                 proj.getCategoryName(),
@@ -58,8 +74,8 @@ public class ActiveItemsService {
                 proj.getEndDate(),
                 proj.getCreatedAt(),
                 proj.getUpdatedAt(),
-                proj.getSellerName(), // Tên người bán
-                images // List ảnh
+                proj.getSellerName(),
+                images 
         );
     }
 }

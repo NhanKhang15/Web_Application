@@ -7,10 +7,9 @@ import {
     AlertCircle,
     History,
 } from "lucide-react";
-import { useAuction } from "../../hook/useAuction.jsx"; // Import hook
 import { useTranslation } from "react-i18next";
 
-// --- Các hàm helper (Đã di chuyển từ AuctionDetail sang đây) ---
+// --- Helper functions ---
 const fmt = (n) => Number(n ?? 0).toLocaleString();
 const hhmmss = (s) => {
     const h = Math.floor(s / 3600);
@@ -19,30 +18,21 @@ const hhmmss = (s) => {
     return [h, m, sec].map((x) => String(x).padStart(2, "0")).join(":");
 };
 
-/**
- * Component này quản lý TOÀN BỘ cột bên phải
- * Nó nhận 'product' làm prop để lấy dữ liệu ban đầu
- */
-export default function AuctionBidPanel({ product }) {
+export default function AuctionBidPanel({ product, bids = [], onPlaceBid, isOwner = false }) {
     const { t } = useTranslation();
 
-    // --- Toàn bộ logic đấu giá đã được di chuyển vào đây ---
-    const {
-        bids,
-        currentBid,
-        nextMinBid,
-        placeBid,
-        secondsLeft,
-        isEnded,
-        reset,
-    } = useAuction({
-        auctionId: product?.id,
-        initialPrice: product?.price ?? 0,
-        minIncrement: 100,
-        softCloseSeconds: 60,
-        startsAt: product?.startDate,
-        endsAt: product?.endDate,
-    });
+    // Calculate time left (simple version, ideally use a hook or interval)
+    const [now, setNow] = useState(Date.now());
+
+    // Update timer every second
+    React.useEffect(() => {
+        const timer = setInterval(() => setNow(Date.now()), 1000);
+        return () => clearInterval(timer);
+    }, []);
+
+    const endDate = new Date(product.endDate).getTime();
+    const secondsLeft = Math.max(0, Math.floor((endDate - now) / 1000));
+    const isEnded = secondsLeft <= 0;
 
     const closesDisplay = useMemo(() => {
         const secondsInDay = 24 * 60 * 60;
@@ -56,23 +46,36 @@ export default function AuctionBidPanel({ product }) {
 
     const [amount, setAmount] = useState("");
     const [msg, setMsg] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const submit = () => {
+    const currentPrice = product.price;
+    const nextMinBid = currentPrice + product.minStep;
+
+    const submit = async () => {
         setMsg(null);
+        if (!amount) return;
+
+        const val = Number(amount);
+        if (val < nextMinBid) {
+            setMsg({ ok: false, text: t('Bid_too_low', { min: fmt(nextMinBid) }) });
+            return;
+        }
+
+        setIsSubmitting(true);
         try {
-            const v = Number(amount);
-            placeBid(v);
-            setMsg({ ok: true, text: t('Bid_placed_success', { amount: fmt(v) }) });
+            await onPlaceBid(val);
+            setMsg({ ok: true, text: t('Bid_placed_success', { amount: fmt(val) }) });
             setAmount("");
         } catch (e) {
-            setMsg({ ok: false, text: t(e.message, e.context) || t('ERR_BID_FAILED') });
+            setMsg({ ok: false, text: e.message || t('ERR_BID_FAILED') });
+        } finally {
+            setIsSubmitting(false);
         }
     };
-    // --- Hết phần logic ---
 
     return (
         <div className="w-full lg:max-w-[360px] shrink-0 bg-white dark:bg-[#14191F] rounded-xl shadow-md border border-gray-200 dark:border-gray-800 p-5 space-y-5">
-            {/* --- Đây là TOÀN BỘ JSX của cột phải --- */}
+            {/* --- Header Info --- */}
             <div>
                 <h1 className="text-2xl font-bold">{product.name}</h1>
                 {product.model && (
@@ -99,7 +102,7 @@ export default function AuctionBidPanel({ product }) {
             <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                 <p className="text-sm text-gray-500 mb-1">{t('CURRENT_BID')}</p>
                 <h2 className="text-3xl font-extrabold text-green-600">
-                    ${fmt(currentBid || product.price)}
+                    ${fmt(currentPrice)}
                 </h2>
                 <p className="text-xs text-gray-400">{bids.length} {t('bids')}</p>
 
@@ -114,7 +117,7 @@ export default function AuctionBidPanel({ product }) {
                         <span className="font-semibold">{t('Reserve_Price')}:</span> ${fmt(product.reservePrice)}
                     </div>
                     <div>
-                        <span className="font-semibold">{t('Current_Price')}:</span> ${fmt(currentBid || product.price)}
+                        <span className="font-semibold">{t('Current_Price')}:</span> ${fmt(currentPrice)}
                     </div>
                 </div>
 
@@ -143,21 +146,28 @@ export default function AuctionBidPanel({ product }) {
                     </div>
                 )}
 
+                {isOwner && (
+                    <div className="mt-3 text-sm flex items-center gap-2 text-orange-500 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/20 p-3 rounded-md">
+                        <AlertCircle className="w-4 h-4" />
+                        {t('Cannot_bid_own_item', { defaultValue: 'Bạn không thể đấu giá sản phẩm của chính mình' })}
+                    </div>
+                )}
+
                 <div className="flex gap-2 mt-4">
                     <input
                         type="number"
                         value={amount}
                         onChange={(e) => setAmount(e.target.value)}
-                        disabled={isEnded}
-                        placeholder={`≥ ${nextMinBid}`}
+                        disabled={isEnded || isSubmitting || isOwner}
+                        placeholder={isOwner ? t('Your_item', { defaultValue: 'Sản phẩm của bạn' }) : `≥ ${nextMinBid}`}
                         className="flex-1 border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 text-sm bg-gray-50 dark:bg-[#0B0F13]"
                     />
                     <button
                         onClick={submit}
-                        disabled={isEnded}
-                        className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md text-sm font-semibold"
+                        disabled={isEnded || isSubmitting || isOwner}
+                        className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md text-sm font-semibold disabled:opacity-50"
                     >
-                        {t('Submit')}
+                        {isSubmitting ? '...' : t('Submit')}
                     </button>
                 </div>
 
@@ -165,18 +175,13 @@ export default function AuctionBidPanel({ product }) {
                     {[50, 100, 250].map((s) => (
                         <button
                             key={s}
+                            disabled={isOwner}
                             onClick={() => setAmount(String(nextMinBid + s))}
-                            className="px-2 py-1 rounded border border-gray-300 dark:border-gray-700"
+                            className="px-2 py-1 rounded border border-gray-300 dark:border-gray-700 disabled:opacity-50"
                         >
                             +{s}
                         </button>
                     ))}
-                    <button
-                        onClick={reset}
-                        className="ml-auto px-2 py-1 rounded border border-gray-300 dark:border-gray-700"
-                    >
-                        {t('Reset_demo')}
-                    </button>
                 </div>
             </div>
 
@@ -189,13 +194,13 @@ export default function AuctionBidPanel({ product }) {
                     {bids.length === 0 && <p className="text-xs text-gray-500">{t('No_bids_yet')}</p>}
                     {bids.map((b) => (
                         <div
-                            key={b.id}
+                            key={b.bidID || b.id}
                             className="flex items-center justify-between text-sm bg-gray-50 dark:bg-[#1A1F25] rounded-md px-3 py-2"
                         >
-                            <span>{b.bidder}</span>
-                            <span>${fmt(b.amount)}</span>
+                            <span>{b.bidderName || b.bidder}</span>
+                            <span>${fmt(b.bidAmount || b.amount)}</span>
                             <span className="text-xs text-gray-500">
-                                {new Date(b.time).toLocaleTimeString()}
+                                {new Date(b.bidTime || b.time).toLocaleTimeString()}
                             </span>
                         </div>
                     ))}
