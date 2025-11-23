@@ -1,8 +1,11 @@
 import React from "react";
 import { auctionMenu } from "../lib/auctionMenu";
 import { Menu, X, ChevronRight } from "lucide-react";
+import {useTranslation} from "react-i18next";
 
 export default function AuctionSideBar({ active, onSelect, isOpen, onToggle }) {
+    const { t } = useTranslation();
+
     return (
         <div
             className={`
@@ -49,7 +52,7 @@ export default function AuctionSideBar({ active, onSelect, isOpen, onToggle }) {
                         <>
                             <div className="px-3 mb-4">
                                 <h3 className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
-                                    Auction Menu
+                                    {t("auction_menu")}
                                 </h3>
                             </div>
                             <ul className="space-y-1">
@@ -77,7 +80,7 @@ export default function AuctionSideBar({ active, onSelect, isOpen, onToggle }) {
                                                 `}
                                             >
                                                 {/* 👇 QUAN TRỌNG: Render item.label (string), KHÔNG render item (object) */}
-                                                <span>{item.label}</span>
+                                                <span>{t(item.transKey) || item.label}</span>
 
                                                 {isActive && (
                                                     <ChevronRight size={16} className="opacity-100" />

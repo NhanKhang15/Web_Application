@@ -15,11 +15,16 @@ export default function AuctionToolbar({ sort, setSort, pageData, setPage, loadi
     };
 
     const handlePrev = () => {
-        setPage((p) => Math.max(0, p - 1));
+        const prevPage = Math.max(0, pageNum - 2);
+        setPage(prevPage);
     };
 
     const handleNext = () => {
-        setPage((p) => (pageData ? (p + 1 < pageData.totalPages ? p + 1 : p) : p));
+        const currentPageIndex = pageData ? pageData.number : 0;
+        const nextPageIndex = currentPageIndex + 1;
+        if (pageData && nextPageIndex < pageData.totalPages) {
+            setPage(nextPageIndex);
+        }
     };
 
     return (

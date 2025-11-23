@@ -1,6 +1,7 @@
 import React from "react";
 import { subSidebarItems } from "../lib/subSidebarItems";
 import {Icon} from "lucide-react";
+import {useTranslation} from "react-i18next";
 
 export default function SubSidebar({
   active,
@@ -9,6 +10,8 @@ export default function SubSidebar({
   bottomClass = "bottom-6",
   leftClass = "left-6",
 }) {
+    const { t } = useTranslation();
+
   return (
     <aside
       className={`
@@ -29,7 +32,7 @@ export default function SubSidebar({
           <button
             key={it.key}
             type="button"
-            title={it.title}
+            title={t(it.transKey) || it.title}
             aria-label={it.title}
             aria-pressed={isActive}
             disabled={isDisabled}

@@ -7,13 +7,14 @@ import {
     Receipt,
     FileText,
 } from "lucide-react";
-import Avatar from "../../../widget/sceens/Avatar.jsx";
+import Avatar from "../../../widget/screens/Avatar.jsx";
 import { motion, AnimatePresence } from "framer-motion";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { useTranslation } from "react-i18next";
 
 export default function UserAttachment({ profile }) {
+    const { t } = useTranslation();
     const [previewUrl, setPreviewUrl] = useState(null);
 
     useEffect(() => {
@@ -29,11 +30,11 @@ export default function UserAttachment({ profile }) {
     };
 
     const documentStatuses = [
-        { label: "Passport", icon: Globe2 },
-        { label: "License", icon: FileBadge },
-        { label: "KYC", icon: FileCheck2 },
-        { label: "Payment", icon: Receipt },
-        { label: "Additional", icon: FileText },
+        { label: "Passport", transKey: "doc_passport", icon: Globe2 },
+        { label: "License", transKey: "doc_license", icon: FileBadge },
+        { label: "KYC", transKey: "doc_kyc", icon: FileCheck2 },
+        { label: "Payment", transKey: "doc_payment", icon: Receipt },
+        { label: "Additional", transKey: "doc_additional", icon: FileText },
     ];
 
     return (
@@ -53,10 +54,10 @@ export default function UserAttachment({ profile }) {
                 />
                 <div className="leading-tight">
                     <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
-                        {profile?.fullName || "Unknown User"}
+                        {profile?.fullName || t("unknown_user")}
                     </h2>
                     <p className="text-sm text-neutral-500">
-                        {profile?.location || profile?.address || "Location unknown"}
+                        {profile?.location || profile?.address || t("location_unknown")}
                     </p>
                 </div>
             </motion.div>
@@ -89,7 +90,7 @@ export default function UserAttachment({ profile }) {
                                     <Icon className="w-8 h-8" />
                                 </div>
                                 <span className="mt-2 text-[11px] md:text-xs font-medium uppercase tracking-widest text-neutral-400">
-                                    {doc.label}
+                                    {t(doc.transKey)}
                                 </span>
                             </div>
 
@@ -109,7 +110,7 @@ export default function UserAttachment({ profile }) {
                                 </div>
                             ) : (
                                 <div className="w-56 h-36 rounded-md flex items-center justify-center text-sm text-neutral-400">
-                                    (Empty)
+                                    {t('empty_state')}
                                 </div>
                             )}
                         </motion.div>

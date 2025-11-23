@@ -3,7 +3,7 @@ import Avatar from "./Avatar";
 
 function UserProfileInfo({ variant = "chip", profile, email, onClick }) {
     const avatarUrl = profile?.avatarUrl || "https://via.placeholder.com/56";
-    const name = profile?.fullName || email || "User";
+    const name = profile?.fullName || email || t("unknown_user");
 
     // Kiểu hiển thị chỉ có avatar
     if (variant === "avatar") {

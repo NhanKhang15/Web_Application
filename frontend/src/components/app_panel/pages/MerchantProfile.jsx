@@ -1,9 +1,9 @@
 // src/pages/MerchantProfile.jsx
 import React, {useEffect, useRef, useState} from "react";
 import LeftNav from "../slidebar/screens/LeftNav";
-import CardShell from "../widget/sceens/CardShell";
+import CardShell from "../widget/screens/CardShell";
 import AuctionSideBar from "../slidebar/screens/AuctionSideBar";
-import UserProfileInfo from "../widget/sceens/UserProfileInfo";
+import UserProfileInfo from "../widget/screens/UserProfileInfo";
 import fullLogo from "../../../assets/logo/full_logo.png";
 import Logo from "../../../assets/logo/logo.png";
 import { Search, Globe, X } from "lucide-react";
@@ -20,9 +20,9 @@ import AuctionView from "../auction/screen/main/AuctionView.jsx";
 import Settings from "../settings/Settings.jsx";
 import Utilities from "../utils/Utilities.jsx";
 import AboutUs from "../about/AboutUs.jsx";
-import CalculatorWidget from "../widget/sceens/CalculatorWidget.jsx";
+import CalculatorWidget from "../widget/screens/CalculatorWidget.jsx";
 // 👇 Đã bỏ import searchAuction vì không dùng nữa
-import { SearchDropdown } from "../widget/sceens/searchAuction.jsx";
+import { SearchDropdown } from "../widget/screens/searchAuction.jsx";
 import PostAuction from "../postAuction/screen/PostAuction.jsx";
 import {useNavigate, useParams, createSearchParams} from "react-router-dom";
 import {NAV_URL_MAPPING} from "../slidebar/lib/NAV_URL_MAPPING.js";
@@ -30,11 +30,12 @@ import { auctionMenu } from "../slidebar/lib/auctionMenu.js";
 import { useTranslation } from "react-i18next";
 
 function EmptyPage({ title }) {
+    const { t } = useTranslation();
     return (
         <div className="flex flex-col gap-4 h-full">
             <h2 className="text-xl font-semibold">{title}</h2>
             <div className="flex-1 min-h-[300px] rounded-lg border border-dashed border-neutral-300 dark:border-neutral-700 p-6 text-neutral-400 dark:text-neutral-500">
-                (để trống)
+                {t ? t('empty_state') : "(empty)"}
             </div>
         </div>
     );
@@ -181,8 +182,8 @@ export default function MerchantProfile() {
     };
 
     const renderSubPage = () => {
-        if (loading) return <p className="text-neutral-500 dark:text-neutral-400">Loading profile...</p>;
-        if (!profile) return <p className="text-red-500">Failed to load user data</p>;
+        if (loading) return <p className="text-neutral-500 dark:text-neutral-400">{t('loading_profile')}</p>;
+        if (!profile) return <p className="text-red-500">{t('loading_profile')}</p>;
 
         switch (activeSub) {
             case "user":
@@ -190,11 +191,11 @@ export default function MerchantProfile() {
             case "file":
                 return <UserAttachment profile={profile} />;
             case "wallet":
-                return <><h2 className="text-xl font-semibold mb-4">Wallet</h2><div className="rounded-lg border border-neutral-200 dark:border-neutral-700 p-4"><p className="text-sm text-neutral-600 dark:text-neutral-400">Ghi chú trống…</p></div></>;
+                return <><h2 className="text-xl font-semibold mb-4">{t('wallet_title')}</h2><div className="rounded-lg border border-neutral-200 dark:border-neutral-700 p-4"><p className="text-sm text-neutral-600 dark:text-neutral-400">{t('empty_state')}</p></div></>;
             case "chart":
-                return <><h2 className="text-xl font-semibold mb-4">Analytics</h2><div className="rounded-lg border border-neutral-200 dark:border-neutral-700 p-4"><p className="text-sm text-neutral-600 dark:text-neutral-400">Biểu đồ (demo).</p></div></>;
+                return <><h2 className="text-xl font-semibold mb-4">{t('analytics_title')}</h2><div className="rounded-lg border border-neutral-200 dark:border-neutral-700 p-4"><p className="text-sm text-neutral-600 dark:text-neutral-400">{t('chart_demo')}</p></div></>;
             default:
-                return <p className="text-sm text-neutral-500 dark:text-neutral-400">Chọn mục ở sub sidebar.</p>;
+                return <p className="text-sm text-neutral-500 dark:text-neutral-400">{t('select_sidebar_item')}</p>;
         }
     };
 
@@ -296,6 +297,29 @@ export default function MerchantProfile() {
                 </main>
             </div>
             <CalculatorWidget />
+
+            <style>{`
+                ::-webkit-scrollbar {
+                    width: 7px; /* Độ rộng vừa phải cho trang chính */
+                }
+                ::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                ::-webkit-scrollbar-thumb {
+                    background-color: #d1d5db; /* Màu sáng (Gray-300) */
+                    border-radius: 20px;
+                }
+                ::-webkit-scrollbar-thumb:hover {
+                    background-color: #9ca3af; /* Hover đậm hơn */
+                }
+                /* Dark Mode */
+                :is(.dark) ::-webkit-scrollbar-thumb {
+                    background-color: #4b5563; /* Màu tối (Gray-600) */
+                }
+                :is(.dark) ::-webkit-scrollbar-thumb:hover {
+                    background-color: #6b7280;
+                }
+            `}</style>
         </div>
     );
 }
