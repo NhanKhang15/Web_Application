@@ -1,7 +1,9 @@
 import React, { memo } from "react";
 import Avatar from "./Avatar";
+import {useTranslation} from "react-i18next";
 
 function UserProfileInfo({ variant = "chip", profile, email, onClick }) {
+    const {t} = useTranslation();
     const avatarUrl = profile?.avatarUrl || "https://via.placeholder.com/56";
     const name = profile?.fullName || email || t("unknown_user");
 
