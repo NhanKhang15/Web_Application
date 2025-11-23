@@ -36,8 +36,7 @@ public class JwtService {
     if (keyBytes.length < 32) { // 32 bytes = 256-bit
       throw new IllegalArgumentException(
           "app.jwt.secret is too short. It must be >= 256 bits (32 bytes). " +
-          "Use a base64 32-byte key, e.g. APP_JWT_SECRET=base64:<your-44-char-base64>"
-      );
+              "Use a base64 32-byte key, e.g. APP_JWT_SECRET=base64:<your-44-char-base64>");
     }
 
     this.key = Keys.hmacShaKeyFor(keyBytes);
@@ -53,5 +52,32 @@ public class JwtService {
         .setExpiration(Date.from(now.plusSeconds(ttlSeconds)))
         .signWith(key) // HS256 sẽ được suy ra từ loại key HMAC
         .compact();
+  }
+
+  // --- Validate & Extract ---
+  public io.jsonwebtoken.Claims parse(String token) {
+    return Jwts.parserBuilder()
+        .setSigningKey(key)
+        .build()
+        .parseClaimsJws(token)
+        .getBody();
+  }
+
+  public Integer extractUserId(String token) {
+    String subject = parse(token).getSubject();
+    return Integer.parseInt(subject);
+  }
+
+  public String extractUsername(String token) {
+    return parse(token).get("username", String.class);
+  }
+
+  public boolean validate(String token) {
+    try {
+      parse(token);
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
   }
 }

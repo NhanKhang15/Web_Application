@@ -1,30 +1,36 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import ItemsApi from "../lib/itemDetail";
 import { PostAuctionApi } from "../../postAuction/lib/PostAuctionApi.js";
 import AuctionBidPanel from "../wid/componentDetail/AuctionBidPanel.jsx";
 import AuctionImageGallery from "../wid/componentDetail/AuctionImageGallery.jsx";
-import AuctionInfo from "../wid/componentDetail/AuctionInfo.jsx";
 import ImageGalleryModal from "../wid/componentDetail/ImageGalleryModal.jsx";
 import { useTranslation } from "react-i18next";
+import SockJS from 'sockjs-client';
+import { Stomp } from '@stomp/stompjs';
+import { getToken } from "../../../../lib/api_url";
 
 export default function AuctionDetail() {
     const { category, slug } = useParams();
     const navigate = useNavigate();
     const { t } = useTranslation();
+    const authHeaders = () => {
+        const token = getToken();
+        return token ? { 'Authorization': `Bearer ${token}` } : {};
+    };
 
     // --- State ---
     const [raw, setRaw] = useState(null);
     const [state, setState] = useState({ loading: true, error: null, notFound: false });
     const [images, setImages] = useState([]);
     const [modalInitialIndex, setModalInitialIndex] = useState(null);
+    const [bids, setBids] = useState([]);
 
     // Tự động cuộn lên đầu trang mỗi khi slug thay đổi (chuyển sang sản phẩm khác)
     useEffect(() => {
-        // Cuộn cửa sổ lên toạ độ (0, 0) - Tức là đầu trang
         window.scrollTo({
             top: 0,
-            behavior: "instant" // "instant" để nhảy ngay lập tức, "smooth" nếu muốn trượt từ từ
+            behavior: "instant"
         });
     }, [slug]);
 
@@ -33,6 +39,7 @@ export default function AuctionDetail() {
         let alive = true;
         setState({ loading: true, error: null, notFound: false });
         setImages([]);
+        setBids([]);
 
         ItemsApi.getBySlug(slug)
             .then((data) => {
@@ -40,6 +47,29 @@ export default function AuctionDetail() {
                 if (!data) return setState({ loading: false, error: null, notFound: true });
                 setRaw(data);
                 setState({ loading: false, error: null, notFound: false });
+
+                // Fetch initial bids
+                const auctionId = data.auctionId ?? data.itemId;
+                if (auctionId) {
+                    fetch(`/api/bids/history/${auctionId}`, {
+                        headers: {
+                            ...authHeaders()
+                        },
+                        credentials: 'include'
+                    })
+                        .then(res => res.ok ? res.json() : [])
+                        .then(bidData => {
+                            if (!alive) return;
+                            const mappedBids = Array.isArray(bidData) ? bidData.map((b, index) => ({
+                                bidID: index,
+                                bidAmount: b.bidAmount,
+                                bidTime: b.bidTime,
+                                bidderName: b.username
+                            })) : [];
+                            setBids(mappedBids);
+                        })
+                        .catch(err => console.error("Failed to fetch bids:", err));
+                }
             })
             .catch((err) => {
                 if (!alive) return;
@@ -51,13 +81,54 @@ export default function AuctionDetail() {
         return () => { alive = false; };
     }, [slug]);
 
+    // ====== WebSocket ======
+    useEffect(() => {
+        if (!raw?.auctionId && !raw?.itemId) return;
+
+        // Use the correct URL for SockJS
+        const socketFactory = () => new SockJS('http://localhost:8081/ws');
+        const stompClient = Stomp.over(socketFactory);
+
+        // Disable debug logs to reduce console noise
+        stompClient.debug = () => { };
+
+        stompClient.connect({}, () => {
+            const auctionId = raw?.auctionId ?? raw?.itemId;
+            if (!auctionId) return;
+            stompClient.subscribe(`/topic/auctions/${auctionId}`, (message) => {
+                const event = JSON.parse(message.body);
+
+                // Update current price
+                setRaw(prev => prev ? {
+                    ...prev,
+                    currentPrice: event.currentPrice
+                } : prev);
+
+                // Add new bid to history
+                const newBid = {
+                    bidID: `ws-${Date.now()}-${Math.random()}`, // Ensure unique ID
+                    bidAmount: event.currentPrice,
+                    bidTime: event.updateTime,
+                    bidderName: event.highestBidderName
+                };
+                setBids(prev => [newBid, ...prev]);
+            });
+        });
+
+        return () => {
+            if (stompClient && stompClient.connected) {
+                stompClient.disconnect();
+            }
+        };
+    }, [raw?.itemId]);
+
     // ====== Data Mapping (AuctionDetailProjection -> UI Product) ======
     const product = useMemo(() => {
         if (!raw) return null;
 
-        // Map fields from AuctionDetailProjection
         return {
-            id: raw.itemId,
+            id: raw.auctionId ?? raw.itemId,
+            auctionId: raw.auctionId ?? raw.itemId,
             name: raw.title || "Untitled Item",
             model: raw.slug || "",
             price: raw.currentPrice || raw.startingPrice || 0,
@@ -71,8 +142,7 @@ export default function AuctionDetail() {
             sellerName: raw.sellerName,
             description: raw.description,
             location: raw.location,
-            // Images from API
-            images: raw.imageUrls ? raw.imageUrls.map(url => PostAuctionApi.getFullImageUrl(url)) : [],
+            images: raw.images ? raw.images.map(url => PostAuctionApi.getFullImageUrl(url)) : [],
             fallbackImages: raw.thumbnail ? [PostAuctionApi.getFullImageUrl(raw.thumbnail)] : [],
             features: {
                 Location: raw.location || "—",
@@ -86,7 +156,7 @@ export default function AuctionDetail() {
                 Payment: "Card, Bank Transfer",
                 Returns: "No returns",
             },
-            similar: [] // API doesn't return similar items yet
+            similar: []
         };
     }, [raw]);
 
@@ -107,6 +177,67 @@ export default function AuctionDetail() {
     useEffect(() => {
         if (product?.name) document.title = `${product.name} • Auction Detail`;
     }, [product?.name]);
+
+    // ====== Place Bid ======
+    const handlePlaceBid = async (amount) => {
+        try {
+            const response = await fetch('/api/bids', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...authHeaders()
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    auctionId: raw.auctionId ?? raw.itemId,
+                    amount: amount
+                })
+            });
+
+            if (!response.ok) {
+                const rawError = await response.text();
+                let message = rawError;
+                try {
+                    const parsed = rawError ? JSON.parse(rawError) : {};
+                    message = parsed?.message || parsed?.error || message;
+                } catch { /* noop */ }
+                throw new Error(message || 'Bid failed');
+            }
+
+            // Success is handled via WebSocket update
+            return { ok: true };
+        } catch (error) {
+            console.error("Bid error:", error);
+            throw error;
+        }
+    };
+
+    // ====== User Check ======
+    const [currentUserId, setCurrentUserId] = useState(null);
+
+    useEffect(() => {
+        const fetchUserId = async () => {
+            try {
+                const token = getToken();
+                if (!token) return;
+
+                const res = await fetch('http://localhost:8081/api/profile/id', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success) {
+                        setCurrentUserId(data.userId);
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to fetch user ID", err);
+            }
+        };
+        fetchUserId();
+    }, []);
+
+    const isOwner = currentUserId === product?.sellerId;
 
     // ====== Render ======
     if (state.loading) return <div className="p-10 text-center text-gray-500">{t('Loading_product_data')}...</div>;
@@ -149,7 +280,12 @@ export default function AuctionDetail() {
             {/* --- RIGHT COLUMN (Bidding & Actions) --- */}
             <div className="lg:col-span-5 flex flex-col gap-6">
                 <div className="sticky top-4">
-                    <AuctionBidPanel product={product} />
+                    <AuctionBidPanel
+                        product={product}
+                        bids={bids}
+                        onPlaceBid={handlePlaceBid}
+                        isOwner={isOwner}
+                    />
 
                     {/* Shipping & Payment Info Block */}
                     <div className="mt-6 bg-gray-50 dark:bg-[#14191F] rounded-xl p-5 border border-gray-200 dark:border-gray-700">

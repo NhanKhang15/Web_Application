@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.security.auth.User;
 import com.example.backend.security.auth.UserRepository;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -34,27 +36,36 @@ public class UserProfileController {
         this.userRepo = userRepo;
     }
 
+    // --- GET current user ID ---
+    @GetMapping("/id")
+    public ResponseEntity<?> getMyId(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Unauthorized"));
+        }
+        User user = userRepo.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        return ResponseEntity.ok(Map.of("success", true, "userId", user.getUserId()));
+    }
+
     // --- GET profile theo userId ---
     @GetMapping("/{userId}")
     public ResponseEntity<?> getProfileByUserId(@PathVariable Integer userId) {
         return profileRepo.findByUser_UserId(userId)
-            .map(this::okProfile)
-            .orElseGet(() -> ResponseEntity.ok(Map.of(
-                "success", true,
-                "user_id", userId,
-                "profile", null
-            )));
+                .map(this::okProfile)
+                .orElseGet(() -> ResponseEntity.ok(Map.of(
+                        "success", true,
+                        "user_id", userId,
+                        "profile", null)));
     }
 
     // --- GET profile theo username (tiện debug) ---
     @GetMapping("/by-username/{username}")
     public ResponseEntity<?> getProfileByUsername(@PathVariable String username) {
         return profileRepo.findByUser_Username(username)
-            .map(this::okProfile)
-            .orElse(ResponseEntity.status(404).body(Map.of(
-                "success", false,
-                "message", "Profile not found"
-            )));
+                .map(this::okProfile)
+                .orElse(ResponseEntity.status(404).body(Map.of(
+                        "success", false,
+                        "message", "Profile not found")));
     }
 
     // --- UPSERT (create or update) profile theo userId ---
@@ -62,16 +73,18 @@ public class UserProfileController {
     @PutMapping("/{userId}")
     @Transactional
     public ResponseEntity<?> upsertProfile(@PathVariable Integer userId,
-                                           @Valid @RequestBody UpsertProfileRequest req) {
+            @Valid @RequestBody UpsertProfileRequest req) {
+        if (userId == null)
+            return ResponseEntity.badRequest().body("User ID cannot be null");
         User user = userRepo.findById(userId)
-            .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
 
         UserProfile p = profileRepo.findByUser_UserId(userId)
-            .orElseGet(() -> {
-                UserProfile np = new UserProfile();
-                np.setUser(user);
-                return np;
-            });
+                .orElseGet(() -> {
+                    UserProfile np = new UserProfile();
+                    np.setUser(user);
+                    return np;
+                });
 
         p.setFullName(req.fullName());
         p.setPhone(req.phone());
@@ -83,57 +96,47 @@ public class UserProfileController {
         UserProfile saved = profileRepo.save(p);
 
         return ResponseEntity.ok(Map.of(
-            "success", true,
-            "message", "Profile saved",
-            "profileId", saved.getProfileId()
-        ));
+                "success", true,
+                "message", "Profile saved",
+                "profileId", saved.getProfileId()));
     }
 
     // --- DTO (record) ---
     public record UpsertProfileRequest(
-        @Size(max = 120, message = "fullName <= 120 ký tự")
-        String fullName,
+            @Size(max = 120, message = "fullName <= 120 ký tự") String fullName,
 
-        @Size(max = 20, message = "phone <= 20 ký tự")
-        String phone,
+            @Size(max = 20, message = "phone <= 20 ký tự") String phone,
 
-        @Size(max = 255, message = "address <= 255 ký tự")
-        String address,
+            @Size(max = 255, message = "address <= 255 ký tự") String address,
 
-        @Size(max = 500, message = "bio <= 500 ký tự")
-        String bio,
+            @Size(max = 500, message = "bio <= 500 ký tự") String bio,
 
-        @Size(max = 500, message = "avatarUrl <= 500 ký tự")
-        String avatarUrl,
+            @Size(max = 500, message = "avatarUrl <= 500 ký tự") String avatarUrl,
 
-        @PastOrPresent(message = "dateOfBirth không được ở tương lai")
-        LocalDate dateOfBirth
-    ) {}
+            @PastOrPresent(message = "dateOfBirth không được ở tương lai") LocalDate dateOfBirth) {
+    }
 
     // --- Helper: build JSON trả về ---
     private ResponseEntity<Map<String, Object>> okProfile(UserProfile p) {
         return ResponseEntity.ok(Map.of(
-            "success", true,
-            "user_id", p.getUser().getUserId(),
-            "username", p.getUser().getUsername(),
-            "email", p.getUser().getEmail(),
-            "profile", Map.of(
-                "fullName", p.getFullName(),
-                "avatarUrl", p.getAvatarUrl(),
-                "phone", p.getPhone(),
-                "address", p.getAddress(),
-                "bio", p.getBio(),
-                "dateOfBirth", p.getDateOfBirth()
-            )
-        ));
+                "success", true,
+                "user_id", p.getUser().getUserId(),
+                "username", p.getUser().getUsername(),
+                "email", p.getUser().getEmail(),
+                "profile", Map.of(
+                        "fullName", p.getFullName(),
+                        "avatarUrl", p.getAvatarUrl(),
+                        "phone", p.getPhone(),
+                        "address", p.getAddress(),
+                        "bio", p.getBio(),
+                        "dateOfBirth", p.getDateOfBirth())));
     }
 
     // --- Basic error mapping cho IllegalArgumentException ---
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<?> handleIllegalArg(IllegalArgumentException ex) {
         return ResponseEntity.status(404).body(Map.of(
-            "success", false,
-            "message", ex.getMessage()
-        ));
+                "success", false,
+                "message", ex.getMessage()));
     }
 }

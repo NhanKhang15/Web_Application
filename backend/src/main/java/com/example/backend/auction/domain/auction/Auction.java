@@ -56,24 +56,91 @@ public class Auction {
     @Column(name = "EndDate", nullable = false)
     private LocalDateTime endDate;
 
+    @Column(name = "CurrentHighestBidId")
+    private Integer currentHighestBidId;
+
     // getters/setters
-    public Integer getAuctionID() { return auctionID; }
-    public AuctionItems getItem() { return item; }
-    public void setItem(AuctionItems item) { this.item = item; }
-    public AuctionStatus getStatus() { return status; }
-    public void setStatus(AuctionStatus status) { this.status = status; }
-    public BigDecimal getStartingPrice() { return startingPrice; }
-    public void setStartingPrice(BigDecimal startingPrice) { this.startingPrice = startingPrice; }
-    public BigDecimal getMinStep() { return minStep; }
-    public void setMinStep(BigDecimal minStep) { this.minStep = minStep; }
-    public BigDecimal getCurrentPrice() { return currentPrice; }
-    public void setCurrentPrice(BigDecimal currentPrice) { this.currentPrice = currentPrice; }
-    public BigDecimal getReservePrice() { return reservePrice; }
-    public void setReservePrice(BigDecimal reservePrice) { this.reservePrice = reservePrice; }
-    public BigDecimal getBuyNowPrice() { return buyNowPrice; }
-    public void setBuyNowPrice(BigDecimal buyNowPrice) { this.buyNowPrice = buyNowPrice; }
-    public LocalDateTime getStartDate() { return startDate; }
-    public void setStartDate(LocalDateTime startDate) { this.startDate = startDate; }
-    public LocalDateTime getEndDate() { return endDate; }
-    public void setEndDate(LocalDateTime endDate) { this.endDate = endDate; }
+    public Integer getCurrentHighestBidId() {
+        return currentHighestBidId;
+    }
+
+    public void setCurrentHighestBidId(Integer currentHighestBidId) {
+        this.currentHighestBidId = currentHighestBidId;
+    }
+
+    public Integer getAuctionID() {
+        return auctionID;
+    }
+
+    public AuctionItems getItem() {
+        return item;
+    }
+
+    public void setItem(AuctionItems item) {
+        this.item = item;
+    }
+
+    public AuctionStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(AuctionStatus status) {
+        this.status = status;
+    }
+
+    public BigDecimal getStartingPrice() {
+        return startingPrice;
+    }
+
+    public void setStartingPrice(BigDecimal startingPrice) {
+        this.startingPrice = startingPrice;
+    }
+
+    public BigDecimal getMinStep() {
+        return minStep;
+    }
+
+    public void setMinStep(BigDecimal minStep) {
+        this.minStep = minStep;
+    }
+
+    public BigDecimal getCurrentPrice() {
+        return currentPrice;
+    }
+
+    public void setCurrentPrice(BigDecimal currentPrice) {
+        this.currentPrice = currentPrice;
+    }
+
+    public BigDecimal getReservePrice() {
+        return reservePrice;
+    }
+
+    public void setReservePrice(BigDecimal reservePrice) {
+        this.reservePrice = reservePrice;
+    }
+
+    public BigDecimal getBuyNowPrice() {
+        return buyNowPrice;
+    }
+
+    public void setBuyNowPrice(BigDecimal buyNowPrice) {
+        this.buyNowPrice = buyNowPrice;
+    }
+
+    public LocalDateTime getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDateTime startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDateTime getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDateTime endDate) {
+        this.endDate = endDate;
+    }
 }

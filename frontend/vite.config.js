@@ -16,6 +16,16 @@ export default defineConfig(({ mode }) => ({
   },
   server: {
     port: 5174,
-    strictPort: true, 
+    strictPort: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8081',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
+  define: {
+    global: 'window',
   },
 }));

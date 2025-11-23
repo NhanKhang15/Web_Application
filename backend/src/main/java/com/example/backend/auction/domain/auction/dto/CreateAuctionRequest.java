@@ -3,9 +3,12 @@ package com.example.backend.auction.domain.auction.dto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.example.backend.utils.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 public class CreateAuctionRequest {
     // --- Item Info ---
-    private Integer sellerId; // ID người bán
+    private Integer sellerId; 
     private Integer categoryId;
     private String title;
     private String description;
@@ -16,7 +19,9 @@ public class CreateAuctionRequest {
     private BigDecimal minStep;
     private BigDecimal reservePrice;
     private BigDecimal buyNowPrice;
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime startDate;
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime endDate;
 
     // Getters & Setters

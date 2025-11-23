@@ -25,7 +25,7 @@ services:
       - mysql               # đơn giản: đợi service mysql lên (không cần condition)
     environment:
       - SERVER_PORT=8081
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/AuctionSite?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=utf8&useUnicode=true
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/AuctionSite?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh&characterEncoding=utf8&useUnicode=true
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=1234567
       - APP_UPLOAD_DIR=/app/uploads
