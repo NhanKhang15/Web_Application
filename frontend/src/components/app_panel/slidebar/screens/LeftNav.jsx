@@ -3,8 +3,11 @@ import {useNavigate} from "react-router-dom";
 import {navigationItems} from "../lib/navigationItems.js";
 
 import {NAV_URL_MAPPING} from "../lib/NAV_URL_MAPPING.js";
+import {useTranslation} from "react-i18next";
 
 export default function LeftNav({ activeKey: controlledKey, onChange }) {
+    const { t } = useTranslation();
+
     const navigate = useNavigate()
     const [internalKey, setInternalKey] = React.useState(controlledKey || "user");
     const activeKey = controlledKey ?? internalKey;
@@ -77,7 +80,7 @@ export default function LeftNav({ activeKey: controlledKey, onChange }) {
                                                 isActive ? "font-bold text-[#e43137]" : "font-normal"
                                             }`}
                                         >
-                                            {n.label}
+                                            {t(n.transKey) || n.label}
                                         </span>
                                     </button>
                                 </li>

@@ -5,8 +5,10 @@ import { Calculator, X } from "lucide-react";
 import * as Toast from "@radix-ui/react-toast";
 import AOS from "aos";
 import "aos/dist/aos.css";
+import {useTranslation} from "react-i18next";
 
 export default function CalculatorWidget() {
+    const { t } = useTranslation();
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState("0");
     const [toastOpen, setToastOpen] = useState(false);
@@ -75,7 +77,7 @@ export default function CalculatorWidget() {
             setLastExpression("");
             setLastOperator("");
         } catch {
-            setValue("Lỗi!");
+            setValue("Err");
             setToastOpen(true);
         }
     };
@@ -114,7 +116,7 @@ export default function CalculatorWidget() {
                         {/* Header */}
                         <div className="flex justify-between items-center mb-3">
                             <h3 className="font-semibold text-neutral-800 dark:text-neutral-100 flex items-center gap-2">
-                                <Calculator className="w-5 h-5 text-blue-500" /> Calculator
+                                <Calculator className="w-5 h-5 text-blue-500" /> {t("Calculator_Title")}
                             </h3>
                             <button
                                 onClick={() => setOpen(false)}
@@ -181,7 +183,7 @@ export default function CalculatorWidget() {
                 duration={2000}
                 className="bg-red-600 text-white rounded-lg px-4 py-2 shadow-lg font-medium"
             >
-                <Toast.Title>Lỗi tính toán!</Toast.Title>
+                <Toast.Title>{t("Calc_Error")}</Toast.Title>
             </Toast.Root>
 
             <Toast.Viewport className="fixed bottom-6 right-6 z-[99999]" />

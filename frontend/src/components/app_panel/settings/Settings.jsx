@@ -32,7 +32,7 @@ export default function Settings() {
 
     const handleLogout = () => {
         sessionStorage.removeItem("user");
-        alert("🚪 " + t("logout") + " thành công!");
+        alert("🚪 " + t("logout_success") + " thành công!");
         navigate("/", { replace: true });
     };
 
@@ -90,9 +90,9 @@ export default function Settings() {
                                 onClick={() => handleLanguageChange("en")}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-lg border 
                                 ${i18n.language.startsWith("en")
-                                    ? "bg-blue-600 text-white border-blue-600"
-                                    : "border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                                } transition`}
+                                        ? "bg-blue-600 text-white border-blue-600"
+                                        : "border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                                    } transition`}
                             >
                                 <Globe className="w-5 h-5" /> English
                             </button>
@@ -101,9 +101,9 @@ export default function Settings() {
                                 onClick={() => handleLanguageChange("vi")}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-lg border
                                 ${i18n.language.startsWith("vi")
-                                    ? "bg-blue-600 text-white border-blue-600"
-                                    : "border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                                } transition`}
+                                        ? "bg-blue-600 text-white border-blue-600"
+                                        : "border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                                    } transition`}
                             >
                                 <Globe className="w-5 h-5" /> Tiếng Việt
                             </button>
@@ -163,13 +163,13 @@ export default function Settings() {
 
                 {/* ✅ Toast thông báo */}
                 <Toast.Root
-                    className="fixed bottom-5 right-5 bg-green-600 text-white px-5 py-3 rounded-lg shadow-lg"
+                    className="bg-green-600 text-white px-5 py-3 rounded-lg shadow-lg"
                     open={toastOpen}
                     onOpenChange={setToastOpen}
                 >
                     <Toast.Title>✅ {t("success")}</Toast.Title>
                 </Toast.Root>
-                <Toast.Viewport />
+                <Toast.Viewport className="fixed bottom-5 right-20 z-[1000000]" />
             </div>
         </Toast.Provider>
     );

@@ -272,9 +272,9 @@ export default function AuctionView() {
                 <h2 className="text-2xl font-bold text-neutral-600 dark:text-neutral-300 mb-2">
                     {currentMenu?.label || slug}
                 </h2>
-                <p className="text-sm text-neutral-500">Tính năng đang được phát triển.</p>
+                <p className="text-sm text-neutral-500">{t("feature_developing")}</p>
                 <button onClick={() => navigate('/dashboard/auctions/main')} className="mt-6 px-6 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-md">
-                    Về Dashboard
+                    {t("back_to_dashboard")}
                 </button>
             </div>
         );

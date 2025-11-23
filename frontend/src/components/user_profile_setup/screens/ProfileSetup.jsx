@@ -1,9 +1,11 @@
 import React, { useMemo, useRef, useState, useEffect } from "react";
 import { getCurrentUser, upsertProfile } from "../../auth/services/userprofile_api";
 import { useNavigate } from "react-router-dom";
-import { uploadAvatar } from "../lib/upload_api"; 
+import { uploadAvatar } from "../lib/upload_api";
+import { useTranslation } from "react-i18next";
 
 export default function ProfileSetup() {
+  const { t } = useTranslation();
   const [step, setStep] = useState(1);
 
   const [fullName, setFullName] = useState("");
@@ -65,7 +67,7 @@ export default function ProfileSetup() {
     setSubmitting(true);
     try {
       const me = getCurrentUser();
-      if (!me?.userId) throw new Error("Thiếu userId. Hãy đăng nhập lại.");
+      if (!me?.userId) throw new Error(t("missing_userid_error"));
 
       // 1) Upload nếu có file, không thì để rỗng (skip)
       const uploadedUrl = await uploadAvatar(avatarFile);
@@ -85,10 +87,10 @@ export default function ProfileSetup() {
         // alert("Đã lưu profile ✅");
         window.location.replace("/dashboard");
       } else {
-        throw new Error(res?.message || "Lưu thất bại");
+        throw new Error(res?.message || t("save_failed_error"));
       }
     } catch (e) {
-      setErr(e.message || "Có lỗi xảy ra");
+      setErr(e.message || t("error_occurred"));
     } finally {
       setSubmitting(false);
     }
@@ -108,19 +110,19 @@ export default function ProfileSetup() {
         <div className="mb-6 flex items-center gap-3 text-sm font-medium text-neutral-400">
           {[1, 2, 3, 4].map((s) => (
             <React.Fragment key={s}>
-              <Step label={`Step ${s}`} active={step === s} done={step > s} />
+              <Step label={`${t("profile_step")} ${s}`} active={step === s} done={step > s} />
               {s < 4 && <Dash />}
             </React.Fragment>
           ))}
         </div>
 
         <div className="mb-4">
-          <p className="text-sm font-semibold text-[#E43137]">Step {step}</p>
+          <p className="text-sm font-semibold text-[#E43137]">{t("profile_step")} {step}</p>
           <h2 className="mt-1 text-2xl font-bold text-white">
-            {step === 1 && "What’s your full name?"}
-            {step === 2 && "What’s your phone number?"}
-            {step === 3 && "What’s your address?"}
-            {step === 4 && "Your birthday, bio & avatar"}
+            {step === 1 && t("whats_your_full_name")}
+            {step === 2 && t("whats_your_phone_number")}
+            {step === 3 && t("whats_your_address")}
+            {step === 4 && t("your_birthday_bio_avatar")}
           </h2>
         </div>
 
@@ -133,10 +135,10 @@ export default function ProfileSetup() {
         <form onSubmit={onSubmit} className="space-y-5">
           {step === 1 && (
             <div>
-              <label className="block text-sm font-medium text-neutral-200">Full name</label>
+              <label className="block text-sm font-medium text-neutral-200">{t("full_name_label")}</label>
               <input
                 type="text"
-                placeholder="Jane Marie"
+                placeholder={t("placeholder_full_name")}
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 className="mt-1 w-full rounded-md border border-neutral-700 bg-neutral-900 text-white px-4 py-2.5"
@@ -146,10 +148,10 @@ export default function ProfileSetup() {
 
           {step === 2 && (
             <div>
-              <label className="block text-sm font-medium text-neutral-200">Phone number</label>
+              <label className="block text-sm font-medium text-neutral-200">{t("phone_number_label")}</label>
               <input
                 type="tel"
-                placeholder="+84 912 345 678"
+                placeholder={t("placeholder_phone")}
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 className="mt-1 w-full rounded-md border border-neutral-700 bg-neutral-900 text-white px-4 py-2.5"
@@ -159,10 +161,10 @@ export default function ProfileSetup() {
 
           {step === 3 && (
             <div>
-              <label className="block text-sm font-medium text-neutral-200">Home address</label>
+              <label className="block text-sm font-medium text-neutral-200">{t("home_address")}</label>
               <input
                 type="text"
-                placeholder="123 Example St, Footscray, VIC"
+                placeholder={t("placeholder_address")}
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 className="mt-1 w-full rounded-md border border-neutral-700 bg-neutral-900 text-white px-4 py-2.5"
@@ -173,7 +175,7 @@ export default function ProfileSetup() {
           {step === 4 && (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-neutral-200">Date of Birth</label>
+                <label className="block text-sm font-medium text-neutral-200">{t("date_of_birth")}</label>
                 <input
                   type="date"
                   value={dob}
@@ -183,9 +185,9 @@ export default function ProfileSetup() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-neutral-200">Bio (optional)</label>
+                <label className="block text-sm font-medium text-neutral-200">{t("bio_optional")}</label>
                 <textarea
-                  placeholder="A few words about you…"
+                  placeholder={t("placeholder_bio")}
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   className="mt-1 w-full rounded-md border border-neutral-700 bg-neutral-900 text-white px-4 py-2.5"
@@ -194,7 +196,7 @@ export default function ProfileSetup() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-neutral-200">Avatar</label>
+                <label className="block text-sm font-medium text-neutral-200">{t("avatar_label")}</label>
                 <div className="mt-2 flex items-center gap-4">
                   <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-neutral-800 ring-1 ring-neutral-600">
                     {avatarPreviewUrl ? (
@@ -209,7 +211,7 @@ export default function ProfileSetup() {
                       onClick={() => fileInputRef.current?.click()}
                       className="rounded-md bg-[#E43137] px-3 py-2 text-sm text-white"
                     >
-                      Upload
+                      {t("upload_button")}
                     </button>
                     <input
                       ref={fileInputRef}
@@ -221,7 +223,7 @@ export default function ProfileSetup() {
                   </div>
                 </div>
                 <p className="mt-2 text-xs text-neutral-400">
-                  Không chọn ảnh avatar hiển thị bằng chữ cái đầu tên của bạn.
+                  {t("avatar_fallback_text")}
                 </p>
               </div>
             </div>
@@ -234,7 +236,7 @@ export default function ProfileSetup() {
                 onClick={prevStep}
                 className="rounded-md border border-neutral-500 px-4 py-2 text-sm text-neutral-200"
               >
-                Back
+                {t("back_button")}
               </button>
             )}
             {!finalStep ? (
@@ -243,7 +245,7 @@ export default function ProfileSetup() {
                 onClick={nextStep}
                 className="ml-auto rounded-md bg-[#E43137] px-4 py-2 text-sm text-white"
               >
-                Next
+                {t("next_button")}
               </button>
             ) : (
               <button
@@ -251,7 +253,7 @@ export default function ProfileSetup() {
                 disabled={submitting || !canFinish}
                 className="ml-auto rounded-md bg-[#E43137] px-4 py-2 text-sm text-white disabled:opacity-50"
               >
-                {submitting ? "Saving…" : "Finish"}
+                {submitting ? t("saving_button") : t("finish_button")}
               </button>
             )}
           </div>
@@ -269,9 +271,8 @@ function Step({ label, active, done }) {
   return (
     <div className={`flex items-center gap-2 ${active ? "text-white" : done ? "text-[#E43137]" : "text-neutral-500"}`}>
       <div
-        className={`grid h-6 w-6 place-items-center rounded-full border-2 ${
-          active ? "border-[#E43137]" : done ? "border-[#E43137] bg-[#E43137]" : "border-neutral-500"
-        }`}
+        className={`grid h-6 w-6 place-items-center rounded-full border-2 ${active ? "border-[#E43137]" : done ? "border-[#E43137] bg-[#E43137]" : "border-neutral-500"
+          }`}
       >
         {done ? (
           <svg viewBox="0 0 20 20" className="h-3.5 w-3.5 fill-white">

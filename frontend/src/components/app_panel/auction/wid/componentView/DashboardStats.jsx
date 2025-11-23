@@ -4,30 +4,33 @@ import {
     TrendingUp,
     ShoppingCart,
 } from "lucide-react";
-
-// Định nghĩa stats cố định ở đây
-const stats = [
-    {
-        label: "TOTAL REVENUE",
-        value: "$50,000",
-        icon: <CircleDollarSign className="w-5 h-5 text-red-500" />,
-        className: "text-red-600 dark:text-red-400",
-    },
-    {
-        label: "SALES",
-        value: "$40,250",
-        icon: <ShoppingCart className="w-5 h-5 text-gray-800 dark:text-gray-200" />,
-        className: "text-black dark:text-white",
-    },
-    {
-        label: "PROFIT",
-        value: "+25,600",
-        icon: <TrendingUp className="w-5 h-5 text-green-500" />,
-        className: "text-green-600 dark:text-green-400",
-    },
-];
+import {useTranslation} from "react-i18next";
 
 export default function DashboardStats() {
+    const { t } = useTranslation();
+
+    // Định nghĩa stats cố định ở đây
+    const stats = [
+        {
+            label: t("total_revenue"),
+            value: "$50,000",
+            icon: <CircleDollarSign className="w-5 h-5 text-red-500" />,
+            className: "text-red-600 dark:text-red-400",
+        },
+        {
+            label: t("sales"),
+            value: "$40,250",
+            icon: <ShoppingCart className="w-5 h-5 text-gray-800 dark:text-gray-200" />,
+            className: "text-black dark:text-white",
+        },
+        {
+            label: t("profit"),
+            value: "+25,600",
+            icon: <TrendingUp className="w-5 h-5 text-green-500" />,
+            className: "text-green-600 dark:text-green-400",
+        },
+    ];
+
     return (
         <div className="flex flex-wrap gap-16 items-start justify-start mb-8 px-6 flex-shrink-0">
             {stats.map((s, i) => (

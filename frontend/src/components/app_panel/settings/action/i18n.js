@@ -170,6 +170,7 @@ const resources = {
 
             user_info: "User Information",
             edit_user_info: "Edit Information",
+            change_avatar: "Change Avatar",
             phone: "Phone Number",
             address: "Address",
             bio: "Biography",
@@ -224,15 +225,18 @@ const resources = {
             No: "No",
             Reset: "Reset",
             Apply: "Apply",
+
             // Lỗi cho useAuction
             ERR_INVALID_NUMBER: "Invalid number",
             ERR_AUCTION_ENDED: "Auction ended",
             ERR_BID_TOO_LOW: "Bid must be ≥ {{minBid}}",
+
             // +++ CÁC KEY MỚI CẦN THÊM BÂY GIỜ +++
             bids: "bids",
             Bid_placed_success: "Bid placed: ${{amount}}",
             ERR_BID_FAILED: "Bid failed, please try again.",
             Aria_Close_Filter: "Close filter",
+
             // Sort Options
             Sort_Price_Desc: "Price ↓",
             Sort_Price_Asc: "Price ↑",
@@ -270,12 +274,146 @@ const resources = {
             Please_fill_required_fields: "Please fill in all required fields (Title, Category, Price, Dates)",
             End_date_must_be_after_start: "End date must be after the start date",
             Max_10_images: "Maximum 10 images allowed",
-            Auction_created_success: "Auction created successfully! Item ID: {{itemId}}",
+            Auction_created_success: "Auction created successfully!",
             Failed_to_create_auction: "Failed to create auction. Please try again.",
             Failed_to_load_categories: "Failed to load categories",
 
             Main_Image: "Main Image",
-            Set_as_Thumbnail: "Set as Thumbnail"
+            Set_as_Thumbnail: "Set as Thumbnail",
+
+            // ProfileSetup
+            profile_step: "Step",
+            whats_your_full_name: "What's your full name?",
+            whats_your_phone_number: "What's your phone number?",
+            whats_your_address: "What's your address?",
+            your_birthday_bio_avatar: "Your birthday, bio & avatar",
+            full_name_label: "Full name",
+            phone_number_label: "Phone number",
+            home_address: "Home address",
+            bio_optional: "Bio (optional)",
+            avatar_label: "Avatar",
+            upload_button: "Upload",
+            back_button: "Back",
+            next_button: "Next",
+            finish_button: "Finish",
+            saving_button: "Saving…",
+            missing_userid_error: "Missing userId. Please log in again.",
+            save_failed_error: "Save failed",
+            error_occurred: "An error occurred",
+            avatar_fallback_text: "If no avatar is selected, it will display your initials.",
+            placeholder_full_name: "Jane Marie",
+            placeholder_phone: "+84 912 345 678",
+            placeholder_address: "123 Example St, Footscray, VIC",
+            placeholder_bio: "A few words about you…",
+
+            // MerchantProfile & Dashboard
+            loading_profile: "Loading profile...",
+            failed_load_user_data: "Failed to load user data",
+            wallet_title: "Wallet",
+            analytics_title: "Analytics",
+            empty_note: "Empty note…",
+            chart_demo: "Chart (demo).",
+            select_sub_sidebar: "Select an item from the sub sidebar.",
+            empty_placeholder: "(empty)",
+
+            // Navigation Items
+            nav_auction: "AUCTION",
+            nav_post: "POST",
+            nav_user: "USER",
+            nav_settings: "SETTINGS",
+            nav_trader: "TRADER",
+            nav_utilities: "UTILITIES",
+            nav_about_us: "ABOUT US",
+
+            // Sub-sidebar
+            sub_user: "User",
+            sub_attachments: "Attachments",
+            sub_wallet: "Wallet",
+            sub_analytics: "Analytics",
+
+            // --- Dashboard Stats ---
+            total_revenue: "TOTAL REVENUE",
+            sales: "SALES",
+            profit: "PROFIT",
+
+            // --- Auction View / Grid ---
+            Results_for: "Results for",
+            Clear_search: "Clear search",
+            No_items_found: "No items found.",
+            No_similar_items_found: "No similar items found.",
+            feature_developing: "This feature is under development.",
+            back_to_dashboard: "Back to Dashboard",
+
+            // --- Auction Detail / Card ---
+            Untitled_Item: "Untitled Item",
+            Unknown_Category: "Unknown Category",
+            No_description: "No description provided.",
+            std_shipping: "Standard Shipping",
+            calc_checkout: "Calculated at checkout",
+            payment_methods: "Card, Bank Transfer",
+            no_returns: "No returns",
+            seller_prefix: "Seller #",
+
+            // --- Auction Bid Panel ---
+            Days_left: "{{count}} day(s) left", // Dùng biến count
+            Bid_too_low: "Bid must be ≥ {{min}}",
+            Your_item: "Your item",
+            Cannot_bid_own_item: "You cannot bid on your own item.",
+            buy_now_alert: "Buy Now functionality coming soon!",
+            Buy_Now: "Buy Now",
+            Current_Price: "Current Price",
+            Min_Step: "Min Step",
+            Reserve_Price: "Reserve Price",
+            Shipping: "Shipping",
+            Item_location: "Item Location",
+            Payment: "Payment",
+            Returns: "Returns",
+
+            logout_success: "Logout successful!",
+            auction_menu: "Auction Menu",
+
+            // Placeholder & States
+            empty_state: "(empty)",
+            failed_load_profile: "Failed to load user data",
+            select_sidebar_item: "Select an item from the sub sidebar.",
+            remove: "Remove",
+
+            // Locations placeholders
+            location_placeholder: "e.g., Dubai, Abu Dhabi",
+
+            // Document Types (UserAttachment)
+            doc_passport: "Passport",
+            doc_license: "License",
+            doc_kyc: "KYC",
+            doc_payment: "Payment",
+            doc_additional: "Additional",
+            location_unknown: "Location unknown",
+            unknown_user: "Unknown User",
+
+            // Navigation Labels (Nếu trong file config bạn để tiếng Anh)
+            nav_dashboard: "Dashboard",
+            nav_active_auctions: "Active Auctions",
+            nav_past_auctions: "Past Auctions",
+            nav_my_bids: "My Bids",
+            nav_watchlist: "Watchlist",
+
+            // --- Auction Menu (Sidebar) ---
+            menu_dashboard: "Dashboard",
+            menu_ongoing: "Ongoing Auctions",
+            menu_closed: "Closed Auctions",
+            menu_sold: "Sold",
+            menu_cashed: "Cashed",
+            menu_scheduled: "Scheduled Auctions",
+            menu_cancelled: "Cancelled Auctions",
+            menu_cancelled_completion: "Cancelled after completion",
+            menu_history: "History",
+
+            // --- Search Dropdown ---
+            Recent_Searches: "Recent Searches",
+
+            // --- Calculator Widget ---
+            Calculator_Title: "Calculator",
+            Calc_Error: "Calculation Error!",
         },
     },
     vi: {
@@ -445,6 +583,7 @@ const resources = {
 
             user_info: "Thông tin người dùng",
             edit_user_info: "Chỉnh sửa thông tin",
+            change_avatar: "Đổi ảnh đại diện",
             phone: "Số điện thoại",
             address: "Địa chỉ",
             bio: "Giới thiệu",
@@ -545,12 +684,146 @@ const resources = {
             Please_fill_required_fields: "Vui lòng điền các trường bắt buộc (Tiêu đề, Danh mục, Giá, Ngày)",
             End_date_must_be_after_start: "Ngày kết thúc phải sau ngày bắt đầu",
             Max_10_images: "Chỉ được phép tải tối đa 10 ảnh",
-            Auction_created_success: "Tạo phiên đấu giá thành công! ID Vật phẩm: {{itemId}}",
+            Auction_created_success: "Tạo phiên đấu giá thành công!",
             Failed_to_create_auction: "Tạo phiên đấu giá thất bại. Vui lòng thử lại.",
             Failed_to_load_categories: "Không thể tải danh mục",
 
             Main_Image: "Ảnh bìa",
-            Set_as_Thumbnail: "Đặt làm ảnh bìa"
+            Set_as_Thumbnail: "Đặt làm ảnh bìa",
+
+            // ProfileSetup
+            profile_step: "Bước",
+            whats_your_full_name: "Tên đầy đủ của bạn là gì?",
+            whats_your_phone_number: "Số điện thoại của bạn là gì?",
+            whats_your_address: "Địa chỉ của bạn là gì?",
+            your_birthday_bio_avatar: "Ngày sinh, giới thiệu & ảnh đại diện",
+            full_name_label: "Họ và tên",
+            phone_number_label: "Số điện thoại",
+            home_address: "Địa chỉ nhà",
+            bio_optional: "Giới thiệu (tùy chọn)",
+            avatar_label: "Ảnh đại diện",
+            upload_button: "Tải lên",
+            back_button: "Quay lại",
+            next_button: "Tiếp tục",
+            finish_button: "Hoàn tất",
+            saving_button: "Đang lưu…",
+            missing_userid_error: "Thiếu userId. Hãy đăng nhập lại.",
+            save_failed_error: "Lưu thất bại",
+            error_occurred: "Có lỗi xảy ra",
+            avatar_fallback_text: "Không chọn ảnh avatar hiển thị bằng chữ cái đầu tên của bạn.",
+            placeholder_full_name: "Nguyễn Văn A",
+            placeholder_phone: "+84 912 345 678",
+            placeholder_address: "123 Đường Lê Lợi, Quận 1, TP.HCM",
+            placeholder_bio: "Vài dòng về bản thân bạn…",
+
+            // MerchantProfile & Dashboard
+            loading_profile: "Đang tải hồ sơ...",
+            failed_load_user_data: "Không thể tải dữ liệu người dùng",
+            wallet_title: "Ví",
+            analytics_title: "Phân tích",
+            empty_note: "Ghi chú trống…",
+            chart_demo: "Biểu đồ (demo).",
+            select_sub_sidebar: "Chọn mục ở sub sidebar.",
+            empty_placeholder: "(để trống)",
+
+            // Navigation Items
+            nav_auction: "ĐẤU GIÁ",
+            nav_post: "ĐĂNG BÀI",
+            nav_user: "NGƯỜI DÙNG",
+            nav_settings: "CÀI ĐẶT",
+            nav_trader: "KINH DOANH",
+            nav_utilities: "TIỆN ÍCH",
+            nav_about_us: "VỀ CHÚNG TÔI",
+
+            // Sub-sidebar
+            sub_user: "Người dùng",
+            sub_attachments: "Tệp đính kèm",
+            sub_wallet: "Ví",
+            sub_analytics: "Phân tích",
+
+            // --- Dashboard Stats ---
+            total_revenue: "TỔNG DOANH THU",
+            sales: "DOANH SỐ",
+            profit: "LỢI NHUẬN",
+
+            // --- Auction View / Grid ---
+            Results_for: "Kết quả cho",
+            Clear_search: "Xóa tìm kiếm",
+            No_items_found: "Không tìm thấy sản phẩm nào.",
+            No_similar_items_found: "Không tìm thấy sản phẩm tương tự.",
+            feature_developing: "Tính năng này đang được phát triển.",
+            back_to_dashboard: "Về Dashboard",
+
+            // --- Auction Detail / Card ---
+            Untitled_Item: "Vật phẩm chưa đặt tên",
+            Unknown_Category: "Danh mục chưa rõ",
+            No_description: "Không có mô tả.",
+            std_shipping: "Vận chuyển tiêu chuẩn",
+            calc_checkout: "Tính khi thanh toán",
+            payment_methods: "Thẻ, Chuyển khoản",
+            no_returns: "Không đổi trả",
+            seller_prefix: "Người bán #",
+
+            // --- Auction Bid Panel ---
+            Days_left: "Còn {{count}} ngày",
+            Bid_too_low: "Giá đặt phải ≥ {{min}}",
+            Your_item: "Sản phẩm của bạn",
+            Cannot_bid_own_item: "Bạn không thể đấu giá sản phẩm của chính mình.",
+            buy_now_alert: "Tính năng Mua Ngay đang phát triển!",
+            Buy_Now: "Mua Ngay",
+            Current_Price: "Giá hiện tại",
+            Min_Step: "Bước giá",
+            Reserve_Price: "Giá sàn",
+            Shipping: "Vận chuyển",
+            Item_location: "Nơi bán",
+            Payment: "Thanh toán",
+            Returns: "Đổi trả",
+
+            logout_success: "Đăng xuất thành công!",
+            auction_menu: "Danh mục Đấu giá",
+
+            // Placeholder & States
+            empty_state: "(để trống)",
+            failed_load_profile: "Không thể tải dữ liệu người dùng",
+            select_sidebar_item: "Chọn một mục từ menu phụ.",
+            remove: "Xóa",
+
+            // Locations placeholders
+            location_placeholder: "Vd: Hà Nội, TP.HCM",
+
+            // Document Types (UserAttachment)
+            doc_passport: "Hộ chiếu",
+            doc_license: "Giấy phép",
+            doc_kyc: "Xác minh (KYC)",
+            doc_payment: "Thanh toán",
+            doc_additional: "Khác",
+            location_unknown: "Chưa rõ vị trí",
+            unknown_user: "Người dùng ẩn danh",
+
+            // Navigation Labels
+            nav_dashboard: "Bảng điều khiển",
+            nav_active_auctions: "Đấu giá đang mở",
+            nav_past_auctions: "Đấu giá đã kết thúc",
+            nav_my_bids: "Đấu giá của tôi",
+            nav_watchlist: "Danh sách theo dõi",
+
+            // --- Auction Menu (Sidebar) ---
+            menu_dashboard: "Bảng điều khiển",
+            menu_ongoing: "Đấu giá đang diễn ra",
+            menu_closed: "Đấu giá đã đóng",
+            menu_sold: "Đã bán",
+            menu_cashed: "Đã thanh toán",
+            menu_scheduled: "Đấu giá sắp tới",
+            menu_cancelled: "Đấu giá đã hủy",
+            menu_cancelled_completion: "Hủy sau khi hoàn thành",
+            menu_history: "Lịch sử",
+
+            // --- Search Dropdown ---
+            Recent_Searches: "Lịch sử tìm kiếm",
+
+            // --- Calculator Widget ---
+            Calculator_Title: "Máy tính",
+            Calc_Error: "Lỗi tính toán!",
         },
     },
 };
