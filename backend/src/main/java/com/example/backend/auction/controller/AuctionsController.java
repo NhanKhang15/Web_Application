@@ -1,12 +1,12 @@
 package com.example.backend.auction.controller;
 
-
 import com.example.backend.auction.domain.auction.dto.AuctionDetailDto;
 import com.example.backend.auction.domain.auction.dto.FilterOptionsDto;
 import com.example.backend.auction.service.ActiveItemsService;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.PageRequest; // Re-add PageRequest
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +22,7 @@ import com.example.backend.auction.service.ActiveItemsService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/auctions") 
+@RequestMapping("/api/auctions")
 @CrossOrigin
 public class AuctionsController {
 
@@ -35,12 +35,11 @@ public class AuctionsController {
     // API 1: Xem danh sách hoạt động
     @GetMapping("/active")
     public ResponseEntity<Page<AuctionDto>> getActiveList(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            Pageable pageable,
             @RequestParam(required = false) Integer categoryId,
             @RequestParam(required = false) String from,
             @RequestParam(required = false) String to) {
-        return ResponseEntity.ok(service.listActiveAuctions(PageRequest.of(page, size)));
+        return ResponseEntity.ok(service.listActiveAuctions(pageable));
     }
 
     // API 2: Xem danh sách đả kết thúc
@@ -80,10 +79,8 @@ public class AuctionsController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Page<AuctionDto>> searchAuctions(@RequestParam String keyword,
-                                                                 @RequestParam(defaultValue = "0") int page,
-                                                                 @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(service.searchAuctions(keyword, PageRequest.of(page, size)));
+    public ResponseEntity<Page<AuctionDto>> searchAuctions(@RequestParam String keyword, Pageable pageable) {
+        return ResponseEntity.ok(service.searchAuctions(keyword, pageable));
     }
 
     @GetMapping("/filters")

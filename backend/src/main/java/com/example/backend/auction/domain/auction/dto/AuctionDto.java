@@ -22,18 +22,18 @@ public interface AuctionDto {
 
     BigDecimal getStartingPrice();
 
-    LocalDateTime getStartDate(); 
-     
-    LocalDateTime getEndDate(); 
-      
-    String getStatus(); 
-             
+    LocalDateTime getStartDate();
+
+    LocalDateTime getEndDate();
+
+    String getStatus();
+
     Integer getCategoryId();
 
-    
     String getCategoryName();
 
-    
     String getLocation();
+
+    LocalDateTime getCreatedAt();
 
 }

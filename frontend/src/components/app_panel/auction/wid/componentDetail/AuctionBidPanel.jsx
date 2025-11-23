@@ -209,17 +209,28 @@ export default function AuctionBidPanel({ product, bids = [], onPlaceBid, isOwne
                 </div>
             </div>
 
-            {/* Shipping */}
+            {/* Shipping & Payment Info Block */}
             <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                 <h2 className="text-md font-semibold mb-3 text-purple-600 uppercase">
                     {t('Shipping_Payment')}
                 </h2>
-                <div className="space-y-2 text-sm leading-relaxed">
-                    {Object.entries(product.shipping).map(([key, value]) => (
-                        <p key={key}>
-                            <span className="font-medium">{key}:</span> {String(value)}
-                        </p>
-                    ))}
+                <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                        <span className="text-gray-500">{t('Shipping')}</span>
+                        <span className="font-medium">{product.shipping.Method}</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-gray-500">{t('Item_location')}</span>
+                        <span className="font-medium">{product.location}</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-gray-500">{t('Payment')}</span>
+                        <span className="font-medium">{product.shipping.Payment}</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-gray-500">{t('Returns')}</span>
+                        <span className="font-medium">{product.shipping.Returns}</span>
+                    </div>
                 </div>
             </div>
 

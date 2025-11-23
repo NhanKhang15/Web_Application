@@ -26,21 +26,6 @@ export default function AuctionToolbar({ sort, setSort, pageData, setPage, loadi
         // Thêm class pb-4 nếu là bottom toolbar để cách lề dưới một chút
         <div className={`flex items-center ${hideSort ? 'justify-end' : 'justify-between'} gap-4 px-6 mb-3 ${hideSort ? 'mt-2 pb-4' : ''}`}>
 
-            {/* Chỉ hiển thị phần Sort nếu hideSort là false */}
-            {!hideSort && (
-                <div className="flex items-center gap-3 text-sm">
-                    <span className="text-gray-500">{t('Sort')}</span>
-                    <select
-                        value={sort}
-                        onChange={handleSortChange}
-                        className="border rounded-md px-2 py-1 bg-white dark:bg-[#14191F] border-neutral-200 dark:border-neutral-700"
-                    >
-                        <option value="created_desc">{t('Newest')}</option>
-                        <option value="created_asc">{t('Oldest')}</option>
-                    </select>
-                </div>
-            )}
-
             <div className="flex items-center gap-2">
                 <button
                     onClick={handlePrev}

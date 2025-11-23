@@ -11,7 +11,7 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 import AuctionDetail from "./AuctionDetail.jsx";
 import { fetchAuctionItems } from "../../lib/auctionItems.js";
-import {auctionMenu} from "../../../slidebar/lib/auctionMenu.js";
+import { auctionMenu } from "../../../slidebar/lib/auctionMenu.js";
 
 import DashboardStats from "../../wid/componentView/DashboardStats.jsx";
 import AuctionToolbar from "../../wid/componentView/AuctionToolbar.jsx";
@@ -31,11 +31,11 @@ export default function AuctionView() {
     const sortParam = searchParams.get("sort") || "created_desc";
 
     const urlCategories = useMemo(() =>
-            searchParams.get("category") ? new Set(searchParams.get("category").split(',')) : new Set()
+        searchParams.get("category") ? new Set(searchParams.get("category").split(',')) : new Set()
         , [searchParams]);
 
     const urlBranches = useMemo(() =>
-            searchParams.get("branch") ? new Set(searchParams.get("branch").split(',')) : new Set()
+        searchParams.get("branch") ? new Set(searchParams.get("branch").split(',')) : new Set()
         , [searchParams]);
 
     // 2. STATES
@@ -44,10 +44,19 @@ export default function AuctionView() {
     // State chứa dữ liệu bộ lọc từ API (Location, Category...)
     const [filterOptions, setFilterOptions] = useState({ locations: [], categories: [] });
 
-    // State lọc tạm thời (cho FilterSheet)
-    const [filters, setFilters] = useState({
+    // State lọc tạm thời (cho FilterSheet - Draft)
+    const [draftFilters, setDraftFilters] = useState({
         branches: urlBranches,
         categories: urlCategories,
+        sort: sortParam,
+        dateFrom: "", dateTo: "", timeFrom: "", timeTo: "", negotiated: null, types: new Set(),
+    });
+
+    // State lọc chính thức (Applied - dùng để fetch/render)
+    const [appliedFilters, setAppliedFilters] = useState({
+        branches: urlBranches,
+        categories: urlCategories,
+        sort: sortParam,
         dateFrom: "", dateTo: "", timeFrom: "", timeTo: "", negotiated: null, types: new Set(),
     });
 
@@ -57,12 +66,14 @@ export default function AuctionView() {
 
     // Đồng bộ URL vào filters khi URL thay đổi (ví dụ người dùng bấm nút Back)
     useEffect(() => {
-        setFilters(prev => ({
-            ...prev,
+        const newFilters = {
             branches: urlBranches,
-            categories: urlCategories
-        }));
-    }, [urlBranches, urlCategories]);
+            categories: urlCategories,
+            sort: sortParam
+        };
+        setDraftFilters(prev => ({ ...prev, ...newFilters }));
+        setAppliedFilters(prev => ({ ...prev, ...newFilters }));
+    }, [urlBranches, urlCategories, sortParam]);
 
     // AOS init
     useEffect(() => {
@@ -73,7 +84,7 @@ export default function AuctionView() {
     useEffect(() => {
         getJSON("/api/auctions/filters")
             .then(res => {
-                if(res) setFilterOptions({ locations: res.locations || [], categories: res.categories || [] });
+                if (res) setFilterOptions({ locations: res.locations || [], categories: res.categories || [] });
             })
             .catch(console.error);
     }, []);
@@ -93,6 +104,11 @@ export default function AuctionView() {
             case "created_asc": return "createdAt,asc";
             case "price_asc": return "currentPrice,asc";
             case "price_desc": return "currentPrice,desc";
+            case "amount_asc": return "startingPrice,asc"; // Changed to startingPrice
+            case "amount_desc": return "startingPrice,desc"; // Changed to startingPrice
+            case "year_asc": return "createdAt,asc";
+            case "year_desc": return "createdAt,desc";
+            case "name_az": return "title,asc";
             case "created_desc": default: return "createdAt,desc";
         }
     }, [sortParam]);
@@ -119,8 +135,8 @@ export default function AuctionView() {
                 try {
                     let res;
 
-                    const fromStr = combineDateTime(filters.dateFrom, filters.timeFrom, false);
-                    const toStr = combineDateTime(filters.dateTo, filters.timeTo, true);
+                    const fromStr = combineDateTime(appliedFilters.dateFrom, appliedFilters.timeFrom, false);
+                    const toStr = combineDateTime(appliedFilters.dateTo, appliedFilters.timeTo, true);
 
                     // Tạo query params cho Date
                     let dateQuery = "";
@@ -157,23 +173,23 @@ export default function AuctionView() {
             run();
             return () => { cancelled = true; };
         }
-    }, [pageParam, apiSort, slug, itemSlug, keyword, filters]);
+    }, [pageParam, apiSort, slug, itemSlug, keyword, appliedFilters]); // Depend on appliedFilters
 
     // 5. LỌC CLIENT-SIDE (Kết hợp với kết quả từ Server)
     const list = useMemo(() => {
         let content = data?.content || [];
 
         // Lọc theo Branch (Lấy từ URL filters)
-        if (filters.branches?.size > 0) {
-            content = content.filter((x) => x.location && filters.branches.has(x.location));
+        if (appliedFilters.branches?.size > 0) {
+            content = content.filter((x) => x.location && appliedFilters.branches.has(x.location));
         }
         // Lọc theo Category
-        if (filters.categories?.size > 0) {
-            content = content.filter((x) => x.categoryName && filters.categories.has(x.categoryName));
+        if (appliedFilters.categories?.size > 0) {
+            content = content.filter((x) => x.categoryName && appliedFilters.categories.has(x.categoryName));
         }
 
         return content;
-    }, [data, filters]);
+    }, [data, appliedFilters]);
 
     // Refresh AOS
     useEffect(() => {
@@ -183,16 +199,17 @@ export default function AuctionView() {
 
     // 6. HÀM XỬ LÝ SỰ KIỆN
 
-    // Khi bấm Apply trên FilterSheet -> Đẩy lên URL
+    // Khi bấm Apply trên FilterSheet -> Đẩy lên URL + Commit appliedFilters
     const handleApplyFilter = () => {
         const params = {};
         if (keyword) params.search = keyword;
-        if (filters.categories.size > 0) params.category = Array.from(filters.categories).join(',');
-        if (filters.branches.size > 0) params.branch = Array.from(filters.branches).join(',');
-        params.sort = sortParam;
+        if (draftFilters.categories.size > 0) params.category = Array.from(draftFilters.categories).join(',');
+        if (draftFilters.branches.size > 0) params.branch = Array.from(draftFilters.branches).join(',');
+        params.sort = draftFilters.sort;
         params.page = 0; // Reset về trang 1
 
         setSearchParams(params);
+        setAppliedFilters(draftFilters); // Commit draft -> applied
         setOpenFilter(false);
     };
 
@@ -201,7 +218,7 @@ export default function AuctionView() {
         if (keyword) params.search = keyword;
         setSearchParams(params);
 
-        setFilters({
+        const resetState = {
             branches: new Set(),
             categories: new Set(),
             dateFrom: "",  // Reset ngày
@@ -210,7 +227,10 @@ export default function AuctionView() {
             timeTo: "",
             negotiated: null,
             types: new Set(),
-        });
+            sort: "created_desc",
+        };
+        setDraftFilters(resetState);
+        setAppliedFilters(resetState);
     };
 
     const handleSetPage = (newPage) => {
@@ -265,11 +285,11 @@ export default function AuctionView() {
             <FilterSheet
                 open={openFilter}
                 onClose={() => setOpenFilter(false)}
-                filters={filters}
-                setFilters={setFilters}
-                sort={sortParam} // Dùng sort từ URL
-                setSort={handleSetSort} // Hàm set sort đẩy lên URL
-                onApply={handleApplyFilter} // Hàm apply đẩy lên URL
+                filters={draftFilters}
+                setFilters={setDraftFilters}
+                sort={draftFilters.sort}
+                setSort={(val) => setDraftFilters(prev => ({ ...prev, sort: val }))}
+                onApply={handleApplyFilter}
                 onReset={handleResetFilter}
                 // 👇 Truyền dữ liệu động vào FilterSheet
                 locationOptions={filterOptions.locations}
@@ -278,16 +298,16 @@ export default function AuctionView() {
 
             <div className={`flex flex-col w-full transition-[padding] duration-300 ease-out ${openFilter ? "pt-[35vh]" : "pt-0"}`}>
                 <div className="flex flex-wrap items-center justify-between gap-4 mb-4 px-6 pt-6 flex-shrink-0" data-aos="fade-down">                    <div className="flex items-center gap-32 justify-between">
-                        <div className="flex items-center rounded-md bg-[#ECEFF1] dark:bg-[#1A1F25] px-2 py-1 shadow-sm" data-aos="zoom-in">
-                            <CalendarDays className="w-4 h-4 mr-2 text-[#96A0AE] dark:text-gray-400" />
-                            <div className="flex items-center">
-                                <div className="bg-white dark:bg-[#0F141A] border border-neutral-200 dark:border-neutral-700 rounded-md px-2 py-1 text-[12px] font-semibold mr-2">
-                                    {day}
-                                </div>
-                                <span className="text-[12px] font-semibold tracking-wide text-[#212121] dark:text-gray-200">{monthYear}</span>
+                    <div className="flex items-center rounded-md bg-[#ECEFF1] dark:bg-[#1A1F25] px-2 py-1 shadow-sm" data-aos="zoom-in">
+                        <CalendarDays className="w-4 h-4 mr-2 text-[#96A0AE] dark:text-gray-400" />
+                        <div className="flex items-center">
+                            <div className="bg-white dark:bg-[#0F141A] border border-neutral-200 dark:border-neutral-700 rounded-md px-2 py-1 text-[12px] font-semibold mr-2">
+                                {day}
                             </div>
+                            <span className="text-[12px] font-semibold tracking-wide text-[#212121] dark:text-gray-200">{monthYear}</span>
                         </div>
                     </div>
+                </div>
                     <button
                         type="button"
                         onClick={() => setOpenFilter(true)}
@@ -303,9 +323,9 @@ export default function AuctionView() {
 
                 {keyword && (
                     <div className="px-6 pb-2 flex items-center gap-2">
-                     <span className="text-sm text-neutral-500">
-                        {t('Results_for')}: <b className="text-neutral-900 dark:text-white">"{keyword}"</b>
-                     </span>
+                        <span className="text-sm text-neutral-500">
+                            {t('Results_for')}: <b className="text-neutral-900 dark:text-white">"{keyword}"</b>
+                        </span>
                         <button
                             onClick={() => setSearchParams({})} // Xóa hết params = về trang chủ sạch
                             className="text-xs text-red-500 hover:underline"
@@ -315,13 +335,16 @@ export default function AuctionView() {
                     </div>
                 )}
 
-                <AuctionToolbar
-                    sort={sortParam}
-                    setSort={handleSetSort}
-                    pageData={data ? {...data, content: list} : null} // Hack nhẹ để Toolbar hiển thị đúng số lượng sau khi filter client
-                    setPage={handleSetPage}
-                    loading={loading}
-                />
+                <div className="flex-shrink-0 border-t border-neutral-200 dark:border-neutral-800 pt-2 bg-gray-50 dark:bg-[#0B0F13]">
+                    <AuctionToolbar
+                        sort={sortParam}
+                        setSort={handleSetSort}
+                        pageData={data}
+                        setPage={handleSetPage}
+                        loading={loading}
+                        hideSort={true}
+                    />
+                </div>
 
                 <AuctionGrid
                     list={list}
