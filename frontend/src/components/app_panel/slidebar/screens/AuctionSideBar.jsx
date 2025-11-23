@@ -39,7 +39,6 @@ export default function AuctionSideBar({ active, onSelect, isOpen, onToggle }) {
                         <div className="relative z-10">
                             {isOpen ? <X size={22} /> : <Menu size={22} />}
                         </div>
-                        {/* Glow effect on hover */}
                         <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-neutral-100 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 dark:from-white/5" />
                     </button>
                 </div>
@@ -54,12 +53,19 @@ export default function AuctionSideBar({ active, onSelect, isOpen, onToggle }) {
                                 </h3>
                             </div>
                             <ul className="space-y-1">
-                                {auctionMenu.map((label) => {
-                                    const isActive = active === label;
+                                {/* 👇 ĐÃ SỬA LOGIC MAP Ở ĐÂY 👇 */}
+                                {auctionMenu.map((item) => {
+                                    // item bây giờ là object { label, path }
+                                    // active là string (ví dụ "Dashboard")
+                                    // Nên phải so sánh active === item.label
+                                    const isActive = active === item.label;
+
                                     return (
-                                        <li key={label}>
+                                        // Dùng item.path làm key cho chuẩn xác
+                                        <li key={item.path}>
                                             <button
-                                                onClick={() => onSelect?.(label)}
+                                                // Khi click, chỉ gửi tên hiển thị (label) lên cha
+                                                onClick={() => onSelect?.(item.label)}
                                                 className={`
                                                     group relative w-full flex items-center justify-between
                                                     px-4 py-3 rounded-xl text-sm font-medium
@@ -70,7 +76,9 @@ export default function AuctionSideBar({ active, onSelect, isOpen, onToggle }) {
                                                 }
                                                 `}
                                             >
-                                                <span>{label}</span>
+                                                {/* 👇 QUAN TRỌNG: Render item.label (string), KHÔNG render item (object) */}
+                                                <span>{item.label}</span>
+
                                                 {isActive && (
                                                     <ChevronRight size={16} className="opacity-100" />
                                                 )}
@@ -86,10 +94,9 @@ export default function AuctionSideBar({ active, onSelect, isOpen, onToggle }) {
                     )}
                 </div>
 
-                {/* Collapsed State Icons (Optional - if we want to show icons when collapsed) */}
+                {/* Collapsed State Icons */}
                 {!isOpen && (
                     <div className="absolute top-24 left-0 w-full flex flex-col items-center gap-4 opacity-50 pointer-events-none">
-                        {/* Placeholder for collapsed icons if we had them mapped */}
                         <div className="w-1 h-1 rounded-full bg-neutral-300 dark:bg-neutral-700" />
                         <div className="w-1 h-1 rounded-full bg-neutral-300 dark:bg-neutral-700" />
                         <div className="w-1 h-1 rounded-full bg-neutral-300 dark:bg-neutral-700" />

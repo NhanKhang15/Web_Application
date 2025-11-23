@@ -12,6 +12,8 @@ public interface AuctionDetailProjection {
 
     String getCategoryName();
 
+    Integer getCategoryId();
+
     String getTitle();
 
     String getSlug();
