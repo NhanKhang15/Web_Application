@@ -4,6 +4,9 @@ export async function loginLocal({ username, password }) {
   const res = await postJSON("/api/login", { username, password });
 
   if (res?.success) {
+    if (res.token) {
+      setToken(res.token);
+    }
     // Cookie JSESSIONID đã được browser tự lưu (do credentials: "include")
     // -> chỉ cần return res thôi
     console.log("Login OK, cookie stored by browser");
