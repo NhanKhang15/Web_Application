@@ -1,3 +1,4 @@
+// src/App.jsx
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./components/auth/screens/Login";
 import Signup from "./components/auth/screens/Signup";
@@ -6,8 +7,11 @@ import ProfileSetup from "./components/user_profile_setup/screens/ProfileSetup";
 import MerchantProfile from "./components/app_panel/pages/MerchantProfile";
 import Homepage from "./components/cover_page/page/Homepage.jsx";
 import { ThemeProvider } from "./components/theme/ThemeProvider.jsx";
-import AuctionView from "./components/app_panel/auction/screen/AuctionView.jsx";
-import AuctionDetail from "./components/app_panel/auction/screen/AuctionDetail.jsx";
+
+// Các component con này được MerchantProfile tự import và render,
+// nên ta không cần import vào đây để làm Route con nữa.
+// import AuctionView from ...
+// import AuctionDetail from ...
 
 function getUser() {
     const u = sessionStorage.getItem("user");
@@ -22,17 +26,8 @@ function RequireAuth({ children }) {
     return children;
 }
 
-function RedirectHome() {
-    const u = getUser();
-    if (!u) return <Navigate to="/login" replace />;
-
-    const completed = !!u.profileCompleted;
-    return <Navigate to={completed ? "/dashboard" : "/user/profile"} replace />;
-}
-
 export default function App() {
     return (
-        // ✅ bọc toàn bộ App bằng ThemeProvider
         <ThemeProvider>
             <BrowserRouter>
                 <Routes>
@@ -43,6 +38,7 @@ export default function App() {
 
                     {/* OAuth callback */}
                     <Route path="/auth/callback" element={<AuthCallback />} />
+
                     <Route
                         path="/user/profile"
                         element={
@@ -52,19 +48,34 @@ export default function App() {
                         }
                     />
 
-                    {/* Dashboard */}
+                    {/* --- CẬP NHẬT DASHBOARD ROUTES --- */}
+
+                    {/* Level 1: /dashboard */}
                     <Route
                         path="/dashboard"
-                        element={
-                            <RequireAuth>
-                                <MerchantProfile /> {/* có <Outlet /> bên trong */}
-                            </RequireAuth>
-                        }
-                    >
-                        <Route index element={<AuctionView />} />
-                        <Route path=":category" element={<AuctionView />} />
-                        <Route path=":category/:slug" element={<AuctionDetail />} /> {/* hoặc ItemDetail */}
-                    </Route>
+                        element={<RequireAuth><MerchantProfile /></RequireAuth>}
+                    />
+
+                    {/* Level 2: /dashboard/auctions */}
+                    <Route
+                        path="/dashboard/:category"
+                        element={<RequireAuth><MerchantProfile /></RequireAuth>}
+                    />
+
+                    {/* Level 3: Menu con (VD: /dashboard/auctions/main, /dashboard/auctions/ongoing) */}
+                    {/* Ở đây tham số thứ 2 ta gọi là :slug để khớp với logic MerchantProfile hiện tại */}
+                    <Route
+                        path="/dashboard/:category/:slug"
+                        element={<RequireAuth><MerchantProfile /></RequireAuth>}
+                    />
+
+                    {/* 👇 THÊM ROUTE NÀY: Level 4 cho Chi tiết sản phẩm */}
+                    {/* VD: /dashboard/auctions/main/iphone-15 */}
+                    {/* :slug là 'main', :itemSlug là 'iphone-15' */}
+                    <Route
+                        path="/dashboard/:category/:slug/:itemSlug"
+                        element={<RequireAuth><MerchantProfile /></RequireAuth>}
+                    />
 
                     <Route path="*" element={<Homepage />} />
                 </Routes>
