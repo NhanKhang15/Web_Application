@@ -22,4 +22,6 @@ public interface ActiveAuctionDto {
     Integer getCategoryId();
 
     String getCategoryName();
+
+    String getLocation();
 }
