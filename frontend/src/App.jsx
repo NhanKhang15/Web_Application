@@ -7,11 +7,8 @@ import ProfileSetup from "./components/user_profile_setup/screens/ProfileSetup";
 import MerchantProfile from "./components/app_panel/pages/MerchantProfile";
 import Homepage from "./components/cover_page/page/Homepage.jsx";
 import { ThemeProvider } from "./components/theme/ThemeProvider.jsx";
+import EmailVerificationPage from "./components/verify_mail/screens/VerificationPage";
 
-// Các component con này được MerchantProfile tự import và render,
-// nên ta không cần import vào đây để làm Route con nữa.
-// import AuctionView from ...
-// import AuctionDetail from ...
 
 function getUser() {
     const u = sessionStorage.getItem("user");
@@ -38,6 +35,9 @@ export default function App() {
 
                     {/* OAuth callback */}
                     <Route path="/auth/callback" element={<AuthCallback />} />
+
+                    {/* Email Verification */}
+                    <Route path="/verify-email" element={<EmailVerificationPage />} />
 
                     <Route
                         path="/user/profile"

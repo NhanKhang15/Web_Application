@@ -24,3 +24,7 @@ export async function getProfileByUsername(username) {
 export async function upsertProfile(userId, payload) {
   return putJSON(`/api/profile/${userId}`, payload);
 }
+
+export async function updateMyProfile(payload) {
+  return putJSON(`/api/profile/edit-profile`, payload);
+}
