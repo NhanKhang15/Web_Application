@@ -53,7 +53,7 @@ public class SignupController {
 
             User saved = userRepository.save(u);
 
-            return build(true, "Tạo tài khoản thành công!!!!",
+            return build(true, "Tạo tài khoản thành công! Lưu ý, hãy xác thực tài khoản của bạn qua email.",
                     saved.getUserId(), saved.getUsername(), saved.getEmail());
 
         } catch (DataIntegrityViolationException dup) {
@@ -65,7 +65,42 @@ public class SignupController {
         }
     }
 
-    private ResponseEntity<Map<String, Object>> build(boolean success, String message, int userId, String username, String email) {
+    @PostMapping("/change-email")
+    public ResponseEntity<Map<String, Object>> changeEmail(@RequestBody ChangeEmailRequest req) {
+        System.out.println("ChangeEmail called: current=" + req.currentEmail() + ", new=" + req.newEmail());
+        String currentEmail = req.currentEmail();
+        String newEmail = req.newEmail();
+
+        if (currentEmail == null || newEmail == null || currentEmail.isBlank() || newEmail.isBlank()) {
+            return build(false, "Vui lòng nhập đầy đủ thông tin!", 0, "null", "null");
+        }
+
+        currentEmail = currentEmail.trim().toLowerCase();
+        newEmail = newEmail.trim().toLowerCase();
+
+        // 1. Find user by currentEmail
+        User user = userRepository.findByEmail(currentEmail).orElse(null);
+        if (user == null) {
+            return build(false, "Email hiện tại không tồn tại!", 0, "null", "null");
+        }
+
+        // 2. Check if newEmail is already taken
+        if (userRepository.findByEmail(newEmail).isPresent()) {
+            return build(false, "Email mới đã tồn tại!", 0, user.getUsername(), "null");
+        }
+
+        // 3. Update email
+        user.setEmail(newEmail);
+        userRepository.save(user);
+
+        return build(true, "Cập nhật email thành công!", user.getUserId(), user.getUsername(), newEmail);
+    }
+
+    public record ChangeEmailRequest(String currentEmail, String newEmail) {
+    }
+
+    private ResponseEntity<Map<String, Object>> build(boolean success, String message, int userId, String username,
+            String email) {
         Map<String, Object> response = new HashMap<>();
         response.put("success", success);
         response.put("message", message);
