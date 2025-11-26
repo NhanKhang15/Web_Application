@@ -102,6 +102,7 @@ export default function EditUserDialog({ open, onOpenChange, profile, onSave }) 
                             { label: t("full_name"), name: "fullName", type: "text" },
                             { label: t("phone"), name: "phone", type: "text" },
                             { label: t("address"), name: "address", type: "text" },
+                            { label: t("date_of_birth") || "Date of Birth", name: "dateOfBirth", type: "date" },
                         ].map((field, idx) => (
                             <div key={idx}>
                                 <label className="block text-sm font-medium mb-1.5 text-neutral-700 dark:text-neutral-300">

@@ -1,7 +1,7 @@
 import { postFormData } from "../../../lib/api_url";
 
 export async function uploadAvatar(file) {
-  if (!file) return ""; // skip avatar
+  if (!file) return ""; 
   const form = new FormData();
   form.append("file", file);
 
