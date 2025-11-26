@@ -152,6 +152,22 @@ CREATE TABLE IF NOT EXISTS AuctionTags (
 
 CREATE INDEX idx_tags_name ON AuctionTags(TagName);
 
+CREATE TABLE IF NOT EXISTS EmailVerificationTokens (
+    TokenID     INT AUTO_INCREMENT PRIMARY KEY,
+    UserID      INT NOT NULL,
+    Token       VARCHAR(100) NOT NULL UNIQUE, -- Mã xác thực (OTP hoặc UUID)
+    ExpiresAt   DATETIME NOT NULL,            -- Thời gian hết hạn
+    UsedAt      DATETIME NULL,                -- Thời gian đã sử dụng
+    CreatedAt   DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_evt_user
+        FOREIGN KEY (UserID) REFERENCES Users(UserID)
+        ON DELETE CASCADE
+) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Index để tìm kiếm token nhanh hơn
+CREATE INDEX idx_evt_token ON EmailVerificationTokens(Token);
+
 -- BIDS
 CREATE TABLE IF NOT EXISTS Bids (
 	BidID      INT AUTO_INCREMENT PRIMARY KEY,
