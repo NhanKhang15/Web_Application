@@ -22,7 +22,7 @@ import com.example.backend.auction.domain.auction.dto.CategoryDto;
 import com.example.backend.auction.domain.item.AuctionItemsRepository;
 
 @Service
-public class ActiveItemsService {
+public class    ActiveItemsService {
 
     private final AuctionRepository auctionRepo;
     private final AuctionImgRepository imgRepo;
