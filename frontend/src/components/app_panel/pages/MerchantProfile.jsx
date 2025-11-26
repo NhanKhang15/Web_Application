@@ -21,6 +21,7 @@ import Settings from "../settings/Settings.jsx";
 import Utilities from "../utils/Utilities.jsx";
 import AboutUs from "../about/AboutUs.jsx";
 import CalculatorWidget from "../widget/screens/CalculatorWidget.jsx";
+// 👇 Đã bỏ import searchAuction vì không dùng nữa
 import { SearchDropdown } from "../widget/screens/searchAuction.jsx";
 import PostAuction from "../postAuction/screen/PostAuction.jsx";
 import {useNavigate, useParams, createSearchParams} from "react-router-dom";
@@ -131,7 +132,7 @@ export default function MerchantProfile() {
     }, [category]);
 
     useEffect(() => {
-        if (leftKey === "auction") {
+        if (category === "auctions") {
             if (!slug) {
                 navigate("/dashboard/auctions/main", { replace: true });
             } else {
@@ -142,8 +143,11 @@ export default function MerchantProfile() {
                     setAuctionView("Dashboard");
                 }
             }
+        } else if (category === "user") {
+            // Reset activeSub to 'user' when navigating to /dashboard/user
+            setActiveSub("user");
         }
-    }, [slug, leftKey, navigate]);
+    }, [slug, category, navigate]);
 
     const handleNavigation = (key) => {
         if (navigate) {
@@ -176,7 +180,7 @@ export default function MerchantProfile() {
         });
     });
 
-    const { t , i18n} = useTranslation();
+    const { t, i18n } = useTranslation();
     const changeLang = (lng) => {
         i18n.changeLanguage(lng);
         localStorage.setItem("lang", lng);

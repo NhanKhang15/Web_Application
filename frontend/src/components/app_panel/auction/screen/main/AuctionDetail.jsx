@@ -252,8 +252,42 @@ export default function AuctionDetail() {
         if (product?.name) document.title = `${product.name} • Auction Detail`;
     }, [product?.name]);
 
+    // ====== User Check ======
+    const [currentUser, setCurrentUser] = useState(null);
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const token = getToken();
+                if (!token) return;
+
+                const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success) {
+                        setCurrentUser(data);
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to fetch user info", err);
+            }
+        };
+        fetchUser();
+    }, []);
+
+    const isOwner = currentUser?.userId === product?.sellerId;
+
     // ====== Place Bid ======
     const handlePlaceBid = async (amount) => {
+        // Check email verification
+        if (currentUser && !currentUser.emailVerified) {
+            alert(t("please_verify_email_to_bid") || "Vui lòng xác thực email để tham gia đấu giá!");
+            navigate("/dashboard/user"); // Redirect to UserOverview
+            return { ok: false };
+        }
+
         try {
             const response = await fetch('/api/bids', {
                 method: 'POST',
@@ -285,33 +319,6 @@ export default function AuctionDetail() {
             throw error;
         }
     };
-
-    // ====== User Check ======
-    const [currentUserId, setCurrentUserId] = useState(null);
-
-    useEffect(() => {
-        const fetchUserId = async () => {
-            try {
-                const token = getToken();
-                if (!token) return;
-
-                const res = await fetch(`${API_BASE_URL}/api/profile/id`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.success) {
-                        setCurrentUserId(data.userId);
-                    }
-                }
-            } catch (err) {
-                console.error("Failed to fetch user ID", err);
-            }
-        };
-        fetchUserId();
-    }, []);
-
-    const isOwner = currentUserId === product?.sellerId;
 
     // ====== Render ======
     if (state.loading) return <div className="p-10 text-center text-gray-500">{t('Loading_product_data')}...</div>;

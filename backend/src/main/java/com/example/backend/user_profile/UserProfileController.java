@@ -101,6 +101,20 @@ public class UserProfileController {
                 "profileId", saved.getProfileId()));
     }
 
+    // --- UPSERT current user profile ---
+    @PutMapping("/edit-profile")
+    @Transactional
+    public ResponseEntity<?> updateMyProfile(@AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody UpsertProfileRequest req) {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).body(Map.of("success", false, "message", "Unauthorized"));
+        }
+        User user = userRepo.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        return upsertProfile(user.getUserId(), req);
+    }
+
     // --- DTO (record) ---
     public record UpsertProfileRequest(
             @Size(max = 120, message = "fullName <= 120 ký tự") String fullName,

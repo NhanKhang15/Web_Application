@@ -1,5 +1,6 @@
 // src/user_infor/screens/InfoCardBody.jsx
 import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Avatar from "../../../widget/screens/Avatar.jsx";
 import { motion } from "framer-motion";
 import AOS from "aos";
@@ -8,6 +9,7 @@ import { useTranslation } from "react-i18next";
 
 export default function InfoCardBody({ profile }) {
     const { t } = useTranslation();
+    const navigate = useNavigate();
     if (!profile) return null;
 
     return (
@@ -56,6 +58,14 @@ export default function InfoCardBody({ profile }) {
                 </div>
                 <div className="flex flex-col gap-6">
                     <InfoField label={t("email")} value={profile.email} />
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => navigate("/verify-email")}
+                            className="px-4 py-2 text-sm font-medium text-white bg-[#E43137] rounded-md hover:bg-[#c92b30] transition-colors"
+                        >
+                            Verify Email
+                        </button>
+                    </div>
                     <InfoField label={t("bio")} value={profile.bio} />
                 </div>
             </motion.div>
