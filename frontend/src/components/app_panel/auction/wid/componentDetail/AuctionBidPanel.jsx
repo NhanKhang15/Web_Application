@@ -76,9 +76,9 @@ export default function AuctionBidPanel({ product, bids = [], onPlaceBid, isOwne
     };
 
     return (
-        <div className="w-full lg:max-w-[360px] shrink-0 bg-white dark:bg-[#14191F] rounded-xl shadow-md border border-gray-200 dark:border-gray-800 p-5 space-y-5">
+        <div className="bg-white dark:bg-[#14191F] rounded-xl shadow-md border border-gray-200 dark:border-gray-800">
             {/* --- Header Info --- */}
-            <div>
+            <div className="p-5 border-b dark:border-gray-700">
                 <h1 className="text-2xl font-bold">{product.name}</h1>
                 {product.model && (
                     <p className="text-gray-500 dark:text-gray-400">{product.model}</p>
@@ -101,7 +101,7 @@ export default function AuctionBidPanel({ product, bids = [], onPlaceBid, isOwne
             </div>
 
             {/* Bid section */}
-            <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+            <div className="p-5 border-t border-gray-200 dark:border-gray-700 pt-4">
                 <p className="text-sm text-gray-500 mb-1">{t('CURRENT_BID')}</p>
                 <h2 className="text-3xl font-extrabold text-green-600">
                     ${fmt(currentPrice)}
@@ -188,7 +188,7 @@ export default function AuctionBidPanel({ product, bids = [], onPlaceBid, isOwne
             </div>
 
             {/* Bid history */}
-            <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+            <div className="p-5 border-t border-gray-200 dark:border-gray-700 pt-4">
                 <h2 className="text-md font-semibold mb-3 uppercase flex items-center gap-2">
                     <History className="w-4 h-4" /> {t('Bid_History')}
                 </h2>
@@ -215,7 +215,7 @@ export default function AuctionBidPanel({ product, bids = [], onPlaceBid, isOwne
             </div>
 
             {/* Shipping & Payment Info Block */}
-            <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+            <div className="p-5 border-t border-gray-200 dark:border-gray-700 pt-4">
                 <h2 className="text-md font-semibold mb-3 text-purple-600 uppercase">
                     {t('Shipping_Payment')}
                 </h2>
@@ -240,7 +240,7 @@ export default function AuctionBidPanel({ product, bids = [], onPlaceBid, isOwne
             </div>
 
             {/* Similar Items */}
-            <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+            <div className="p-5 border-t border-gray-200 dark:border-gray-700 pt-4">
                 <h2 className="text-md font-semibold mb-3 uppercase text-gray-500 tracking-wider text-xs">
                     {t('Similar_Items')}
                 </h2>
