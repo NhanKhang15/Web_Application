@@ -26,6 +26,9 @@ import { useNavigate, useParams, createSearchParams } from "react-router-dom";
 import { NAV_URL_MAPPING } from "../slidebar/lib/NAV_URL_MAPPING.js";
 import { auctionMenu } from "../slidebar/lib/auctionMenu.js";
 import { useTranslation } from "react-i18next";
+import PlatformUsers from "../trader/screens/PlatformUsers.jsx";
+import UserWallet from "../user_infor/screens/wallet/UserWallet.jsx";
+import UserChart from "../user_infor/screens/performance/UserChart.jsx";
 
 function EmptyPage({ title }) {
     const { t } = useTranslation();
@@ -192,9 +195,9 @@ export default function MerchantProfile() {
             case "file":
                 return <UserAttachment profile={profile} />;
             case "wallet":
-                return <><h2 className="text-xl font-semibold mb-4">{t('wallet_title')}</h2><div className="rounded-lg border border-neutral-200 dark:border-neutral-700 p-4"><p className="text-sm text-neutral-600 dark:text-neutral-400">{t('empty_state')}</p></div></>;
+                return <UserWallet profile={profile} />;
             case "chart":
-                return <><h2 className="text-xl font-semibold mb-4">{t('analytics_title')}</h2><div className="rounded-lg border border-neutral-200 dark:border-neutral-700 p-4"><p className="text-sm text-neutral-600 dark:text-neutral-400">{t('chart_demo')}</p></div></>;
+                return <UserChart profile={profile} />;
             default:
                 return <p className="text-sm text-neutral-500 dark:text-neutral-400">{t('select_sidebar_item')}</p>;
         }
@@ -285,6 +288,8 @@ export default function MerchantProfile() {
                             <CardShell variant="custom" plClass="pl-0 md:pl-[4%]" stickyTop={contentPadTop}><PostAuction /></CardShell>
                         ) : leftKey === "user" ? (
                             <CardShell subKey={activeSub} onSubChange={setActiveSub} plClass="pl-0 md:pl-[4%]" stickyTop={contentPadTop}>{renderSubPage()}</CardShell>
+                        ): leftKey === "trader" ? (
+                            <CardShell variant="custom" plClass="pl-0 md:pl-[4%]" stickyTop={contentPadTop}><PlatformUsers /></CardShell>
                         ) : leftKey === "settings" ? (
                             <CardShell plClass="pl-0 md:pl-[4%]" stickyTop={contentPadTop}><Settings /></CardShell>
                         ) : leftKey === "utils" ? (

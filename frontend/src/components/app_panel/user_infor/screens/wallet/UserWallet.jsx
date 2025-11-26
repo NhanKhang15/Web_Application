@@ -1,0 +1,77 @@
+// frontend/src/components/dashboard/user_infor/screens/wallet/UserWallet.jsx
+import React, { useEffect } from "react";
+import StatCard from "./StatCard.jsx";
+import { BsCreditCard } from "react-icons/bs";
+import { FaHandHoldingUsd } from "react-icons/fa";
+import { RiMoneyDollarCircleFill } from "react-icons/ri";
+import { IoLocationSharp, IoAnalyticsSharp } from "react-icons/io5";
+import Avatar from "../../../widget/screens/Avatar.jsx";
+import { motion } from "framer-motion";
+import AOS from "aos";
+import "aos/dist/aos.css";
+
+export default function UserWallet({ profile }) {
+    useEffect(() => {
+            AOS.init({ duration: 600, offset: 100, once: true });
+        }, []);
+    
+    return (
+        <div className="flex flex-col gap-12 pt-12 pb-8 relative w-full overflow-x-hidden">
+            {/* Header */}
+            <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                className="flex items-center gap-4 pl-2"
+                data-aos="fade-up"
+            >
+                <Avatar
+                    size={64}
+                    src={profile?.avatarUrl || "https://via.placeholder.com/64"}
+                    alt={profile?.fullName || "User"}
+                />
+                <div className="leading-tight">
+                    <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+                        {profile?.fullName || "Unknown User"}
+                    </h2>
+                    <p className="text-sm text-neutral-500">
+                        {profile?.location || profile?.address || "Location unknown"}
+                    </p>
+                </div>
+            </motion.div>
+
+            {/* Wallet Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10 pt-4">
+                
+                {/* Credit Limit */}
+                <StatCard
+                    label="Credit Limit"
+                    value="$50,000"
+                    icon={<BsCreditCard className="text-blue-500" />}
+                />
+
+                {/* Deposit Amount */}
+                <StatCard
+                    label="Deposit Amount"
+                    value="$40,250"
+                    icon={<FaHandHoldingUsd className="text-blue-500" />}
+                />
+
+                {/* Highest Bid Amount */}
+                <StatCard
+                    label="Highest Bid Amount"
+                    value="$154,300"
+                    icon={<RiMoneyDollarCircleFill className="text-red-500" />}
+                />
+
+                {/* Average Bid Price */}
+                <StatCard
+                    label="Average Bid Price"
+                    value="$12,450"
+                    icon={<IoAnalyticsSharp className="text-green-500" />}
+                />
+
+            </div>
+        </div>
+    );
+}
