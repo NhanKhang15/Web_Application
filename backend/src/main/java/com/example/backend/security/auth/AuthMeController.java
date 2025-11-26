@@ -29,7 +29,7 @@ public class AuthMeController {
 
   @GetMapping("/me")
   public ResponseEntity<?> me(Authentication authentication,
-                              @AuthenticationPrincipal Object principal) {
+      @AuthenticationPrincipal Object principal) {
     if (authentication == null || !authentication.isAuthenticated()) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
           .body(Map.of("success", false, "message", "Unauthorized"));
@@ -47,8 +47,10 @@ public class AuthMeController {
     if (principal instanceof OAuth2User ou) {
       var attr = ou.getAttributes();
       email = (String) attr.getOrDefault("email", null);
-      if (username == null) username = (String) attr.getOrDefault("name", null);
-      if (username == null && email != null) username = email;
+      if (username == null)
+        username = (String) attr.getOrDefault("name", null);
+      if (username == null && email != null)
+        username = email;
     }
     if (authentication instanceof OAuth2AuthenticationToken oat && email == null) {
       var attr = oat.getPrincipal().getAttributes();
@@ -76,7 +78,7 @@ public class AuthMeController {
         "userId", u.getUserId(),
         "username", u.getUsername(),
         "email", u.getEmail(),
-        "profileCompleted", completed
-    ));
+        "emailVerified", u.isEmailVerified(),
+        "profileCompleted", completed));
   }
 }

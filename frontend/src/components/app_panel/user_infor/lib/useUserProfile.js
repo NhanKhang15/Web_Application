@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import {
     getCurrentUser,
     getProfileByUserId,
-    upsertProfile,
+    updateMyProfile,
 } from "../../../auth/services/userprofile_api.js";
 
 // 👇 1. Import hàm upload từ file bạn vừa gửi (sửa đường dẫn cho đúng nơi bạn lưu file)
@@ -43,8 +43,6 @@ export function useUserProfile() {
     // 👇 2. Cập nhật hàm updateProfile để xử lý upload ảnh thật
     const updateProfile = async (updatedProfileData, fileImage) => {
         try {
-            if (!profile?.userId) throw new Error("User ID missing");
-
             // --- LOGIC MỚI: UPLOAD ẢNH ---
             if (fileImage) {
                 try {
@@ -65,16 +63,20 @@ export function useUserProfile() {
             // -----------------------------
 
             // Tiếp tục lưu thông tin (Tên, SDT, Bio và URL ảnh mới)
-            const data = await upsertProfile(profile.userId, updatedProfileData);
+            const data = await updateMyProfile(updatedProfileData);
 
             if (data?.success) {
-                const refreshed = await getProfileByUserId(profile.userId);
-                setProfile({
-                    userId: refreshed.user_id,
-                    username: refreshed.username,
-                    email: refreshed.email,
-                    ...refreshed.profile,
-                });
+                // Refresh profile data
+                const currentUser = getCurrentUser();
+                if (currentUser?.userId) {
+                    const refreshed = await getProfileByUserId(currentUser.userId);
+                     setProfile({
+                        userId: refreshed.user_id,
+                        username: refreshed.username,
+                        email: refreshed.email,
+                        ...refreshed.profile,
+                    });
+                }
             }
 
             return data;

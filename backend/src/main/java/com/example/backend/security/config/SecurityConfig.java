@@ -39,7 +39,7 @@ public class SecurityConfig {
             .requestMatchers("/oauth2/**", "/login/**").permitAll()
 
             // Local auth API (JWT trong body)
-            .requestMatchers(HttpMethod.POST, "/api/login", "/api/signup").permitAll()
+            .requestMatchers(HttpMethod.POST, "/api/login", "/api/signup", "/api/change-email").permitAll()
 
             // debug/test (dev)
             .requestMatchers("/api/test/**").permitAll()
