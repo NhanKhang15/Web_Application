@@ -33,7 +33,7 @@ const resources = {
                 {
                     titleWhite: "Accelerate, Elevate, and ",
                     titleRed: "Innovate!",
-                    description: "Bid on Dream Cars, Exotic Animals, and Cutting-Edge Electronics in Our Unique Auctions!",
+                    description: "Bid on Dream Cars, Rare Collectibles, and Cutting-Edge Electronics in Our Unique Auctions!",
                 },
                 {
                     titleWhite: "Discover Rare ",
@@ -65,12 +65,12 @@ const resources = {
                     highlights: ["Excellent Condition", "Original Papers"],
                 },
                 {
-                    titleWhite: "Exotic ",
-                    titleRed: "Animal Auction.",
+                    titleWhite: "Rare ",
+                    titleRed: "Collectibles.",
                     description:
-                        "Bid on rare and exotic animals, responsibly sourced with full documentation.",
-                    features: ["Unique Species", "Certified Health"],
-                    highlights: ["Rare Opportunity", "Exclusive Access"],
+                        "Discover unique historical artifacts, rare coins, and vintage items that tell a story.",
+                    features: ["Authenticated Items", "Historical Value"],
+                    highlights: ["Rare Finds", "Investment Potential"],
                 },
                 {
                     titleWhite: "High-End ",
@@ -82,7 +82,7 @@ const resources = {
                 },
             ],
 
-            categories: ["Car Auctions", "Animal Auctions", "Electronic Auctions", "Exotic Clothing Auction"],
+            categories: ["Car Auctions", "Collectibles", "Electronic Auctions", "Exotic Clothing Auction"],
 
             footer: {
                 terms: "Terms & Conditions",
@@ -446,7 +446,7 @@ const resources = {
                 {
                     titleWhite: "Tăng tốc, Nâng tầm và ",
                     titleRed: "Đổi mới!",
-                    description: "Đấu giá siêu xe, động vật quý hiếm và công nghệ tiên tiến ngay hôm nay!",
+                    description: "Đấu giá siêu xe, hàng sưu tầm quý hiếm và công nghệ tiên tiến ngay hôm nay!",
                 },
                 {
                     titleWhite: "Khám phá ",
@@ -478,12 +478,12 @@ const resources = {
                     highlights: ["Tình trạng xuất sắc", "Giấy tờ nguyên bản"],
                 },
                 {
-                    titleWhite: "Đấu giá ",
-                    titleRed: "Động vật quý hiếm.",
+                    titleWhite: "Hàng Sưu Tầm ",
+                    titleRed: "Quý Hiếm.",
                     description:
-                        "Đấu giá các loài độc đáo, nguồn gốc rõ ràng kèm chứng nhận sức khoẻ.",
-                    features: ["Loài độc nhất", "Chứng nhận sức khoẻ"],
-                    highlights: ["Cơ hội hiếm", "Quyền truy cập độc quyền"],
+                        "Khám phá các hiện vật lịch sử độc đáo, tiền xu cổ và các món đồ vintage mang đậm dấu ấn thời gian.",
+                    features: ["Vật phẩm đã xác thực", "Giá trị lịch sử"],
+                    highlights: ["Tìm kiếm hiếm có", "Tiềm năng đầu tư"],
                 },
                 {
                     titleWhite: "Thiết bị điện tử ",
@@ -495,7 +495,7 @@ const resources = {
                 },
             ],
 
-            categories: ["Đấu giá xe hơi", "Đấu giá động vật", "Đấu giá điện tử", "Đấu giá quần áo cao cấp"],
+            categories: ["Đấu giá xe hơi", "Hàng sưu tầm", "Đấu giá điện tử", "Đấu giá quần áo cao cấp"],
 
             footer: {
                 terms: "Điều khoản & Điều kiện",
