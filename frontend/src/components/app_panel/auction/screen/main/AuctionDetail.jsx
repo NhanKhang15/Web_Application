@@ -23,14 +23,21 @@ export default function AuctionDetail() {
     const { t } = useTranslation();
 
     const handleOpenChat = () => {
-        if (!currentUserId) {
-            alert("Vui lòng đăng nhập"); // Hoặc logic login modal
+        // 👇 SỬA: Kiểm tra dựa trên currentUser (đã fetch từ API)
+        if (!currentUser || !currentUser.userId) {
+            alert(t("please_login_to_chat") || "Vui lòng đăng nhập để chat");
             return;
         }
-        // Gọi widget global mở lên với thông tin người bán này
+
+        // 👇 Logic mở chat
+        // Lưu ý: Đảm bảo product.sellerId có dữ liệu
+        if (!product.sellerId) {
+            console.error("Missing sellerId for chat");
+            return;
+        }
+
         openChat(product.sellerId, product.sellerName, product.id, product.name);
     };
-
     const authHeaders = () => {
         const token = getToken();
         return token ? { 'Authorization': `Bearer ${token}` } : {};
