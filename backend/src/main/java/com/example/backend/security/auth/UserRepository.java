@@ -9,9 +9,13 @@ import org.springframework.data.repository.query.Param;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByUsername(String username);
+
     Optional<User> findByEmail(String email);
+
     Optional<User> findBySocialProviderAndSocialUID(User.SocialProvider sp, String uid);
+
     boolean existsByUsername(String username);
+
     boolean existsByEmail(String email);
 
     // xác định coi đả điền form chưa
