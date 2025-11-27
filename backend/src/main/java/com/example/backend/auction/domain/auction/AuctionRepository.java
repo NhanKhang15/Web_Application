@@ -127,6 +127,7 @@ public interface AuctionRepository extends JpaRepository<Auction, Integer> {
     @Query(value = """
                 SELECT
                     -- Item Info
+                    a.AuctionID AS auctionId,
                     ai.ItemID AS itemId,
                     ai.SellerID AS sellerId,
                     c.CategoryName AS categoryName,

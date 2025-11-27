@@ -11,14 +11,33 @@ import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
 import { getToken, API_BASE_URL } from "../../../../../lib/api_url.js";
 import AuctionInfo from "../../wid/componentDetail/AuctionInfo.jsx";
+import { useChat } from "../../../widget/screens/ChatContext.jsx";
 
 export default function AuctionDetail() {
+    const { openChat } = useChat();
+
     const { category, slug, itemSlug } = useParams();
     const realProductSlug = itemSlug || slug;
 
     const navigate = useNavigate();
     const { t } = useTranslation();
 
+    const handleOpenChat = () => {
+        // 👇 SỬA: Kiểm tra dựa trên currentUser (đã fetch từ API)
+        if (!currentUser || !currentUser.userId) {
+            alert(t("please_login_to_chat") || "Vui lòng đăng nhập để chat");
+            return;
+        }
+
+        // 👇 Logic mở chat
+        // Lưu ý: Đảm bảo product.sellerId có dữ liệu
+        if (!product.sellerId) {
+            console.error("Missing sellerId for chat");
+            return;
+        }
+
+        openChat(product.sellerId, product.sellerName, product.id, product.name);
+    };
     const authHeaders = () => {
         const token = getToken();
         return token ? { 'Authorization': `Bearer ${token}` } : {};
@@ -337,6 +356,26 @@ export default function AuctionDetail() {
                 <div className="lg:col-span-5 relative">
                     {/* Sticky Wrapper: Giữ cho cột phải chạy theo khi cuộn */}
                     <div className="sticky top-6">
+                        {!isOwner && (
+                            <div className="bg-white dark:bg-[#14191F] rounded-xl p-4 mb-4 shadow-sm border border-gray-200 dark:border-gray-800 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold text-gray-600">
+                                        {product.sellerName?.charAt(0)}
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-gray-500">Người bán</p>
+                                        <p className="font-bold text-sm">{product.sellerName}</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={handleOpenChat}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
+                                >
+                                    Chat ngay
+                                </button>
+                            </div>
+                        )}
+
                         {/* AuctionBidPanel đã bao gồm: Giá, Bid Input, Lịch sử, Shipping */}
                         <AuctionBidPanel
                             product={product}
