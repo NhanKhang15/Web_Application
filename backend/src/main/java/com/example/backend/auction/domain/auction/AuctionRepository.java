@@ -19,6 +19,9 @@ import jakarta.persistence.LockModeType;
 @Repository
 public interface AuctionRepository extends JpaRepository<Auction, Integer> {
 
+    List<Auction> findAllByStatusAndEndDateBefore(com.example.backend.auction.domain.item.AuctionStatus status,
+            java.time.LocalDateTime endDate);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT a FROM Auction a WHERE a.auctionID = :id")
     Optional<Auction> findByIdForUpdate(@Param("id") Integer id);
@@ -165,50 +168,47 @@ public interface AuctionRepository extends JpaRepository<Auction, Integer> {
     Optional<AuctionDetailProjection> findDetailBySlug(@Param("slug") String slug);
 
     @Query(value = """
-        SELECT 
-            a.AuctionID AS auctionId, 
-            i.ItemID AS itemId, 
-            i.SellerID AS sellerId,
-            a.CurrentPrice AS currentPrice, 
-            a.BuyNowPrice AS buyNowPrice, 
-            i.Title AS title, 
-            i.Thumbnail AS thumbnail, 
-            i.Slug AS slug, 
-            a.StartingPrice AS startingPrice, 
-            a.StartDate AS startDate, 
-            a.EndDate AS endDate, 
-            a.Status AS status, 
-            i.CategoryID AS categoryId, 
-            i.Location AS location, 
-            a.CreatedAt AS createdAt,
-            a.MinStep AS minStep
-        FROM Auctions a 
-        JOIN AuctionItems i ON a.ItemID = i.ItemID 
-        WHERE a.Status = 'Open' 
-        AND (
-            LOWER(i.Title) LIKE LOWER(CONCAT('%', :keyword, '%')) 
-            OR LOWER(:keyword) LIKE LOWER(CONCAT('%', i.Title, '%'))
-        )
-        AND (:minPrice IS NULL OR a.CurrentPrice >= :minPrice)
-        AND (:maxPrice IS NULL OR a.CurrentPrice <= :maxPrice)
-        AND (:ownerId IS NULL OR i.SellerID = :ownerId)
-        """,
-            countQuery = """
-        SELECT COUNT(*) FROM Auctions a 
-        JOIN AuctionItems i ON a.ItemID = i.ItemID 
-        WHERE a.Status = 'Open' 
-        AND (LOWER(i.Title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(:keyword) LIKE LOWER(CONCAT('%', i.Title, '%')))
-        AND (:minPrice IS NULL OR a.CurrentPrice >= :minPrice)
-        AND (:maxPrice IS NULL OR a.CurrentPrice <= :maxPrice)
-        """,
-            nativeQuery = true)
+            SELECT
+                a.AuctionID AS auctionId,
+                i.ItemID AS itemId,
+                i.SellerID AS sellerId,
+                a.CurrentPrice AS currentPrice,
+                a.BuyNowPrice AS buyNowPrice,
+                i.Title AS title,
+                i.Thumbnail AS thumbnail,
+                i.Slug AS slug,
+                a.StartingPrice AS startingPrice,
+                a.StartDate AS startDate,
+                a.EndDate AS endDate,
+                a.Status AS status,
+                i.CategoryID AS categoryId,
+                i.Location AS location,
+                a.CreatedAt AS createdAt,
+                a.MinStep AS minStep
+            FROM Auctions a
+            JOIN AuctionItems i ON a.ItemID = i.ItemID
+            WHERE a.Status = 'Open'
+            AND (
+                LOWER(i.Title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                OR LOWER(:keyword) LIKE LOWER(CONCAT('%', i.Title, '%'))
+            )
+            AND (:minPrice IS NULL OR a.CurrentPrice >= :minPrice)
+            AND (:maxPrice IS NULL OR a.CurrentPrice <= :maxPrice)
+            AND (:ownerId IS NULL OR i.SellerID = :ownerId)
+            """, countQuery = """
+            SELECT COUNT(*) FROM Auctions a
+            JOIN AuctionItems i ON a.ItemID = i.ItemID
+            WHERE a.Status = 'Open'
+            AND (LOWER(i.Title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(:keyword) LIKE LOWER(CONCAT('%', i.Title, '%')))
+            AND (:minPrice IS NULL OR a.CurrentPrice >= :minPrice)
+            AND (:maxPrice IS NULL OR a.CurrentPrice <= :maxPrice)
+            """, nativeQuery = true)
     Page<AuctionDto> searchAuctionsAdvanced(
             @Param("keyword") String keyword,
             @Param("minPrice") Double minPrice,
             @Param("maxPrice") Double maxPrice,
             @Param("ownerId") Integer ownerId,
-            Pageable pageable
-    );
+            Pageable pageable);
 
     @org.springframework.transaction.annotation.Transactional
     @org.springframework.data.jpa.repository.Modifying
