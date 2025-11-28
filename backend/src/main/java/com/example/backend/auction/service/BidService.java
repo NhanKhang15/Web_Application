@@ -24,13 +24,16 @@ public class BidService {
     private final BidRepository bidRepository;
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final org.springframework.context.ApplicationEventPublisher eventPublisher;
 
     public BidService(AuctionRepository auctionRepository, BidRepository bidRepository, UserRepository userRepository,
-            SimpMessagingTemplate messagingTemplate) {
+            SimpMessagingTemplate messagingTemplate,
+            org.springframework.context.ApplicationEventPublisher eventPublisher) {
         this.auctionRepository = auctionRepository;
         this.bidRepository = bidRepository;
         this.userRepository = userRepository;
         this.messagingTemplate = messagingTemplate;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -93,6 +96,9 @@ public class BidService {
                 bidder.getUserId(),
                 bidder.getUsername());
         messagingTemplate.convertAndSend("/topic/auctions/" + auction.getAuctionID(), event);
+
+        // 5. Publish BidPlacedEvent (Async email)
+        eventPublisher.publishEvent(new com.example.backend.event.BidPlacedEvent(this, bid.getBidID()));
 
         return BidResult.success(bid);
     }

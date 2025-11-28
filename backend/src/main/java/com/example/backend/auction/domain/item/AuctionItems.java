@@ -2,6 +2,8 @@ package com.example.backend.auction.domain.item;
 
 import java.time.LocalDateTime;
 
+import com.example.backend.security.auth.User;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,6 +22,10 @@ public class AuctionItems {
 
     @Column(name = "SellerID", nullable = false)
     private Integer sellerId;
+
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "SellerID", insertable = false, updatable = false)
+    private User seller;
 
     @Column(name = "CategoryID", nullable = false)
     private Integer categoryId;
@@ -63,6 +69,14 @@ public class AuctionItems {
 
     public void setSellerId(Integer sellerId) {
         this.sellerId = sellerId;
+    }
+
+    public User getSeller() {
+        return seller;
+    }
+
+    public void setSeller(User seller) {
+        this.seller = seller;
     }
 
     public Integer getCategoryId() {
