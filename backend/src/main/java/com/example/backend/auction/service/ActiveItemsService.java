@@ -118,14 +118,24 @@ public class    ActiveItemsService {
         if (keyword == null || keyword.trim().isEmpty()) {
             return Page.empty(pageable);
         }
-        String defaultFrom = "2000-01-01 00:00:00";
-        String defaultTo = "2099-12-31 23:59:59";
 
         // Gọi repository để tìm kiếm theo title
         if (pageable.getSort().isUnsorted()) {
             pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
                     Sort.by(Sort.Direction.DESC, "startDate"));
         }
-        return auctionRepo.searchAuctionsByTitle(defaultFrom, defaultTo, keyword.trim(), pageable);
+        return auctionRepo.searchAuctionsAdvanced(keyword.trim(), null, null, null, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<AuctionDto> searchAuctionsAdvanced(String keyword, Double minPrice, Double maxPrice, Integer ownerId, Pageable pageable) {
+        if (keyword == null) keyword = "";
+
+        if (pageable.getSort().isUnsorted()) {
+            // 👇 Sửa "CurrentPrice" thành "currentPrice" cho khớp với alias trong DTO/Query
+            pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("currentPrice").ascending());
+        }
+
+        return auctionRepo.searchAuctionsAdvanced(keyword.trim(), minPrice, maxPrice, ownerId, pageable);
     }
 }

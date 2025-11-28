@@ -36,4 +36,7 @@ public interface AuctionDto {
 
     LocalDateTime getCreatedAt();
 
+    BigDecimal getMinStep();
+
+    Integer getSellerId();
 }
