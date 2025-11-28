@@ -20,16 +20,14 @@ import AuctionView from "../auction/screen/main/AuctionView.jsx";
 import Settings from "../settings/Settings.jsx";
 import Utilities from "../utils/Utilities.jsx";
 import AboutUs from "../about/AboutUs.jsx";
-import CalculatorWidget from "../widget/screens/CalculatorWidget.jsx";
-// 👇 Đã bỏ import searchAuction vì không dùng nữa
 import { SearchDropdown } from "../widget/screens/searchAuction.jsx";
 import PostAuction from "../postAuction/screen/PostAuction.jsx";
 import {useNavigate, useParams, createSearchParams} from "react-router-dom";
 import { ChatProvider } from "../widget/screens/ChatContext.jsx";
-import SellerChatWidget from "../widget/screens/SellerChatWidget.jsx";
 import {NAV_URL_MAPPING} from "../slidebar/lib/NAV_URL_MAPPING.js";
 import { auctionMenu } from "../slidebar/lib/auctionMenu.js";
 import { useTranslation } from "react-i18next";
+import UtilityMenu from "../widget/screens/UtilityMenu.jsx";
 
 function EmptyPage({ title }) {
     const { t } = useTranslation();
@@ -303,9 +301,7 @@ export default function MerchantProfile() {
                     </main>
                 </div>
 
-                <SellerChatWidget currentUserId={profile?.userId} />
-
-                <CalculatorWidget />
+                <UtilityMenu currentUserId={profile?.userId} />
 
                 <style>{`
                     ::-webkit-scrollbar {
