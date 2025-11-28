@@ -12,36 +12,18 @@ import { Stomp } from '@stomp/stompjs';
 import { getToken, API_BASE_URL } from "../../../../../lib/api_url.js";
 import AuctionInfo from "../../wid/componentDetail/AuctionInfo.jsx";
 import { useChat } from "../../../widget/screens/ChatContext.jsx";
+import {useUserProfile} from "../../../user_infor/lib/useUserProfile.js";
 
 export default function AuctionDetail() {
     const { openChat } = useChat();
+
+    const { profile: currentUser } = useUserProfile();
 
     const { category, slug, itemSlug } = useParams();
     const realProductSlug = itemSlug || slug;
 
     const navigate = useNavigate();
     const { t } = useTranslation();
-
-    const handleOpenChat = () => {
-        // 👇 SỬA: Kiểm tra dựa trên currentUser (đã fetch từ API)
-        if (!currentUser || !currentUser.userId) {
-            alert(t("please_login_to_chat") || "Vui lòng đăng nhập để chat");
-            return;
-        }
-
-        // 👇 Logic mở chat
-        // Lưu ý: Đảm bảo product.sellerId có dữ liệu
-        if (!product.sellerId) {
-            console.error("Missing sellerId for chat");
-            return;
-        }
-
-        openChat(product.sellerId, product.sellerName, product.id, product.name);
-    };
-    const authHeaders = () => {
-        const token = getToken();
-        return token ? { 'Authorization': `Bearer ${token}` } : {};
-    };
 
     // --- State ---
     const [raw, setRaw] = useState(null);
@@ -52,6 +34,39 @@ export default function AuctionDetail() {
 
     const [categories, setCategories] = useState({});
     const [similarItems, setSimilarItems] = useState([]);
+
+    const handleOpenChat = () => {
+        if (!currentUser || !currentUser.userId) {
+            alert(t("please_login_to_chat") || "Vui lòng đăng nhập để chat");
+            // Có thể thêm navigate("/login") nếu muốn
+            return;
+        }
+
+        if (String(currentUser.userId) === String(product.sellerId)) {
+            alert("Bạn không thể chat với chính mình!");
+            return;
+        }
+
+        if (!product.sellerId) {
+            console.error("Missing sellerId for chat");
+            return;
+        }
+
+        console.log("Mở chat với:", product.sellerName, "ID:", product.sellerId);
+
+        // Gọi hàm từ Context để set state mở chat
+        openChat(
+            product.sellerId,
+            product.sellerName,
+            product.auctionId || product.id,
+            product.name
+        );
+    };
+
+    const authHeaders = () => {
+        const token = getToken();
+        return token ? { 'Authorization': `Bearer ${token}` } : {};
+    };
 
     // Tự động cuộn lên đầu trang mỗi khi slug thay đổi (chuyển sang sản phẩm khác)
     useEffect(() => {
@@ -260,7 +275,7 @@ export default function AuctionDetail() {
     }, [product?.name]);
 
     // ====== User Check ======
-    const [currentUser, setCurrentUser] = useState(null);
+    const [setCurrentUser] = useState(null);
 
     useEffect(() => {
         const fetchUser = async () => {
