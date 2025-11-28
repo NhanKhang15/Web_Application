@@ -59,6 +59,12 @@ public class Auction {
     @Column(name = "CurrentHighestBidId")
     private Integer currentHighestBidId;
 
+    @Column(name = "CreatedAt", insertable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "UpdatedAt", insertable = false, updatable = false)
+    private LocalDateTime updatedAt;
+
     // getters/setters
     public Integer getCurrentHighestBidId() {
         return currentHighestBidId;
@@ -142,5 +148,21 @@ public class Auction {
 
     public void setEndDate(LocalDateTime endDate) {
         this.endDate = endDate;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

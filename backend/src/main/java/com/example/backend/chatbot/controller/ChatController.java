@@ -19,7 +19,8 @@ public class ChatController {
 
     @PostMapping("/message")
     public ResponseEntity<ChatResponse> chat(@RequestBody ChatRequest request) {
-        String response = chatbotService.processUserMessage(request.getMessage());
+        // 👇 Truyền cả object request (có chứa history) vào service
+        String response = chatbotService.processUserMessage(request);
         return ResponseEntity.ok(new ChatResponse(response));
     }
 }
