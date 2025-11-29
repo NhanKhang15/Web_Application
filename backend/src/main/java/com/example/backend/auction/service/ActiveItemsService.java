@@ -38,11 +38,40 @@ public class    ActiveItemsService {
     }
 
     @Transactional(readOnly = true)
-    public Page<AuctionDto> listActiveAuctions(Pageable pageable) {
+    public Page<AuctionDto> listActiveAuctions(
+            Pageable pageable,
+            List<String> categories,
+            List<String> locations,
+            String from,
+            String to,
+            Boolean negotiated
+    ) {
         if (pageable.getSort().isUnsorted()) {
             pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
                     Sort.by(Sort.Direction.DESC, "endDate"));
         }
+
+        // ⭐ XỬ LÝ QUAN TRỌNG: Chuyển List rỗng thành NULL
+        // Vì SQL Native Query sẽ lỗi nếu dùng IN () với List rỗng.
+        List<String> safeCategories = (categories != null && !categories.isEmpty()) ? categories : null;
+        List<String> safeLocations = (locations != null && !locations.isEmpty()) ? locations : null;
+
+        // Kiểm tra xem có cần gọi Query lọc tổng hợp hay không
+        boolean hasFilter = safeCategories != null || safeLocations != null || from != null || to != null || negotiated != null;
+
+        if (hasFilter) {
+            // GỌI HÀM REPOSITORY MỚI
+            return auctionRepo.findActiveAuctionsFiltered(
+                    safeCategories,
+                    safeLocations,
+                    from,
+                    to,
+                    negotiated,
+                    pageable
+            );
+        }
+
+        // Nếu không có bộ lọc nào, chạy query mặc định (nhanh hơn)
         return auctionRepo.findAuctionsByStatus("Open", pageable);
     }
 
