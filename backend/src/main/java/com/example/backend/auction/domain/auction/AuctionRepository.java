@@ -210,6 +210,64 @@ public interface AuctionRepository extends JpaRepository<Auction, Integer> {
             @Param("ownerId") Integer ownerId,
             Pageable pageable);
 
+    @Query(value = """
+        SELECT
+            a.AuctionID AS auctionId,
+            a.ItemID AS itemId,
+            a.CurrentPrice AS currentPrice,
+            a.BuyNowPrice AS buyNowPrice,
+            a.StartingPrice AS startingPrice,
+            a.StartDate AS startDate,
+            a.EndDate AS endDate,
+            a.Status AS status,
+            ai.Title AS title,
+            ai.Slug AS slug,
+            COALESCE(img.ImgUrl, ai.Thumbnail) AS thumbnail,
+            u.Username AS sellerName,
+            ai.CategoryID AS categoryId,
+            c.CategoryName AS categoryName,
+            ai.Location AS location,
+            a.CreatedAt AS createdAt
+        FROM Auctions a
+        JOIN AuctionItems ai ON a.ItemID = ai.ItemID
+        JOIN Users u ON ai.SellerID = u.UserID
+        JOIN Categories c ON ai.CategoryID = c.CategoryID
+        LEFT JOIN ItemImages img ON ai.ItemID = img.ItemID AND img.IsMain = 1
+        WHERE a.Status = 'Open'
+            -- 1. SỬA LẠI: Dùng SpEL để check null cho List Categories
+            AND ( :#{#categories == null} = true OR c.CategoryName IN (:#{#categories}) )
+            
+            -- 2. SỬA LẠI: Dùng SpEL để check null cho List Locations
+            AND ( :#{#locations == null} = true OR ai.Location IN (:#{#locations}) )
+            
+            -- 3. Date Range (Giữ nguyên, vì tham số String đơn check IS NULL vẫn ổn)
+            AND (:fromDate IS NULL OR a.StartDate >= CAST(:fromDate AS DATETIME))
+            AND (:toDate IS NULL OR a.StartDate <= CAST(:toDate AS DATETIME))
+            
+            -- 4. Negotiated
+            AND (:negotiated IS NULL OR :negotiated IS NULL) -- (Logic tạm nếu chưa có cột DB)
+            
+        """,
+            countQuery = """
+        SELECT COUNT(a.AuctionID)
+        FROM Auctions a
+        JOIN AuctionItems ai ON a.ItemID = ai.ItemID
+        JOIN Categories c ON ai.CategoryID = c.CategoryID
+        WHERE a.Status = 'Open'
+            AND ( :#{#categories == null} = true OR c.CategoryName IN (:#{#categories}) )
+            AND ( :#{#locations == null} = true OR ai.Location IN (:#{#locations}) )
+            AND (:fromDate IS NULL OR a.StartDate >= CAST(:fromDate AS DATETIME))
+            AND (:toDate IS NULL OR a.StartDate <= CAST(:toDate AS DATETIME))
+        """, nativeQuery = true)
+    Page<AuctionDto> findActiveAuctionsFiltered(
+            @Param("categories") List<String> categories,
+            @Param("locations") List<String> locations,
+            @Param("fromDate") String fromDate,
+            @Param("toDate") String toDate,
+            @Param("negotiated") Boolean negotiated,
+            Pageable pageable
+    );
+
     @org.springframework.transaction.annotation.Transactional
     @org.springframework.data.jpa.repository.Modifying
     @Query(value = "UPDATE Auctions SET Status = 'Open' WHERE Status = 'Scheduled' AND StartDate <= CURRENT_TIMESTAMP", nativeQuery = true)

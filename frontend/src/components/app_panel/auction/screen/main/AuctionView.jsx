@@ -1,23 +1,18 @@
-import React, { useMemo, useState, useEffect } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import {
-    CalendarDays,
-    Filter,
-    ArrowLeft,
-    Construction,
-} from "lucide-react";
+import React, {useEffect, useMemo, useState} from "react";
+import {useNavigate, useParams, useSearchParams} from "react-router-dom";
+import {ArrowLeft, CalendarDays, Construction, Filter,} from "lucide-react";
 import FilterSheet from "../../wid/FilterSheet.jsx";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import AuctionDetail from "./AuctionDetail.jsx";
-import { fetchAuctionItems } from "../../lib/auctionItems.js";
-import { auctionMenu } from "../../../slidebar/lib/auctionMenu.js";
+import {fetchAuctionItems} from "../../lib/auctionItems.js";
+import {auctionMenu} from "../../../slidebar/lib/auctionMenu.js";
 
 import DashboardStats from "../../wid/componentView/DashboardStats.jsx";
 import AuctionToolbar from "../../wid/componentView/AuctionToolbar.jsx";
 import AuctionGrid from "../../wid/componentView/AuctionGrid.jsx";
-import { useTranslation } from "react-i18next";
-import { getJSON } from "../../../../../lib/api_url.js";
+import {useTranslation} from "react-i18next";
+import {getJSON} from "../../../../../lib/api_url.js";
 
 export default function AuctionView() {
     const { t } = useTranslation();
@@ -135,34 +130,36 @@ export default function AuctionView() {
                 try {
                     let res;
 
+                    // Chuẩn bị Date/Time
                     const fromStr = combineDateTime(appliedFilters.dateFrom, appliedFilters.timeFrom, false);
                     const toStr = combineDateTime(appliedFilters.dateTo, appliedFilters.timeTo, true);
 
-                    // Tạo query params cho Date
-                    let dateQuery = "";
-                    if (fromStr) {
-                        dateQuery += `&from=${encodeURIComponent(fromStr)}`;
-                    }
-                    if (toStr) {
-                        dateQuery += `&to=${encodeURIComponent(toStr)}`;
-                    }
+                    // TẠO OBJECT CHỨA TẤT CẢ FILTERS
+                    const filterParams = {
+                        categories: appliedFilters.categories, // Set<string>
+                        branches: appliedFilters.branches,     // Set<string>
+                        dateFrom: fromStr,
+                        dateTo: toStr,
+                        negotiated: appliedFilters.negotiated,
+                        // size: 16, // fetchAuctionItems đã có default 16
+                    };
+
 
                     // CASE A: TÌM KIẾM (Có keyword -> Gọi API Search mới có phân trang)
                     if (keyword) {
+                        // API Search của bạn chưa hỗ trợ lọc nâng cao, giữ nguyên như cũ
                         const path = `/api/auctions/search?keyword=${encodeURIComponent(keyword)}&page=${pageParam}&size=16&sort=${apiSort}`;
                         res = await getJSON(path);
                     }
-                    // CASE B: DANH SÁCH THƯỜNG
+                    // CASE B: DANH SÁCH THƯỜNG (SỬ DỤNG HÀM MỚI VÀ GỬI FILTER)
                     else {
-                        let path = `/api/auctions/active?page=${pageParam}&size=16&sort=${apiSort}`;
-                        // Nối thêm param date
-                        path += dateQuery;
-
-                        // Nếu có lọc category (nhưng logic backend ở trên tôi chưa handle filter category + date cùng lúc, bạn tự bổ sung nhé)
-                        // if (categoryId) path += `&categoryId=${categoryId}`;
-
-                        res = await getJSON(path);
+                        res = await fetchAuctionItems({
+                            page: pageParam,
+                            sort: apiSort,
+                            filters: filterParams // <-- QUAN TRỌNG: GỬI TẤT CẢ FILTERS
+                        });
                     }
+
                     if (!cancelled) setData(res);
                 } catch (e) {
                     if (!cancelled) setError(e?.message || "Failed to load items");
@@ -177,19 +174,8 @@ export default function AuctionView() {
 
     // 5. LỌC CLIENT-SIDE (Kết hợp với kết quả từ Server)
     const list = useMemo(() => {
-        let content = data?.content || [];
-
-        // Lọc theo Branch (Lấy từ URL filters)
-        if (appliedFilters.branches?.size > 0) {
-            content = content.filter((x) => x.location && appliedFilters.branches.has(x.location));
-        }
-        // Lọc theo Category
-        if (appliedFilters.categories?.size > 0) {
-            content = content.filter((x) => x.categoryName && appliedFilters.categories.has(x.categoryName));
-        }
-
-        return content;
-    }, [data, appliedFilters]);
+        return data?.content || [];
+    }, [data]);
 
     // Refresh AOS
     useEffect(() => {
