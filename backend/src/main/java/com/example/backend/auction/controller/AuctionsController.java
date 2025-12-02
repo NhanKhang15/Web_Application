@@ -36,10 +36,13 @@ public class AuctionsController {
     @GetMapping("/active")
     public ResponseEntity<Page<AuctionDto>> getActiveList(
             Pageable pageable,
-            @RequestParam(required = false) Integer categoryId,
+            @RequestParam(required = false) List<String> category, // Cần List<String>
+            @RequestParam(required = false) List<String> location, // Cần List<String>
             @RequestParam(required = false) String from,
-            @RequestParam(required = false) String to) {
-        return ResponseEntity.ok(service.listActiveAuctions(pageable));
+            @RequestParam(required = false) String to,
+            @RequestParam(required = false) Boolean negotiated
+    ) {
+        return ResponseEntity.ok(service.listActiveAuctions(pageable, category, location, from, to, negotiated));
     }
 
     // API 2: Xem danh sách đả kết thúc

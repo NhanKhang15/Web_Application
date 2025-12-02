@@ -27,6 +27,7 @@ export function useUserProfile() {
                         userId: data.user_id,
                         username: data.username,
                         email: data.email,
+                        emailVerified: data.emailVerified,
                         ...data.profile,
                     });
                 }
@@ -74,6 +75,7 @@ export function useUserProfile() {
                         userId: refreshed.user_id,
                         username: refreshed.username,
                         email: refreshed.email,
+                        emailVerified: refreshed.emailVerified,
                         ...refreshed.profile,
                     });
                 }

@@ -11,18 +11,19 @@ import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
 import { getToken, API_BASE_URL } from "../../../../../lib/api_url.js";
 import AuctionInfo from "../../wid/componentDetail/AuctionInfo.jsx";
+import { useChat } from "../../../widget/screens/ChatContext.jsx";
+import {useUserProfile} from "../../../user_infor/lib/useUserProfile.js";
 
 export default function AuctionDetail() {
+    const { openChat } = useChat();
+
+    const { profile: currentUser } = useUserProfile();
+
     const { category, slug, itemSlug } = useParams();
     const realProductSlug = itemSlug || slug;
 
     const navigate = useNavigate();
     const { t } = useTranslation();
-
-    const authHeaders = () => {
-        const token = getToken();
-        return token ? { 'Authorization': `Bearer ${token}` } : {};
-    };
 
     // --- State ---
     const [raw, setRaw] = useState(null);
@@ -33,6 +34,39 @@ export default function AuctionDetail() {
 
     const [categories, setCategories] = useState({});
     const [similarItems, setSimilarItems] = useState([]);
+
+    const handleOpenChat = () => {
+        if (!currentUser || !currentUser.userId) {
+            alert(t("please_login_to_chat") || "Vui lòng đăng nhập để chat");
+            // Có thể thêm navigate("/login") nếu muốn
+            return;
+        }
+
+        if (String(currentUser.userId) === String(product.sellerId)) {
+            alert("Bạn không thể chat với chính mình!");
+            return;
+        }
+
+        if (!product.sellerId) {
+            console.error("Missing sellerId for chat");
+            return;
+        }
+
+        console.log("Mở chat với:", product.sellerName, "ID:", product.sellerId);
+
+        // Gọi hàm từ Context để set state mở chat
+        openChat(
+            product.sellerId,
+            product.sellerName,
+            product.auctionId || product.id,
+            product.name
+        );
+    };
+
+    const authHeaders = () => {
+        const token = getToken();
+        return token ? { 'Authorization': `Bearer ${token}` } : {};
+    };
 
     // Tự động cuộn lên đầu trang mỗi khi slug thay đổi (chuyển sang sản phẩm khác)
     useEffect(() => {
@@ -241,7 +275,7 @@ export default function AuctionDetail() {
     }, [product?.name]);
 
     // ====== User Check ======
-    const [currentUser, setCurrentUser] = useState(null);
+    const [setCurrentUser] = useState(null);
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -337,6 +371,26 @@ export default function AuctionDetail() {
                 <div className="lg:col-span-5 relative">
                     {/* Sticky Wrapper: Giữ cho cột phải chạy theo khi cuộn */}
                     <div className="sticky top-6">
+                        {!isOwner && (
+                            <div className="bg-white dark:bg-[#14191F] rounded-xl p-4 mb-4 shadow-sm border border-gray-200 dark:border-gray-800 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold text-gray-600">
+                                        {product.sellerName?.charAt(0)}
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-gray-500">Người bán</p>
+                                        <p className="font-bold text-sm">{product.sellerName}</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={handleOpenChat}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
+                                >
+                                    Chat ngay
+                                </button>
+                            </div>
+                        )}
+
                         {/* AuctionBidPanel đã bao gồm: Giá, Bid Input, Lịch sử, Shipping */}
                         <AuctionBidPanel
                             product={product}
