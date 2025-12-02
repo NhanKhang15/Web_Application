@@ -59,12 +59,14 @@ export default function InfoCardBody({ profile }) {
                 <div className="flex flex-col gap-6">
                     <InfoField label={t("email")} value={profile.email} />
                     <div className="flex items-center gap-4">
-                        <button
-                            onClick={() => navigate("/verify-email")}
-                            className="px-4 py-2 text-sm font-medium text-white bg-[#E43137] rounded-md hover:bg-[#c92b30] transition-colors"
-                        >
-                            Verify Email
-                        </button>
+                        {!profile.emailVerified && (
+                            <button
+                                onClick={() => navigate("/verify-email")}
+                                className="px-4 py-2 text-sm font-medium text-white bg-[#E43137] rounded-md hover:bg-[#c92b30] transition-colors"
+                            >
+                                Verify Email
+                            </button>
+                        )}
                     </div>
                     <InfoField label={t("bio")} value={profile.bio} />
                 </div>
