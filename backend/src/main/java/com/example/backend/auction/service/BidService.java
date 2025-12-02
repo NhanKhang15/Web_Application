@@ -15,11 +15,19 @@ import com.example.backend.auction.domain.auction.dto.BidResult;
 import com.example.backend.auction.domain.item.AuctionStatus;
 import com.example.backend.auction.event.AuctionUpdatedEvent;
 import com.example.backend.security.auth.User;
-import com.example.backend.security.auth.UserRepository; // Need to find where UserRepository is
+import com.example.backend.security.auth.UserRepository;
+import com.example.backend.payment.repository.WalletRepository;
+import com.example.backend.payment.repository.WalletTransactionRepository;
+import com.example.backend.payment.entity.Wallet;
+import com.example.backend.payment.entity.WalletTransaction;
+import com.example.backend.payment.entity.TransactionType;
+import com.example.backend.payment.entity.Direction;
 
 @Service
 public class BidService {
 
+    private final WalletRepository walletRepository;
+    private final WalletTransactionRepository walletTransactionRepository;
     private final AuctionRepository auctionRepository;
     private final BidRepository bidRepository;
     private final UserRepository userRepository;
@@ -28,12 +36,16 @@ public class BidService {
 
     public BidService(AuctionRepository auctionRepository, BidRepository bidRepository, UserRepository userRepository,
             SimpMessagingTemplate messagingTemplate,
-            org.springframework.context.ApplicationEventPublisher eventPublisher) {
+            org.springframework.context.ApplicationEventPublisher eventPublisher,
+            WalletRepository walletRepository,
+            WalletTransactionRepository walletTransactionRepository) {
         this.auctionRepository = auctionRepository;
         this.bidRepository = bidRepository;
         this.userRepository = userRepository;
         this.messagingTemplate = messagingTemplate;
         this.eventPublisher = eventPublisher;
+        this.walletRepository = walletRepository;
+        this.walletTransactionRepository = walletTransactionRepository;
     }
 
     @Transactional
@@ -51,16 +63,6 @@ public class BidService {
 
         // Check amount
         BigDecimal minNextBid = auction.getCurrentPrice().add(auction.getMinStep());
-        // If current price is starting price and no bids yet, maybe logic differs?
-        // But usually current price starts at starting price.
-        // If no bids, first bid must be >= starting price.
-        // The logic in pseudocode: minNextBid = currentPrice + minIncrement.
-        // If currentPrice is 0 (init), trigger sets it to StartingPrice.
-        // So if StartingPrice 100, MinStep 10. CurrentPrice 100. MinNextBid 110.
-        // Wait, if no one bid yet, can I bid 100?
-        // Usually yes.
-        // Let's check if there are any bids.
-        // If currentHighestBidId is null, it means no bids.
 
         if (auction.getCurrentHighestBidId() == null) {
             // No bids yet. Must be >= StartingPrice.
@@ -75,6 +77,49 @@ public class BidService {
 
         User bidder = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // --- Wallet Logic Start ---
+        Wallet wallet = walletRepository.findByUser_UserId(userId)
+                .orElseThrow(() -> new RuntimeException("Wallet not found for user"));
+
+        // Calculate amount to deduct (Differential logic)
+        BigDecimal amountToDeduct = amount;
+        java.util.Optional<Bid> previousBidOpt = bidRepository
+                .findTopByAuction_AuctionIDAndBidder_UserIdOrderByBidAmountDesc(auctionId, userId);
+
+        if (previousBidOpt.isPresent()) {
+            BigDecimal previousMaxBid = previousBidOpt.get().getBidAmount();
+            if (amount.compareTo(previousMaxBid) > 0) {
+                amountToDeduct = amount.subtract(previousMaxBid);
+            } else {
+                // New bid is lower or equal to previous max bid?
+                // Logic says we shouldn't be here if validation passed (minNextBid check).
+                // But if for some reason it happens, we deduct 0 or handle it.
+                // Assuming standard flow, new bid > previous max bid.
+                amountToDeduct = BigDecimal.ZERO;
+            }
+        }
+
+        if (amountToDeduct.compareTo(BigDecimal.ZERO) > 0) {
+            if (wallet.getBalance().compareTo(amountToDeduct) < 0) {
+                return BidResult.failed("Insufficient wallet balance to cover the bid increase");
+            }
+
+            // Deduct balance
+            wallet.setBalance(wallet.getBalance().subtract(amountToDeduct));
+            walletRepository.save(wallet);
+
+            // Create Transaction
+            WalletTransaction transaction = new WalletTransaction();
+            transaction.setUser(bidder);
+            transaction.setAmount(amountToDeduct);
+            transaction.setType(TransactionType.BID_FREEZE);
+            transaction.setDirection(Direction.OUT);
+            transaction.setRelatedAuction(auction);
+            transaction.setNote("Bid placed on auction " + auctionId + " (Deducted: " + amountToDeduct + ")");
+            walletTransactionRepository.save(transaction);
+        }
+        // --- Wallet Logic End ---
 
         // 2. Save bid
         Bid bid = new Bid();
