@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 import com.example.backend.auction.domain.item.AuctionItems;
 import com.example.backend.auction.domain.item.AuctionStatus;
+import com.example.backend.security.auth.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -59,6 +60,19 @@ public class Auction {
     @Column(name = "CurrentHighestBidId")
     private Integer currentHighestBidId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "WinnerID")
+    private User winner;
+
+    @Column(name = "FinalPrice", precision = 18, scale = 2)
+    private BigDecimal finalPrice;
+
+    @Column(name = "CreatedAt", insertable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "UpdatedAt", insertable = false, updatable = false)
+    private LocalDateTime updatedAt;
+
     // getters/setters
     public Integer getCurrentHighestBidId() {
         return currentHighestBidId;
@@ -66,6 +80,22 @@ public class Auction {
 
     public void setCurrentHighestBidId(Integer currentHighestBidId) {
         this.currentHighestBidId = currentHighestBidId;
+    }
+
+    public User getWinner() {
+        return winner;
+    }
+
+    public void setWinner(User winner) {
+        this.winner = winner;
+    }
+
+    public BigDecimal getFinalPrice() {
+        return finalPrice;
+    }
+
+    public void setFinalPrice(BigDecimal finalPrice) {
+        this.finalPrice = finalPrice;
     }
 
     public Integer getAuctionID() {
@@ -142,5 +172,21 @@ public class Auction {
 
     public void setEndDate(LocalDateTime endDate) {
         this.endDate = endDate;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

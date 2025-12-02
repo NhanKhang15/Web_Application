@@ -143,7 +143,8 @@ public class UserProfileController {
                         "phone", p.getPhone(),
                         "address", p.getAddress(),
                         "bio", p.getBio(),
-                        "dateOfBirth", p.getDateOfBirth())));
+                        "dateOfBirth", p.getDateOfBirth()),
+                "emailVerified", p.getUser().isEmailVerified()));
     }
 
     // --- Basic error mapping cho IllegalArgumentException ---
