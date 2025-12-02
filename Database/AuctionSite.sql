@@ -214,9 +214,56 @@ CREATE TABLE IF NOT EXISTS Messages (
 CREATE INDEX idx_msg_pair ON Messages(SenderID, ReceiverID, SentAt);
 CREATE INDEX idx_msg_auc  ON Messages(AuctionID, SentAt);
 
+CREATE TABLE IF NOT EXISTS Wallets (
+    WalletID   INT AUTO_INCREMENT PRIMARY KEY,
+    UserID     INT NOT NULL UNIQUE,
+    Balance    DECIMAL(18,2) NOT NULL DEFAULT 0.00,
+    CreatedAt  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT FK_Wallets_User FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE
+) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE INDEX idx_wallet_user ON Wallets(UserID);
+
+CREATE TABLE IF NOT EXISTS TopupOrders (
+    TopupID               BIGINT AUTO_INCREMENT PRIMARY KEY,
+    UserID                INT NOT NULL,
+    Amount                DECIMAL(18,2) NOT NULL,
+    Currency              CHAR(3) NOT NULL DEFAULT 'VND',
+    StripeSessionId       VARCHAR(100) UNIQUE NULL,
+    StripePaymentIntentId VARCHAR(100) NULL,
+    Status                ENUM('PENDING','PAID','FAILED','CANCELLED') NOT NULL DEFAULT 'PENDING',
+    CreatedAt             DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt             DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT FK_Topup_User FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE
+) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE INDEX idx_topup_user_status ON TopupOrders(UserID, Status); 
+
+CREATE TABLE IF NOT EXISTS WalletTransactions (
+    TransactionID         BIGINT AUTO_INCREMENT PRIMARY KEY,
+    UserID                INT NOT NULL,
+    Type                  ENUM('TOPUP','BID_FREEZE','BID_RELEASE','PAYMENT','REFUND') NOT NULL,
+    Amount                DECIMAL(18,2) NOT NULL,
+    Direction             ENUM('IN','OUT') NOT NULL,  -- IN = cộng, OUT = trừ
+    RelatedAuctionID      INT NULL,
+    RelatedDealID         INT NULL,
+    TopupID               BIGINT NULL,
+    StripePaymentIntentId VARCHAR(100) NULL,
+    StripeSessionId       VARCHAR(100) NULL,
+    Note                  VARCHAR(255) NULL,
+    CreatedAt             DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT FK_WT_User   FOREIGN KEY (UserID)           REFERENCES Users(UserID),
+    CONSTRAINT FK_WT_Auc    FOREIGN KEY (RelatedAuctionID) REFERENCES Auctions(AuctionID),
+    CONSTRAINT FK_WT_Deal   FOREIGN KEY (RelatedDealID)    REFERENCES Deals(DealID),
+    CONSTRAINT FK_WT_Topup  FOREIGN KEY (TopupID)          REFERENCES TopupOrders(TopupID)
+) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 -- Trigger chặn tự đấu giá (Self-Bidding)
 DELIMITER $$
-
 CREATE TRIGGER trg_prevent_self_bidding
 BEFORE INSERT ON Bids
 FOR EACH ROW
