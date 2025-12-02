@@ -13,6 +13,8 @@ import AuctionToolbar from "../../wid/componentView/AuctionToolbar.jsx";
 import AuctionGrid from "../../wid/componentView/AuctionGrid.jsx";
 import {useTranslation} from "react-i18next";
 import {getJSON} from "../../../../../lib/api_url.js";
+import OngoingAuctions from "../ongoingAuction/OngoingAuctions.jsx";
+import ClosedAuctions from "../closedAuction/ClosedAuctions.jsx";
 
 export default function AuctionView() {
     const { t } = useTranslation();
@@ -237,10 +239,41 @@ export default function AuctionView() {
 
     // --- RENDER ---
 
+    if (slug === 'ongoing') {
+        return (
+            <div className="p-6">
+                <button 
+                    onClick={() => navigate(`/dashboard/auctions/main`)} 
+                    className="flex items-center gap-2 text-sm text-gray-500 hover:text-blue-500 mb-4"
+                >
+                    <ArrowLeft className="w-4 h-4" /> {t('Back_to_Auctions')}
+                </button>
+                <OngoingAuctions />
+            </div>
+        );
+    }
+
+    if (slug === 'closed') { 
+        return (
+            <div className="p-6">
+                <button 
+                    onClick={() => navigate(`/dashboard/auctions/main`)} 
+                    className="flex items-center gap-2 text-sm text-gray-500 hover:text-blue-500 mb-4"
+                >
+                    <ArrowLeft className="w-4 h-4" /> {t('Back_to_Auctions')}
+                </button>
+                <ClosedAuctions />
+            </div>
+        );
+    }
+
     if (itemSlug) {
         return (
             <div className="p-6">
-                <button onClick={() => navigate(`/dashboard/auctions/main`)} className="flex items-center gap-2 text-sm text-gray-500 hover:text-blue-500 mb-4">
+                <button 
+                    onClick={() => navigate(`/dashboard/auctions/main`)} 
+                    className="flex items-center gap-2 text-sm text-gray-500 hover:text-blue-500 mb-4"
+                >
                     <ArrowLeft className="w-4 h-4" /> {t('Back_to_Auctions')}
                 </button>
                 <AuctionDetail />
