@@ -1,5 +1,5 @@
 // src/pages/MerchantProfile.jsx
-import React, {useEffect, useRef, useState} from "react";
+import React, { useEffect, useRef, useState } from "react";
 import LeftNav from "../slidebar/screens/LeftNav";
 import CardShell from "../widget/screens/CardShell";
 import AuctionSideBar from "../slidebar/screens/AuctionSideBar";
@@ -17,19 +17,19 @@ import { useUserProfile } from "../user_infor/lib/useUserProfile.js";
 import UserOverview from "../user_infor/screens/user/UserOverview.jsx";
 import UserAttachment from "../user_infor/screens/attachment/UserAttachment.jsx";
 import AuctionView from "../auction/screen/main/AuctionView.jsx";
+import PlatformUsers from "../trader/screens/PlatformUsers.jsx";
+import UserWallet from "../user_infor/screens/wallet/UserWallet.jsx";
+import UserChart from "../user_infor/screens/performance/UserChart.jsx";
 import Settings from "../settings/Settings.jsx";
 import Utilities from "../utils/Utilities.jsx";
 import AboutUs from "../about/AboutUs.jsx";
 import { SearchDropdown } from "../widget/screens/searchAuction.jsx";
 import PostAuction from "../postAuction/screen/PostAuction.jsx";
-import {useNavigate, useParams, createSearchParams} from "react-router-dom";
+import { useNavigate, useParams, createSearchParams } from "react-router-dom";
 import { ChatProvider } from "../widget/screens/ChatContext.jsx";
-import {NAV_URL_MAPPING} from "../slidebar/lib/NAV_URL_MAPPING.js";
+import { NAV_URL_MAPPING } from "../slidebar/lib/NAV_URL_MAPPING.js";
 import { auctionMenu } from "../slidebar/lib/auctionMenu.js";
 import { useTranslation } from "react-i18next";
-import PlatformUsers from "../trader/screens/PlatformUsers.jsx";
-import UserWallet from "../user_infor/screens/wallet/UserWallet.jsx";
-import UserChart from "../user_infor/screens/performance/UserChart.jsx";
 import UtilityMenu from "../widget/screens/UtilityMenu.jsx";
 
 function EmptyPage({ title }) {
@@ -275,34 +275,10 @@ export default function MerchantProfile() {
                     </div>
                 </motion.div>
 
-<<<<<<< HEAD
-                <main className="relative flex-1 min-h-0">
-                    <motion.div className="px-3 pb-4 min-w-0" style={{ marginTop: scrolled ? headerH : cardOverlap, zIndex: scrolled ? 5 : 30, willChange: "margin-top" }}>
-                        {leftKey === "auction" ? (
-                            <CardShell variant="custom" customLeft={<AuctionSideBar active={auctionView} onSelect={handleAuctionMenuSelect} isOpen={auctionSidebarOpen} onToggle={() => setAuctionSidebarOpen(!auctionSidebarOpen)} />} plClass={`transition-all duration-500 ${auctionSidebarOpen ? "!pl-[220px]" : "!pl-4"}`}>
-                                <AuctionView view={auctionView} />
-                            </CardShell>
-                        ) : leftKey === "post" ? (
-                            <CardShell variant="custom" plClass="pl-0 md:pl-[4%]" stickyTop={contentPadTop}><PostAuction /></CardShell>
-                        ) : leftKey === "user" ? (
-                            <CardShell subKey={activeSub} onSubChange={setActiveSub} plClass="pl-0 md:pl-[4%]" stickyTop={contentPadTop}>{renderSubPage()}</CardShell>
-                        ): leftKey === "trader" ? (
-                            <CardShell variant="custom" plClass="pl-0 md:pl-[4%]" stickyTop={contentPadTop}><PlatformUsers /></CardShell>
-                        ) : leftKey === "settings" ? (
-                            <CardShell plClass="pl-0 md:pl-[4%]" stickyTop={contentPadTop}><Settings /></CardShell>
-                        ) : leftKey === "utils" ? (
-                            <CardShell variant="custom" plClass="pl-0 md:pl-[4%]"><Utilities /></CardShell>
-                        ) : leftKey === "about" ? (
-                            <CardShell variant="custom" plClass="pl-0 md:pl-[4%]" stickyTop={contentPadTop}><AboutUs /></CardShell>
-                        ) : (
-                            <CardShell variant="custom" plClass="pl-0 md:pl-[4%]"><EmptyPage title={leftKey} /></CardShell>
-                        )}
-=======
                 {/* BODY */}
                 <div className="flex flex-1 min-h-0">
                     <motion.div className="hidden md:block shrink-0 sticky" style={{ top: contentPadTop, willChange: "top", height: useTransform(scrollY, [0, 160], [`calc(100vh - ${EXPANDED_HEADER_VH}vh)`, `calc(100vh - ${COLLAPSED_HEADER_VH}px)`]) }}>
                         <LeftNav activeKey={leftKey} onChange={setLeftKey} />
->>>>>>> bd3ad210e310f89cc5f7dda6add05a91767eea0d
                     </motion.div>
 
                     <main className="relative flex-1 min-h-0">
@@ -315,6 +291,8 @@ export default function MerchantProfile() {
                                 <CardShell variant="custom" plClass="pl-0 md:pl-[4%]" stickyTop={contentPadTop}><PostAuction /></CardShell>
                             ) : leftKey === "user" ? (
                                 <CardShell subKey={activeSub} onSubChange={setActiveSub} plClass="pl-0 md:pl-[4%]" stickyTop={contentPadTop}>{renderSubPage()}</CardShell>
+                            ) : leftKey === "trader" ? (
+                                <CardShell variant="custom" plClass="pl-0 md:pl-[4%]" stickyTop={contentPadTop}><PlatformUsers /></CardShell>
                             ) : leftKey === "settings" ? (
                                 <CardShell plClass="pl-0 md:pl-[4%]" stickyTop={contentPadTop}><Settings /></CardShell>
                             ) : leftKey === "utils" ? (
