@@ -1,19 +1,45 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
     CircleDollarSign,
     TrendingUp,
     ShoppingCart,
 } from "lucide-react";
-import {useTranslation} from "react-i18next";
+import { useTranslation } from "react-i18next";
+import { getToken, API_BASE_URL } from "../../../../../lib/api_url";
 
 export default function DashboardStats() {
     const { t } = useTranslation();
+    const [balance, setBalance] = useState(0);
+
+    useEffect(() => {
+        const fetchBalance = async () => {
+            try {
+                const token = getToken();
+                if (!token) return;
+
+                const res = await fetch(`${API_BASE_URL}/api/wallet/balance`, {
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setBalance(data.balance);
+                }
+            } catch (err) {
+                console.error("Error fetching balance:", err);
+            }
+        };
+
+        fetchBalance();
+    }, []);
+
+    const formatCurrency = (val) =>
+        new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
 
     // Định nghĩa stats cố định ở đây
     const stats = [
         {
             label: t("total_revenue"),
-            value: "$50,000",
+            value: formatCurrency(balance),
             icon: <CircleDollarSign className="w-5 h-5 text-red-500" />,
             className: "text-red-600 dark:text-red-400",
         },
