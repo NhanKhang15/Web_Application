@@ -13,6 +13,8 @@ import com.example.backend.auction.domain.auction.AuctionRepository;
 import com.example.backend.auction.domain.auction.dto.AuctionDetailDto;
 import com.example.backend.auction.domain.auction.dto.AuctionDetailProjection;
 import com.example.backend.auction.domain.auction.dto.AuctionDto;
+import com.example.backend.auction.domain.auction.dto.EndedAuctionDto;
+import com.example.backend.auction.domain.auction.dto.ScheduledAuctionDto;
 import com.example.backend.auction.domain.item.AuctionImgRepository;
 
 import com.example.backend.category.CategoryRepository;
@@ -22,7 +24,7 @@ import com.example.backend.auction.domain.auction.dto.CategoryDto;
 import com.example.backend.auction.domain.item.AuctionItemsRepository;
 
 @Service
-public class    ActiveItemsService {
+public class ActiveItemsService {
 
     private final AuctionRepository auctionRepo;
     private final AuctionImgRepository imgRepo;
@@ -44,63 +46,49 @@ public class    ActiveItemsService {
             List<String> locations,
             String from,
             String to,
-            Boolean negotiated
-    ) {
+            Boolean negotiated) {
         if (pageable.getSort().isUnsorted()) {
             pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
                     Sort.by(Sort.Direction.DESC, "endDate"));
         }
 
-        // ⭐ XỬ LÝ QUAN TRỌNG: Chuyển List rỗng thành NULL
-        // Vì SQL Native Query sẽ lỗi nếu dùng IN () với List rỗng.
         List<String> safeCategories = (categories != null && !categories.isEmpty()) ? categories : null;
         List<String> safeLocations = (locations != null && !locations.isEmpty()) ? locations : null;
 
-        // Kiểm tra xem có cần gọi Query lọc tổng hợp hay không
-        boolean hasFilter = safeCategories != null || safeLocations != null || from != null || to != null || negotiated != null;
+        boolean hasFilter = safeCategories != null || safeLocations != null || from != null || to != null
+                || negotiated != null;
 
         if (hasFilter) {
-            // GỌI HÀM REPOSITORY MỚI
             return auctionRepo.findActiveAuctionsFiltered(
                     safeCategories,
                     safeLocations,
                     from,
                     to,
                     negotiated,
-                    pageable
-            );
+                    pageable);
         }
 
-        // Nếu không có bộ lọc nào, chạy query mặc định (nhanh hơn)
-        return auctionRepo.findAuctionsByStatus("Open", pageable);
+        return auctionRepo.findActiveAuctions("Open", pageable);
     }
 
     @Transactional(readOnly = true)
-    public Page<AuctionDto> listEndedAuctions(Pageable pageable) {
-        return auctionRepo.findAuctionsByStatus("Ended", pageable);
+    public Page<EndedAuctionDto> listEndedAndClosedAuctions(Pageable pageable) {
+        return auctionRepo.findEndedAuctions(List.of("Ended", "Closed"), pageable);
     }
 
     @Transactional(readOnly = true)
-    public Page<AuctionDto> listClosedAuctions(Pageable pageable) {
-        return auctionRepo.findAuctionsByStatus("Closed", pageable);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<AuctionDto> listScheduledAuctions(Pageable pageable) {
-        return auctionRepo.findAuctionsByStatus("Scheduled", pageable);
+    public Page<ScheduledAuctionDto> listScheduledAuctions(Pageable pageable) {
+        return auctionRepo.findScheduledAuctions(pageable);
     }
 
     @Transactional(readOnly = true)
     public AuctionDetailDto getAuctionDetailBySlug(String slug) {
-        // 1. Tìm thông tin chính
         AuctionDetailProjection proj = auctionRepo.findDetailBySlug(slug)
                 .orElseThrow(
                         () -> new RuntimeException("Không tìm thấy sản phẩm hoặc phiên đấu giá với slug: " + slug));
 
-        // 2. Lấy danh sách ảnh dựa trên ItemID vừa tìm được
         List<String> images = imgRepo.findAllImgUrlsByItemId(proj.getItemId());
 
-        // 3. Map sang DTO
         return new AuctionDetailDto(
                 proj.getAuctionId(),
                 proj.getItemId(),
@@ -127,18 +115,13 @@ public class    ActiveItemsService {
 
     @Transactional(readOnly = true)
     public FilterOptionsDto getFilterOptions() {
-        // 1. Lấy danh sách địa điểm (Location) duy nhất từ Repo Item
         List<String> locations = itemRepo.findDistinctLocations();
-
-        // 2. Lấy danh sách danh mục từ CategoryRepository của bạn
         List<Category> activeCats = categoryRepo.findActiveCategories();
 
-        // Map từ Entity sang DTO nhỏ gọn
         List<CategoryDto> categoryDtos = activeCats.stream()
                 .map(c -> new CategoryDto(c.getCategoryId(), c.getCategoryName()))
                 .toList();
 
-        // 3. Trả về DTO tổng
         return new FilterOptionsDto(categoryDtos, locations);
     }
 
@@ -148,7 +131,6 @@ public class    ActiveItemsService {
             return Page.empty(pageable);
         }
 
-        // Gọi repository để tìm kiếm theo title
         if (pageable.getSort().isUnsorted()) {
             pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
                     Sort.by(Sort.Direction.DESC, "startDate"));
@@ -157,12 +139,14 @@ public class    ActiveItemsService {
     }
 
     @Transactional(readOnly = true)
-    public Page<AuctionDto> searchAuctionsAdvanced(String keyword, Double minPrice, Double maxPrice, Integer ownerId, Pageable pageable) {
-        if (keyword == null) keyword = "";
+    public Page<AuctionDto> searchAuctionsAdvanced(String keyword, Double minPrice, Double maxPrice, Integer ownerId,
+            Pageable pageable) {
+        if (keyword == null)
+            keyword = "";
 
         if (pageable.getSort().isUnsorted()) {
-            // 👇 Sửa "CurrentPrice" thành "currentPrice" cho khớp với alias trong DTO/Query
-            pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("currentPrice").ascending());
+            pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
+                    Sort.by("currentPrice").ascending());
         }
 
         return auctionRepo.searchAuctionsAdvanced(keyword.trim(), minPrice, maxPrice, ownerId, pageable);
