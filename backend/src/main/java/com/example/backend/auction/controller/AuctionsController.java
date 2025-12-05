@@ -5,7 +5,7 @@ import com.example.backend.auction.domain.auction.dto.FilterOptionsDto;
 import com.example.backend.auction.service.ActiveItemsService;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest; // Re-add PageRequest
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.auction.domain.auction.dto.AuctionDto;
-import com.example.backend.auction.domain.auction.dto.AuctionDetailDto;
-import com.example.backend.auction.service.ActiveItemsService;
+import com.example.backend.auction.domain.auction.dto.EndedAuctionDto;
+import com.example.backend.auction.domain.auction.dto.ScheduledAuctionDto;
 
 import java.util.List;
 
@@ -40,34 +40,23 @@ public class AuctionsController {
             @RequestParam(required = false) List<String> location, // Cần List<String>
             @RequestParam(required = false) String from,
             @RequestParam(required = false) String to,
-            @RequestParam(required = false) Boolean negotiated
-    ) {
+            @RequestParam(required = false) Boolean negotiated) {
         return ResponseEntity.ok(service.listActiveAuctions(pageable, category, location, from, to, negotiated));
     }
 
-    // API 2: Xem danh sách đả kết thúc
+    // API 2: Xem danh sách đả kết thúc và đóng (Gộp)
     @GetMapping("/ended")
-    public ResponseEntity<Page<AuctionDto>> getEndedList(
+    public ResponseEntity<Page<EndedAuctionDto>> getEndedList(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         // Giới hạn size để tránh quá tải (tùy chọn)
         int pageSize = Math.min(size, 50);
-        return ResponseEntity.ok(service.listEndedAuctions(PageRequest.of(page, pageSize)));
+        return ResponseEntity.ok(service.listEndedAndClosedAuctions(PageRequest.of(page, pageSize)));
     }
 
-    // API 3: Xem danh sách được đóng
-    @GetMapping("/closed")
-    public ResponseEntity<Page<AuctionDto>> getClosedList(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        // Giới hạn size để tránh quá tải (tùy chọn)
-        int pageSize = Math.min(size, 50);
-        return ResponseEntity.ok(service.listClosedAuctions(PageRequest.of(page, pageSize)));
-    }
-
-    // API 4: Xem danh sách đang chờ
+    // API 3: Xem danh sách đang chờ
     @GetMapping("/scheduled")
-    public ResponseEntity<Page<AuctionDto>> getScheduledList(
+    public ResponseEntity<Page<ScheduledAuctionDto>> getScheduledList(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         // Giới hạn size để tránh quá tải (tùy chọn)
@@ -75,7 +64,7 @@ public class AuctionsController {
         return ResponseEntity.ok(service.listScheduledAuctions(PageRequest.of(page, pageSize)));
     }
 
-    // API 5: Xem chi tiết
+    // API 4: Xem chi tiết
     @GetMapping("/detail/{slug}")
     public ResponseEntity<AuctionDetailDto> getDetail(@PathVariable String slug) {
         return ResponseEntity.ok(service.getAuctionDetailBySlug(slug));
