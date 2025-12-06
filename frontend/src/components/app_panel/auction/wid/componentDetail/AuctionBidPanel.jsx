@@ -11,7 +11,8 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
 // --- Helper functions ---
-const fmt = (n) => Number(n ?? 0).toLocaleString();
+const fmt = (n) => Number(n ?? 0).toLocaleString('vi-VN');
+const formatVND = (n) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n ?? 0);
 const hhmmss = (s) => {
     const h = Math.floor(s / 3600);
     const m = Math.floor((s % 3600) / 60);
@@ -104,27 +105,27 @@ export default function AuctionBidPanel({ product, bids = [], onPlaceBid, isOwne
             <div className="p-5 border-t border-gray-200 dark:border-gray-700 pt-4">
                 <p className="text-sm text-gray-500 mb-1">{t('CURRENT_BID')}</p>
                 <h2 className="text-3xl font-extrabold text-green-600">
-                    ${fmt(currentPrice)}
+                    {formatVND(currentPrice)}
                 </h2>
                 <p className="text-xs text-gray-400">{bids.length} {t('bids')}</p>
 
                 <div className="grid grid-cols-2 gap-2 mt-4 text-xs text-gray-500">
                     <div>
-                        <span className="font-semibold">{t('Starting_Price')}:</span> ${fmt(product.startingPrice)}
+                        <span className="font-semibold">{t('Starting_Price')}:</span> {formatVND(product.startingPrice)}
                     </div>
                     <div>
-                        <span className="font-semibold">{t('Min_Step')}:</span> ${fmt(product.minStep)}
+                        <span className="font-semibold">{t('Min_Step')}:</span> {formatVND(product.minStep)}
                     </div>
                     <div>
-                        <span className="font-semibold">{t('Reserve_Price')}:</span> ${fmt(product.reservePrice)}
+                        <span className="font-semibold">{t('Reserve_Price')}:</span> {formatVND(product.reservePrice)}
                     </div>
                     <div>
-                        <span className="font-semibold">{t('Current_Price')}:</span> ${fmt(currentPrice)}
+                        <span className="font-semibold">{t('Current_Price')}:</span> {formatVND(currentPrice)}
                     </div>
                 </div>
 
                 <div className="flex items-center text-xs text-gray-500 mt-3">
-                    <Timer className="w-4 h-4 mr-1" /> {t('Next_min_bid')} ${fmt(nextMinBid)}
+                    <Timer className="w-4 h-4 mr-1" /> {t('Next_min_bid')} {formatVND(nextMinBid)}
                 </div>
 
                 {product.buyNowPrice && (
@@ -133,7 +134,7 @@ export default function AuctionBidPanel({ product, bids = [], onPlaceBid, isOwne
                             className="w-full py-2 bg-red-600 hover:bg-red-700 text-white rounded-md font-bold text-sm uppercase tracking-wide"
                             onClick={() => alert(t("buy_now_alert"))}
                         >
-                            {t('Buy_Now')} - ${fmt(product.buyNowPrice)}
+                            {t('Buy_Now')} - {formatVND(product.buyNowPrice)}
                         </button>
                     </div>
                 )}
@@ -205,7 +206,7 @@ export default function AuctionBidPanel({ product, bids = [], onPlaceBid, isOwne
                             className="flex items-center justify-between text-sm bg-gray-50 dark:bg-[#1A1F25] rounded-md px-3 py-2"
                         >
                             <span>{b.bidderName || b.bidder}</span>
-                            <span>${fmt(b.bidAmount || b.amount)}</span>
+                            <span>{formatVND(b.bidAmount || b.amount)}</span>
                             <span className="text-xs text-gray-500">
                                 {new Date(b.bidTime || b.time).toLocaleTimeString()}
                             </span>
@@ -254,7 +255,7 @@ export default function AuctionBidPanel({ product, bids = [], onPlaceBid, isOwne
                                     if (s.slug) {
                                         // Dùng window.location để ép tải lại trang nếu navigate không ăn
                                         // hoặc dùng navigate nếu đã import hook
-                                        window.location.href = `/dashboard/auctions/main/${s.slug}`;
+                                        window.location.href = `/dashboard/auctions/ongoing/${s.slug}`;
                                     }
                                 }}
                                 className="flex items-center gap-3 bg-gray-50 dark:bg-[#1A1F25] rounded-md p-2 hover:bg-gray-100 dark:hover:bg-[#222831] cursor-pointer transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-700"

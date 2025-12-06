@@ -1,18 +1,18 @@
-import React, {useEffect, useMemo, useState} from "react";
-import {useNavigate, useParams, useSearchParams} from "react-router-dom";
-import {ArrowLeft, CalendarDays, Construction, Filter,} from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { ArrowLeft, CalendarDays, Construction, Filter, } from "lucide-react";
 import FilterSheet from "../../wid/FilterSheet.jsx";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import AuctionDetail from "./AuctionDetail.jsx";
-import {fetchAuctionItems} from "../../lib/auctionItems.js";
-import {auctionMenu} from "../../../slidebar/lib/auctionMenu.js";
+import { fetchAuctionItems } from "../../lib/auctionItems.js";
+import { auctionMenu } from "../../../slidebar/lib/auctionMenu.js";
 
 import DashboardStats from "../../wid/componentView/DashboardStats.jsx";
 import AuctionToolbar from "../../wid/componentView/AuctionToolbar.jsx";
 import AuctionGrid from "../../wid/componentView/AuctionGrid.jsx";
-import {useTranslation} from "react-i18next";
-import {getJSON} from "../../../../../lib/api_url.js";
+import { useTranslation } from "react-i18next";
+import { getJSON } from "../../../../../lib/api_url.js";
 import OngoingAuctions from "../ongoingAuction/OngoingAuctions.jsx";
 import ClosedAuctions from "../closedAuction/ClosedAuctions.jsx";
 
@@ -124,7 +124,7 @@ export default function AuctionView() {
 
     // 4. FETCH DATA CHÍNH (Search hoặc List)
     useEffect(() => {
-        if ((!slug || slug === 'main') && !itemSlug) {
+        if ((!slug || slug === 'ongoing') && !itemSlug) {
             let cancelled = false;
             async function run() {
                 setLoading(true);
@@ -234,16 +234,16 @@ export default function AuctionView() {
     const goItem = (it) => {
         const pSlug = it?.slug || it?.Slug;
         if (!pSlug) return;
-        navigate(`/dashboard/auctions/main/${encodeURIComponent(pSlug)}`);
+        navigate(`/dashboard/auctions/ongoing/${encodeURIComponent(pSlug)}`);
     };
 
     // --- RENDER ---
 
-    if (slug === 'ongoing') {
+    if (slug === 'scheduled') {
         return (
             <div className="p-6">
-                <button 
-                    onClick={() => navigate(`/dashboard/auctions/main`)} 
+                <button
+                    onClick={() => navigate(`/dashboard/auctions/ongoing`)}
                     className="flex items-center gap-2 text-sm text-gray-500 hover:text-blue-500 mb-4"
                 >
                     <ArrowLeft className="w-4 h-4" /> {t('Back_to_Auctions')}
@@ -253,11 +253,11 @@ export default function AuctionView() {
         );
     }
 
-    if (slug === 'closed') { 
+    if (slug === 'closed') {
         return (
             <div className="p-6">
-                <button 
-                    onClick={() => navigate(`/dashboard/auctions/main`)} 
+                <button
+                    onClick={() => navigate(`/dashboard/auctions/ongoing`)}
                     className="flex items-center gap-2 text-sm text-gray-500 hover:text-blue-500 mb-4"
                 >
                     <ArrowLeft className="w-4 h-4" /> {t('Back_to_Auctions')}
@@ -270,8 +270,8 @@ export default function AuctionView() {
     if (itemSlug) {
         return (
             <div className="p-6">
-                <button 
-                    onClick={() => navigate(`/dashboard/auctions/main`)} 
+                <button
+                    onClick={() => navigate(`/dashboard/auctions/ongoing`)}
                     className="flex items-center gap-2 text-sm text-gray-500 hover:text-blue-500 mb-4"
                 >
                     <ArrowLeft className="w-4 h-4" /> {t('Back_to_Auctions')}
@@ -281,7 +281,7 @@ export default function AuctionView() {
         );
     }
 
-    if (slug && slug !== 'main') {
+    if (slug && slug !== 'ongoing') {
         const currentMenu = auctionMenu.find(item => item.path === slug);
         return (
             <div className="w-full h-full flex flex-col items-center justify-center text-neutral-400 p-10 animate-in fade-in zoom-in duration-300 bg-gray-50 dark:bg-[#0B0F13] rounded-xl">
@@ -292,7 +292,7 @@ export default function AuctionView() {
                     {currentMenu?.label || slug}
                 </h2>
                 <p className="text-sm text-neutral-500">{t("feature_developing")}</p>
-                <button onClick={() => navigate('/dashboard/auctions/main')} className="mt-6 px-6 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-md">
+                <button onClick={() => navigate('/dashboard/auctions/ongoing')} className="mt-6 px-6 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-md">
                     {t("back_to_dashboard")}
                 </button>
             </div>

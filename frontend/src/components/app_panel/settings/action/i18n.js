@@ -444,6 +444,71 @@ const resources = {
             start_date: "Start",
             end_date: "End",
             untitled: "Untitled",
+
+            // --- OngoingAuctionTable ---
+            ends_in: "Ends in",
+            ended: "ENDED",
+            stop: "STOP",
+            cancel_action: "CANCEL",
+            th_id: "Id",
+            th_title: "Title",
+            th_min_inc: "Min Inc",
+            th_trader: "Trader",
+            th_base_price: "Base Price",
+            th_timer: "Timer",
+            th_current_price: "Current Price",
+            th_action: "Action",
+
+            // --- ClosedAuctionTable ---
+            ended_on: "Ended:",
+            sold: "Sold",
+            unsold: "Unsold",
+            view_result: "View Result",
+            th_final_price: "Final Price",
+            th_status: "Status",
+            th_winner: "Winner",
+
+            // --- UserWallet ---
+            credit_limit: "Credit Limit",
+            deposit_amount: "Deposit Amount",
+            highest_bid_amount: "Highest Bid Amount",
+            average_bid_price: "Average Bid Price",
+
+            // --- UserChart ---
+            bid_activity: "Bid Activity",
+            browsing_activity: "Browsing Activity",
+            last_fifteen: "Last fifteen",
+            last_30_days: "Last 30 Days",
+            last_90_days: "Last 90 Days",
+
+            // --- AuctionDetail ---
+            seller_label: "Seller",
+            chat_now: "Chat now",
+            your_wallet_balance: "Your wallet balance",
+            cannot_chat_yourself: "You cannot chat with yourself!",
+
+            // --- WalletCard ---
+            wallet_your_wallet: "Your Wallet",
+            wallet_current_balance: "Current balance",
+            wallet_topup: "Top up wallet",
+            wallet_enter_amount: "Enter amount (VND)",
+            wallet_min_amount: "Minimum 10,000",
+            wallet_amount_in_words: "In words:",
+            wallet_pay: "Pay",
+            wallet_processing: "Processing...",
+            wallet_stripe_redirect: "You will be redirected to Stripe's secure payment page.",
+            wallet_transaction_history: "Transaction History",
+            wallet_no_transactions: "No transactions yet.",
+            wallet_th_datetime: "Date & Time",
+            wallet_th_amount: "Amount",
+            wallet_th_direction: "Direction",
+            wallet_th_stripe_id: "Stripe ID",
+            wallet_th_note: "Note",
+            wallet_direction_in: "Deposit",
+            wallet_direction_out: "Withdraw",
+            wallet_min_error: "Minimum top-up amount is 10,000 VND",
+            wallet_error_prefix: "Error:",
+            wallet_error_generic: "An error occurred, please try again.",
         },
     },
     vi: {
@@ -884,6 +949,71 @@ const resources = {
             start_date: "Bắt đầu",
             end_date: "Kết thúc",
             untitled: "Chưa đặt tên",
+
+            // --- OngoingAuctionTable ---
+            ends_in: "Kết thúc trong",
+            ended: "ĐÃ KẾT THÚC",
+            stop: "DỪNG",
+            cancel_action: "HỦY",
+            th_id: "Mã",
+            th_title: "Tiêu đề",
+            th_min_inc: "Bước giá",
+            th_trader: "Người bán",
+            th_base_price: "Giá khởi điểm",
+            th_timer: "Thời gian",
+            th_current_price: "Giá hiện tại",
+            th_action: "Thao tác",
+
+            // --- ClosedAuctionTable ---
+            ended_on: "Kết thúc:",
+            sold: "Đã bán",
+            unsold: "Chưa bán",
+            view_result: "Xem kết quả",
+            th_final_price: "Giá cuối",
+            th_status: "Trạng thái",
+            th_winner: "Người thắng",
+
+            // --- UserWallet ---
+            credit_limit: "Hạn mức tín dụng",
+            deposit_amount: "Số tiền đặt cọc",
+            highest_bid_amount: "Giá đấu cao nhất",
+            average_bid_price: "Giá đấu trung bình",
+
+            // --- UserChart ---
+            bid_activity: "Hoạt động đấu giá",
+            browsing_activity: "Hoạt động duyệt web",
+            last_fifteen: "15 ngày gần nhất",
+            last_30_days: "30 ngày gần nhất",
+            last_90_days: "90 ngày gần nhất",
+
+            // --- AuctionDetail ---
+            seller_label: "Người bán",
+            chat_now: "Chat ngay",
+            your_wallet_balance: "Số dư ví của bạn",
+            cannot_chat_yourself: "Bạn không thể chat với chính mình!",
+
+            // --- WalletCard ---
+            wallet_your_wallet: "Ví của bạn",
+            wallet_current_balance: "Số dư hiện tại",
+            wallet_topup: "Nạp tiền vào ví",
+            wallet_enter_amount: "Nhập số tiền (VND)",
+            wallet_min_amount: "Tối thiểu 10.000",
+            wallet_amount_in_words: "Bằng chữ:",
+            wallet_pay: "Thanh toán",
+            wallet_processing: "Đang xử lý...",
+            wallet_stripe_redirect: "Bạn sẽ được chuyển hướng đến trang thanh toán an toàn của Stripe.",
+            wallet_transaction_history: "Lịch sử giao dịch",
+            wallet_no_transactions: "Chưa có giao dịch nào.",
+            wallet_th_datetime: "Ngày giờ",
+            wallet_th_amount: "Số tiền",
+            wallet_th_direction: "Chiều",
+            wallet_th_stripe_id: "Stripe ID",
+            wallet_th_note: "Ghi chú",
+            wallet_direction_in: "Nạp vào",
+            wallet_direction_out: "Rút ra",
+            wallet_min_error: "Số tiền nạp tối thiểu 10.000 VND",
+            wallet_error_prefix: "Lỗi:",
+            wallet_error_generic: "Có lỗi xảy ra, vui lòng thử lại.",
         },
     },
 };

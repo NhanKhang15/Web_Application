@@ -12,7 +12,8 @@ import { Stomp } from '@stomp/stompjs';
 import { getToken, API_BASE_URL } from "../../../../../lib/api_url.js";
 import AuctionInfo from "../../wid/componentDetail/AuctionInfo.jsx";
 import { useChat } from "../../../widget/screens/ChatContext.jsx";
-import {useUserProfile} from "../../../user_infor/lib/useUserProfile.js";
+import { useUserProfile } from "../../../user_infor/lib/useUserProfile.js";
+import { Wallet } from "lucide-react";
 
 export default function AuctionDetail() {
     const { openChat } = useChat();
@@ -34,6 +35,10 @@ export default function AuctionDetail() {
 
     const [categories, setCategories] = useState({});
     const [similarItems, setSimilarItems] = useState([]);
+    const [walletBalance, setWalletBalance] = useState(null);
+
+    // Format VND helper
+    const formatVND = (n) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n ?? 0);
 
     const handleOpenChat = () => {
         if (!currentUser || !currentUser.userId) {
@@ -43,7 +48,7 @@ export default function AuctionDetail() {
         }
 
         if (String(currentUser.userId) === String(product.sellerId)) {
-            alert("Bạn không thể chat với chính mình!");
+            alert(t("cannot_chat_yourself"));
             return;
         }
 
@@ -214,12 +219,12 @@ export default function AuctionDetail() {
     const product = useMemo(() => {
         if (!raw) return null;
 
-        const catName = categories[raw.categoryId] || raw.categoryName || "Unknown Category";
+        const catName = categories[raw.categoryId] || raw.categoryName || t("Unknown_Category");
 
         return {
             id: raw.auctionId ?? raw.itemId,
             auctionId: raw.auctionId ?? raw.itemId,
-            name: raw.title || "Untitled Item",
+            name: raw.title || t("Untitled_Item"),
             model: raw.slug || "",
             price: raw.currentPrice || raw.startingPrice || 0,
             buyNowPrice: raw.buyNowPrice,
@@ -297,6 +302,27 @@ export default function AuctionDetail() {
             }
         };
         fetchUser();
+    }, []);
+
+    // ====== Fetch Wallet Balance ======
+    useEffect(() => {
+        const fetchBalance = async () => {
+            try {
+                const token = getToken();
+                if (!token) return;
+
+                const res = await fetch(`${API_BASE_URL}/api/wallet/balance`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setWalletBalance(data.balance);
+                }
+            } catch (err) {
+                console.error("Failed to fetch wallet balance:", err);
+            }
+        };
+        fetchBalance();
     }, []);
 
     const isOwner = currentUser?.userId === product?.sellerId;
@@ -378,7 +404,7 @@ export default function AuctionDetail() {
                                         {product.sellerName?.charAt(0)}
                                     </div>
                                     <div>
-                                        <p className="text-xs text-gray-500">Người bán</p>
+                                        <p className="text-xs text-gray-500">{t("seller_label")}</p>
                                         <p className="font-bold text-sm">{product.sellerName}</p>
                                     </div>
                                 </div>
@@ -386,8 +412,27 @@ export default function AuctionDetail() {
                                     onClick={handleOpenChat}
                                     className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
                                 >
-                                    Chat ngay
+                                    {t("chat_now")}
                                 </button>
+                            </div>
+                        )}
+
+                        {/* User Wallet Balance */}
+                        {walletBalance !== null && (
+                            <div className="bg-gradient-to-r from-emerald-500/10 to-teal-500/10 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-xl p-4 mb-4 border border-emerald-200 dark:border-emerald-800/50">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-emerald-500/20 rounded-full flex items-center justify-center">
+                                            <Wallet className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">{t("your_wallet_balance")}</p>
+                                            <p className="font-bold text-lg text-emerald-600 dark:text-emerald-400">
+                                                {formatVND(walletBalance)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         )}
 

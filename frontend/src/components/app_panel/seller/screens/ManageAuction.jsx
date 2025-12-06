@@ -110,9 +110,9 @@ export default function ManageAuction() {
 
     // Format currency
     const formatCurrency = (amount) => {
-        return new Intl.NumberFormat("en-US", {
+        return new Intl.NumberFormat("vi-VN", {
             style: "currency",
-            currency: "USD",
+            currency: "VND",
             minimumFractionDigits: 0,
         }).format(amount || 0);
     };
@@ -142,7 +142,7 @@ export default function ManageAuction() {
     const handleView = (auction) => {
         const slug = auction.slug || auction.itemSlug;
         if (slug) {
-            navigate(`/dashboard/auctions/main/${encodeURIComponent(slug)}`);
+            navigate(`/dashboard/auctions/ongoing/${encodeURIComponent(slug)}`);
         }
     };
 

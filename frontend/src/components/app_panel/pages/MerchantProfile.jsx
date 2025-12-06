@@ -50,7 +50,7 @@ function EmptyPage({ title }) {
 export default function MerchantProfile() {
     const [leftKey, setLeftKey] = React.useState("user");
     const [activeSub, setActiveSub] = React.useState("user");
-    const [auctionView, setAuctionView] = React.useState("Dashboard");
+    const [auctionView, setAuctionView] = React.useState("Ongoing Auctions");
     const [sellerView, setSellerView] = React.useState("Manage Auction");
 
     const navigate = useNavigate();
@@ -110,7 +110,7 @@ export default function MerchantProfile() {
 
         // Điều hướng
         navigate({
-            pathname: "/dashboard/auctions/main",
+            pathname: "/dashboard/auctions/ongoing",
             search: `?${createSearchParams({ search: keyword })}`,
         });
     };
@@ -140,13 +140,13 @@ export default function MerchantProfile() {
     useEffect(() => {
         if (category === "auctions") {
             if (!slug) {
-                navigate("/dashboard/auctions/main", { replace: true });
+                navigate("/dashboard/auctions/ongoing", { replace: true });
             } else {
                 const foundItem = auctionMenu.find(item => item.path === slug);
                 if (foundItem) {
                     setAuctionView(foundItem.label);
                 } else {
-                    setAuctionView("Dashboard");
+                    setAuctionView("Ongoing Auctions");
                 }
             }
         } else if (category === "seller") {
@@ -170,7 +170,7 @@ export default function MerchantProfile() {
         if (navigate) {
             let path = NAV_URL_MAPPING?.[key] || key;
             if (key === "auction") {
-                path = "auctions/main";
+                path = "auctions/ongoing";
             } else if (key === "seller") {
                 path = "seller/manage";
             }
@@ -240,10 +240,10 @@ export default function MerchantProfile() {
                     <div className="h-full px-6 flex items-center justify-between">
                         {/* LEFT: Logo */}
                         <div className="flex items-center">
-                            <button onClick={() => { handleNavigation("auction"); setAuctionView("Dashboard"); }} className="bg-transparent p-0 m-0 flex items-center">
+                            <button onClick={() => { handleNavigation("auction"); setAuctionView("Ongoing Auctions"); }} className="bg-transparent p-0 m-0 flex items-center">
                                 <motion.img src={fullLogo} alt="Auction" className="object-contain select-none h-28 w-auto" style={{ opacity: logoFullOpacity, scale: logoFullScale }} />
                             </button>
-                            <button onClick={() => { handleNavigation("auction"); setAuctionView("Dashboard"); }} className="bg-transparent p-0 m-0 flex items-center">
+                            <button onClick={() => { handleNavigation("auction"); setAuctionView("Ongoing Auctions"); }} className="bg-transparent p-0 m-0 flex items-center">
                                 <motion.img src={Logo} alt="A" className="object-contain select-none h-12 w-auto" style={{ opacity: logoMarkOpacity }} />
                             </button>
                         </div>
