@@ -24,6 +24,9 @@ public interface AuctionRepository extends JpaRepository<Auction, Integer> {
     List<Auction> findAllByStatusAndEndDateBefore(com.example.backend.auction.domain.item.AuctionStatus status,
             java.time.LocalDateTime endDate);
 
+    // Tìm auction theo slug của item (dùng cho chatbot)
+    Optional<Auction> findByItem_Slug(String slug);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT a FROM Auction a WHERE a.auctionID = :id")
     Optional<Auction> findByIdForUpdate(@Param("id") Integer id);
@@ -319,4 +322,78 @@ public interface AuctionRepository extends JpaRepository<Auction, Integer> {
     @org.springframework.data.jpa.repository.Modifying
     @Query(value = "UPDATE Auctions SET Status = 'Ended' WHERE Status = 'Open' AND EndDate < CURRENT_TIMESTAMP", nativeQuery = true)
     void updateOpenToEnded();
+
+    // ========== SELLER AUCTIONS ==========
+    // Find all auctions by seller ID with optional status filter
+    @Query(value = """
+                SELECT
+                    a.AuctionID AS auctionId,
+                    a.ItemID AS itemId,
+                    a.CurrentPrice AS currentPrice,
+                    a.BuyNowPrice AS buyNowPrice,
+                    a.StartingPrice AS startingPrice,
+                    a.StartDate AS startDate,
+                    a.EndDate AS endDate,
+                    a.Status AS status,
+                    ai.Title AS title,
+                    ai.Slug AS slug,
+                    COALESCE(img.ImgUrl, ai.Thumbnail) AS thumbnail,
+                    u.Username AS sellerName,
+                    ai.CategoryID AS categoryId,
+                    c.CategoryName AS categoryName,
+                    ai.Location AS location,
+                    a.CreatedAt AS createdAt
+                FROM Auctions a
+                JOIN AuctionItems ai ON a.ItemID = ai.ItemID
+                JOIN Users u ON ai.SellerID = u.UserID
+                JOIN Categories c ON ai.CategoryID = c.CategoryID
+                LEFT JOIN ItemImages img ON ai.ItemID = img.ItemID AND img.IsMain = 1
+                WHERE ai.SellerID = :sellerId
+                    AND (:status IS NULL OR a.Status = :status)
+                ORDER BY a.CreatedAt DESC
+            """, countQuery = """
+                SELECT COUNT(*)
+                FROM Auctions a
+                JOIN AuctionItems ai ON a.ItemID = ai.ItemID
+                WHERE ai.SellerID = :sellerId
+                    AND (:status IS NULL OR a.Status = :status)
+            """, nativeQuery = true)
+    Page<AuctionDto> findAuctionsBySellerId(
+            @Param("sellerId") Integer sellerId,
+            @Param("status") String status,
+            Pageable pageable);
+
+    // Find all auctions by seller ID (all statuses)
+    @Query(value = """
+                SELECT
+                    a.AuctionID AS auctionId,
+                    a.ItemID AS itemId,
+                    a.CurrentPrice AS currentPrice,
+                    a.BuyNowPrice AS buyNowPrice,
+                    a.StartingPrice AS startingPrice,
+                    a.StartDate AS startDate,
+                    a.EndDate AS endDate,
+                    a.Status AS status,
+                    ai.Title AS title,
+                    ai.Slug AS slug,
+                    COALESCE(img.ImgUrl, ai.Thumbnail) AS thumbnail,
+                    u.Username AS sellerName,
+                    ai.CategoryID AS categoryId,
+                    c.CategoryName AS categoryName,
+                    ai.Location AS location,
+                    a.CreatedAt AS createdAt
+                FROM Auctions a
+                JOIN AuctionItems ai ON a.ItemID = ai.ItemID
+                JOIN Users u ON ai.SellerID = u.UserID
+                JOIN Categories c ON ai.CategoryID = c.CategoryID
+                LEFT JOIN ItemImages img ON ai.ItemID = img.ItemID AND img.IsMain = 1
+                WHERE ai.SellerID = :sellerId
+                ORDER BY a.CreatedAt DESC
+            """, countQuery = """
+                SELECT COUNT(*)
+                FROM Auctions a
+                JOIN AuctionItems ai ON a.ItemID = ai.ItemID
+                WHERE ai.SellerID = :sellerId
+            """, nativeQuery = true)
+    List<AuctionDto> findAllAuctionsBySellerId(@Param("sellerId") Integer sellerId);
 }

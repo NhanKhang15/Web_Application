@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ItemsApi from "../../lib/itemDetail.js";
-import { PostAuctionApi } from "../../../postAuction/lib/PostAuctionApi.js";
+import { PostAuctionApi } from "../../../seller/lib/PostAuctionApi.js";
 import { fetchAuctionItems } from "../../lib/auctionItems";
 import AuctionBidPanel from "../../wid/componentDetail/AuctionBidPanel.jsx";
 import AuctionImageGallery from "../../wid/componentDetail/AuctionImageGallery.jsx";

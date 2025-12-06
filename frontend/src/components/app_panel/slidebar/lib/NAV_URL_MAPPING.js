@@ -1,6 +1,6 @@
 export const NAV_URL_MAPPING = {
     auction: "auctions",
-    post: "seller",
+    seller: "seller",
     user: "user",
     settings: "settings",
     trader: "trader",
