@@ -1,5 +1,6 @@
 // frontend/src/components/dashboard/user_infor/screens/performance/UserChart.jsx
 import React, { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
     ComposedChart,
     Bar,
@@ -33,10 +34,12 @@ const chartData = [
 const formatYAxis = (tick) => `$${tick / 1000}K`;
 
 export default function UserChart({ profile }) {
+    const { t } = useTranslation();
+
     useEffect(() => {
         AOS.init({ duration: 600, offset: 100, once: true });
     }, []);
-    
+
     return (
         <div className="flex flex-col gap-12 pt-12 pb-8 relative w-full overflow-x-hidden">
             {/* Header */}
@@ -54,10 +57,10 @@ export default function UserChart({ profile }) {
                 />
                 <div className="leading-tight">
                     <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
-                        {profile?.fullName || "Unknown User"}
+                        {profile?.fullName || t("unknown_user")}
                     </h2>
                     <p className="text-sm text-neutral-500">
-                        {profile?.location || profile?.address || "Location unknown"}
+                        {profile?.location || profile?.address || t("location_unknown")}
                     </p>
                 </div>
             </motion.div>
@@ -68,71 +71,71 @@ export default function UserChart({ profile }) {
                     {/* Note */}
                     <div className="flex items-center gap-2">
                         <span className="w-3 h-3 bg-blue-500 rounded-full"></span>
-                        <span className="text-xs text-gray-600 dark:text-gray-400">Bid Activity</span>
+                        <span className="text-xs text-gray-600 dark:text-gray-400">{t("bid_activity")}</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <span className="w-3 h-3 bg-purple-500 rounded-full"></span>
-                        <span className="text-xs text-gray-600 dark:text-gray-400">Browsing Activity</span>
+                        <span className="text-xs text-gray-600 dark:text-gray-400">{t("browsing_activity")}</span>
                     </div>
                 </div>
 
                 {/* Filter */}
                 <select className="text-xs text-gray-500 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded p-1 bg-transparent">
-                    <option>Last fifteen</option>
-                    <option>Last 30 Days</option>
-                    <option>Last 90 Days</option>
+                    <option>{t("last_fifteen")}</option>
+                    <option>{t("last_30_days")}</option>
+                    <option>{t("last_90_days")}</option>
                 </select>
             </div>
 
             {/* Chart */}
             <div style={{ width: '100%', height: 300 }}>
                 <ResponsiveContainer>
-                    <ComposedChart 
-                        data={chartData} 
+                    <ComposedChart
+                        data={chartData}
                         margin={{ top: 5, right: 10, bottom: 5, left: -25 }}
                     >
                         {/* Grid */}
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                        
+
                         {/* X Axis (Date and Month) */}
-                        <XAxis 
-                            dataKey="date" 
-                            tick={{ fontSize: 10, fill: '#6B7280' }} 
-                            axisLine={false} 
+                        <XAxis
+                            dataKey="date"
+                            tick={{ fontSize: 10, fill: '#6B7280' }}
+                            axisLine={false}
                             tickLine={false}
                             interval="preserveStartEnd"
                         />
-                        
+
                         {/* Y Axis (Value) */}
-                        <YAxis 
-                            tickFormatter={formatYAxis} 
-                            tick={{ fontSize: 10, fill: '#6B7280' }} 
-                            axisLine={false} 
+                        <YAxis
+                            tickFormatter={formatYAxis}
+                            tick={{ fontSize: 10, fill: '#6B7280' }}
+                            axisLine={false}
                             tickLine={false}
                             domain={[5000, 25000]}
                             ticks={[5000, 10000, 15000, 20000, 25000]}
                         />
-                        
+
                         {/* Tooltip */}
-                        <Tooltip 
-                            formatter={(value) => `$${value.toLocaleString()}`} 
+                        <Tooltip
+                            formatter={(value) => `$${value.toLocaleString()}`}
                             labelClassName="text-black"
                             contentStyle={{ background: "white", border: "1px solid #CCC", borderRadius: "5px" }}
                         />
-                        
+
                         {/* Purple Line (Browsing Activity) */}
-                        <Area 
-                            type="monotone" 
-                            dataKey="browsing" 
+                        <Area
+                            type="monotone"
+                            dataKey="browsing"
                             stroke="#8B5CF6"
                             fillOpacity={0.1}
-                            fill="#8B5CF6" 
+                            fill="#8B5CF6"
                             strokeWidth={2}
                         />
-                        
+
                         {/* Gray Colums (Bid Value) */}
-                        <Bar 
-                            dataKey="bidValue" 
+                        <Bar
+                            dataKey="bidValue"
                             fill="#E5E7EB"
                             barSize={15}
                         />

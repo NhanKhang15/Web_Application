@@ -15,13 +15,13 @@ export default function StatCard({ icon, label, value }) {
             <div className="flex-shrink-0 text-4xl">
                 {icon}
             </div>
-        
+
             {/* Vùng chứa Text*/}
             <div>
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     {label}
                 </p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">
+                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
                     {value}
                 </p>
             </div>

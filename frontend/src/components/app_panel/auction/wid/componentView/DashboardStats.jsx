@@ -45,13 +45,13 @@ export default function DashboardStats() {
         },
         {
             label: t("sales"),
-            value: "$40,250",
+            value: "1.006.250.000 ₫",
             icon: <ShoppingCart className="w-5 h-5 text-gray-800 dark:text-gray-200" />,
             className: "text-black dark:text-white",
         },
         {
             label: t("profit"),
-            value: "+25,600",
+            value: "+640.000.000 ₫",
             icon: <TrendingUp className="w-5 h-5 text-green-500" />,
             className: "text-green-600 dark:text-green-400",
         },
