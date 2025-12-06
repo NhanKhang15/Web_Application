@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { getJSON } from "../../../../lib/api_url";
 import { useUserProfile } from "../../user_infor/lib/useUserProfile";
+import { PostAuctionApi } from "../lib/PostAuctionApi";
 import {
     Package,
     Clock,
@@ -17,7 +18,6 @@ import {
     AlertCircle,
     TrendingUp
 } from "lucide-react";
-import { API_BASE_URL } from "../../../../lib/api_url";
 
 export default function ManageAuction() {
     const { t } = useTranslation();
@@ -129,11 +129,11 @@ export default function ManageAuction() {
         });
     };
 
-    // Get thumbnail URL
+    // Get thumbnail URL - use same approach as AuctionCard
     const getThumbnail = (auction) => {
-        if (auction.thumbnail && auction.thumbnail !== "placeholder.jpg") {
-            if (auction.thumbnail.startsWith("http")) return auction.thumbnail;
-            return `${API_BASE_URL}/uploads/items/${auction.thumbnail}`;
+        const rawImg = auction.thumbnail || auction.imgUrl;
+        if (rawImg && rawImg !== "placeholder.jpg") {
+            return PostAuctionApi.getFullImageUrl(rawImg);
         }
         return "https://via.placeholder.com/100x100?text=No+Image";
     };
@@ -234,7 +234,7 @@ export default function ManageAuction() {
                         >
                             <div className="flex flex-col md:flex-row">
                                 {/* Thumbnail */}
-                                <div className="md:w-40 h-40 md:h-auto flex-shrink-0">
+                                <div className="w-24 h-24 md:w-28 md:h-28 flex-shrink-0 m-4 rounded-lg overflow-hidden">
                                     <img
                                         src={getThumbnail(auction)}
                                         alt={auction.title}
