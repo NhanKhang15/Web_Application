@@ -1,24 +1,26 @@
 // src/services/chatService.js
+import { API_BASE_URL } from "../../../../lib/api_url";
 
-// Định nghĩa URL API (nên đưa vào biến môi trường trong thực tế)
-const API_URL = "http://localhost:8081/api/chatbot/message";
+const API_URL = `${API_BASE_URL}/api/chatbot/message`;
 
 /**
  * Gửi tin nhắn đến Chatbot AI và nhận phản hồi.
  * @param {string} message - Tin nhắn của người dùng
- * @param history
- * @param userId
+ * @param {Array} history - Lịch sử chat
+ * @param {number} userId - ID người dùng
+ * @param {Object} pendingBid - Thông tin bid đang chờ xác nhận (nếu có)
  * @returns {Promise<string>} - Phản hồi từ AI
  */
-export const sendMessageToBot = async (message, history = [], userId = null) => {
+export const sendMessageToBot = async (message, history = [], userId = null, pendingBid = null) => {
     try {
         const response = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 message: message,
-                history: history,
-                userId: userId
+                history: history.map(m => ({ text: m.text, sender: m.sender })),
+                userId: userId,
+                pendingBid: pendingBid // 👈 Gửi thông tin bid đang chờ xác nhận
             }),
         });
 
