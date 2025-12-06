@@ -1,7 +1,7 @@
 // File: AuctionCard.jsx (Component con MỚI)
 import React from "react";
 import { ArrowUp } from "lucide-react";
-import { PostAuctionApi } from "../../../postAuction/lib/PostAuctionApi.js";
+import { PostAuctionApi } from "../../../seller/lib/PostAuctionApi.js";
 import { useTranslation } from "react-i18next";
 
 // helper

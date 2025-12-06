@@ -1,5 +1,5 @@
 // src/api/postAuctionApi.js
-import { API_BASE_URL, getToken } from "../../../../lib/api_url";
+import { API_BASE_URL, getToken } from "../../../../lib/api_url.js";
 
 export class PostAuctionApi {
     /**

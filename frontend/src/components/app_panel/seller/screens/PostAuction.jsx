@@ -4,9 +4,11 @@ import { Upload, Calendar, DollarSign, FileText, Image as ImageIcon, Loader2, Ch
 import PostAuctionApi from "../lib/PostAuctionApi.js";
 import { useTranslation } from "react-i18next";
 import * as Toast from "@radix-ui/react-toast";
+import { useUserProfile } from "../../user_infor/lib/useUserProfile.js";
 
 export default function PostAuction() {
     const { t } = useTranslation();
+    const { profile } = useUserProfile();
     const [formData, setFormData] = React.useState({
         title: "",
         description: "",
@@ -53,6 +55,18 @@ export default function PostAuction() {
         setLoading(true);
 
         try {
+            // Check email verification
+            if (!profile?.emailVerified) {
+                showToast(
+                    t('Email_not_verified_auction', {
+                        defaultValue: "Vui lòng xác thực email trước khi đăng đấu giá! Vào mục Hồ sơ cá nhân (User) để xác thực."
+                    }),
+                    "error"
+                );
+                setLoading(false);
+                return;
+            }
+
             // Validate required fields
             if (!formData.title || !formData.categoryId || !formData.startingPrice) {
                 throw new Error("Please_fill_required_fields");
