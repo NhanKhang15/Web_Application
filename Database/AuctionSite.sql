@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS Auctions (
     CurrentPrice   DECIMAL(18,2) NOT NULL DEFAULT 0.00,
     ReservePrice   DECIMAL(18,2) NULL,
     BuyNowPrice    DECIMAL(18,2) NULL,
-    Status         ENUM('Draft','Scheduled','Open','Ended','Closed','Cancelled')
+    Status         ENUM('Draft','Scheduled','Open','Ended','Closed','Cancelled','Processing' )
     NOT NULL DEFAULT 'Scheduled',
     StartDate      DATETIME NOT NULL,
     EndDate        DATETIME NOT NULL,
