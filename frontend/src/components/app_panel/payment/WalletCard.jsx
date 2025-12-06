@@ -10,10 +10,98 @@ import { useUserProfile } from "../user_infor/lib/useUserProfile";
 export default function WalletCard() {
     const [balance, setBalance] = useState(0);
     const [loading, setLoading] = useState(false);
-    const [amount, setAmount] = useState("");
+    const [amount, setAmount] = useState(""); // Raw numeric value
+    const [displayAmount, setDisplayAmount] = useState(""); // Formatted for display
     const [transactions, setTransactions] = useState([]);
     const [refreshing, setRefreshing] = useState(false);
     const { profile } = useUserProfile();
+
+    // Format number with thousand separators (Vietnamese style: dots)
+    const formatNumberWithSeparator = (value) => {
+        if (!value) return "";
+        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    };
+
+    // Remove formatting to get raw number
+    const parseFormattedNumber = (formattedValue) => {
+        return formattedValue.replace(/\./g, "");
+    };
+
+    // Handle input change with formatting
+    const handleAmountChange = (e) => {
+        const rawValue = parseFormattedNumber(e.target.value);
+        // Only allow digits
+        if (rawValue && !/^\d+$/.test(rawValue)) return;
+
+        setAmount(rawValue);
+        setDisplayAmount(formatNumberWithSeparator(rawValue));
+    };
+
+    // Handle quick amount buttons
+    const handleQuickAmount = (val) => {
+        setAmount(val.toString());
+        setDisplayAmount(formatNumberWithSeparator(val));
+    };
+
+    // Convert number to Vietnamese words (like banks)
+    const numberToVietnameseWords = (num) => {
+        if (!num || num === "0" || num === "") return "";
+
+        const units = ["", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"];
+        const positions = ["", "nghìn", "triệu", "tỷ", "nghìn tỷ", "triệu tỷ"];
+
+        const readThreeDigits = (n) => {
+            let str = "";
+            const hundred = Math.floor(n / 100);
+            const ten = Math.floor((n % 100) / 10);
+            const unit = n % 10;
+
+            if (hundred > 0) {
+                str += units[hundred] + " trăm ";
+            }
+
+            if (ten > 1) {
+                str += units[ten] + " mươi ";
+                if (unit === 1) str += "mốt ";
+                else if (unit === 5) str += "lăm ";
+                else if (unit > 0) str += units[unit] + " ";
+            } else if (ten === 1) {
+                str += "mười ";
+                if (unit === 5) str += "lăm ";
+                else if (unit > 0) str += units[unit] + " ";
+            } else if (ten === 0 && hundred > 0 && unit > 0) {
+                str += "lẻ " + units[unit] + " ";
+            } else if (unit > 0) {
+                str += units[unit] + " ";
+            }
+
+            return str.trim();
+        };
+
+        const number = parseInt(num.toString().replace(/\./g, ""), 10);
+        if (isNaN(number) || number === 0) return "";
+        if (number < 0) return "Số âm không hợp lệ";
+
+        // Split into groups of 3 digits from right
+        const groups = [];
+        let temp = number;
+        while (temp > 0) {
+            groups.push(temp % 1000);
+            temp = Math.floor(temp / 1000);
+        }
+
+        let result = "";
+        for (let i = groups.length - 1; i >= 0; i--) {
+            if (groups[i] > 0) {
+                result += readThreeDigits(groups[i]) + " " + positions[i] + " ";
+            }
+        }
+
+        result = result.trim();
+        // Capitalize first letter
+        result = result.charAt(0).toUpperCase() + result.slice(1);
+        return result + " đồng";
+    };
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
@@ -184,19 +272,25 @@ export default function WalletCard() {
                             Nhập số tiền (VND)
                         </label>
                         <input
-                            type="number"
+                            type="text"
+                            inputMode="numeric"
                             placeholder="Tối thiểu 10.000"
-                            value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
+                            value={displayAmount}
+                            onChange={handleAmountChange}
                             className="w-full px-4 py-3 border rounded-lg dark:bg-neutral-800 dark:border-neutral-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
                         />
+                        {amount && (
+                            <p className="mt-2 text-sm italic text-neutral-600 dark:text-neutral-400">
+                                Bằng chữ: <span className="font-medium text-blue-600 dark:text-blue-400">{numberToVietnameseWords(amount)}</span>
+                            </p>
+                        )}
                     </div>
 
                     <div className="flex flex-wrap gap-2">
                         {[50000, 100000, 200000, 500000].map((val) => (
                             <button
                                 key={val}
-                                onClick={() => setAmount(val)}
+                                onClick={() => handleQuickAmount(val)}
                                 className="px-4 py-2 rounded-full border border-neutral-200 dark:border-neutral-700 text-sm font-medium hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
                             >
                                 {formatCurrency(val)}
