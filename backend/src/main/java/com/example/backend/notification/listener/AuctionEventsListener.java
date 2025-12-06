@@ -23,20 +23,30 @@ public class AuctionEventsListener {
     private final BidRepository bidRepo;
     private final EmailService emailService;
     private final EmailNotificationRepository notifRepo;
+    private final org.springframework.messaging.simp.SimpMessagingTemplate messagingTemplate;
 
     public AuctionEventsListener(AuctionRepository auctionRepo,
             BidRepository bidRepo,
             EmailService emailService,
-            EmailNotificationRepository notifRepo) {
+            EmailNotificationRepository notifRepo,
+            org.springframework.messaging.simp.SimpMessagingTemplate messagingTemplate) {
         this.auctionRepo = auctionRepo;
         this.bidRepo = bidRepo;
         this.emailService = emailService;
         this.notifRepo = notifRepo;
+        this.messagingTemplate = messagingTemplate;
     }
 
     @Async
-    @EventListener
+    @org.springframework.transaction.event.TransactionalEventListener(phase = org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT)
+    @org.springframework.transaction.annotation.Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public void handleAuctionWon(AuctionWonEvent event) {
+        // 1. Send WebSocket notification
+        com.example.backend.auction.domain.auction.dto.AuctionEndedMessage msg = new com.example.backend.auction.domain.auction.dto.AuctionEndedMessage(
+                "ENDED", event.getWinnerBidId());
+        messagingTemplate.convertAndSend("/topic/auctions/" + event.getAuctionId(), msg);
+
+        // 2. Process Email
         Auction auction = auctionRepo.findById(event.getAuctionId())
                 .orElseThrow(() -> new RuntimeException("Auction not found: " + event.getAuctionId()));
         Bid winnerBid = bidRepo.findById(event.getWinnerBidId())

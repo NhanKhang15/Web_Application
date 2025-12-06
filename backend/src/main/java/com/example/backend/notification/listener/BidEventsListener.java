@@ -29,7 +29,8 @@ public class BidEventsListener {
     }
 
     @Async
-    @EventListener
+    @org.springframework.transaction.event.TransactionalEventListener(phase = org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT)
+    @org.springframework.transaction.annotation.Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public void handleBidPlaced(BidPlacedEvent event) {
         Bid bid = bidRepo.findById(event.getBidId())
                 .orElseThrow(() -> new RuntimeException("Bid not found: " + event.getBidId()));
