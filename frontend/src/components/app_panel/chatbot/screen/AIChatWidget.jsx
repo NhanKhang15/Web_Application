@@ -7,9 +7,13 @@ export default function AIChatWidget({ externalOpen, onClose, currentUserId }) {
     const [internalOpen, setInternalOpen] = useState(false);
     const [input, setInput] = useState("");
     const [messages, setMessages] = useState([
-        { id: 1, text: "Xin chào! Tôi là trợ lý AI. Tôi có thể giúp gì cho bạn về sản phẩm?", sender: "bot" }
+        { id: 1, text: "Xin chào! Tôi là trợ lý AI. Tôi có thể giúp gì cho bạn về sản phẩm?\n\n💡 Gợi ý: Nhắn 'tìm laptop' hoặc 'đặt giá 500k cho sản phẩm #1'", sender: "bot" }
     ]);
     const [isLoading, setIsLoading] = useState(false);
+
+    // 👇 State mới: Lưu thông tin bid đang chờ xác nhận
+    const [pendingBid, setPendingBid] = useState(null);
+
     const messagesEndRef = useRef(null);
 
     const isOpen = externalOpen !== undefined ? externalOpen : internalOpen;
@@ -32,7 +36,36 @@ export default function AIChatWidget({ externalOpen, onClose, currentUserId }) {
         setIsLoading(true);
 
         try {
-            const botReply = await sendMessageToBot(userMessage, currentHistory, currentUserId);            setMessages((prev) => [...prev, { id: Date.now() + 1, text: botReply, sender: "bot" }]);
+            // 👇 Gửi pendingBid nếu có (cho flow xác nhận)
+            const botReply = await sendMessageToBot(userMessage, currentHistory, currentUserId, pendingBid);
+
+            // 👇 Kiểm tra response có phải là yêu cầu xác nhận không
+            if (botReply.startsWith("CONFIRM_BID|")) {
+                // Parse thông tin từ CONFIRM_BID|auctionId|slug|title|amount
+                const parts = botReply.split("\n")[0].split("|");
+                if (parts.length >= 5) {
+                    const newPendingBid = {
+                        auctionId: parseInt(parts[1]),
+                        auctionSlug: parts[2],
+                        auctionTitle: parts[3],
+                        bidAmount: parseFloat(parts[4]),
+                        awaitingConfirmation: true
+                    };
+                    setPendingBid(newPendingBid);
+
+                    // Hiển thị phần message cho user (bỏ dòng đầu)
+                    const displayMessage = botReply.split("\n").slice(2).join("\n");
+                    setMessages((prev) => [...prev, { id: Date.now() + 1, text: displayMessage, sender: "bot" }]);
+                }
+            } else {
+                // Response bình thường hoặc kết quả đặt giá
+                // Clear pendingBid nếu đã xử lý xong (có/không)
+                if (pendingBid && (botReply.includes("✅") || botReply.includes("🔙") || botReply.includes("❌"))) {
+                    setPendingBid(null);
+                }
+
+                setMessages((prev) => [...prev, { id: Date.now() + 1, text: botReply, sender: "bot" }]);
+            }
         } catch (error) {
             setMessages((prev) => [...prev, { id: Date.now() + 1, text: "Xin lỗi, hệ thống đang bận.", sender: "bot", isError: true }]);
         } finally {
@@ -58,7 +91,14 @@ export default function AIChatWidget({ externalOpen, onClose, currentUserId }) {
                         style={{ height: "500px", maxHeight: "80vh" }}
                     >
                         <div className="bg-neutral-900 dark:bg-neutral-800 p-4 flex items-center justify-between text-white">
-                            <span className="font-semibold flex items-center gap-2">🤖 Trợ lý AI</span>
+                            <span className="font-semibold flex items-center gap-2">
+                                🤖 Trợ lý AI
+                                {pendingBid && (
+                                    <span className="text-xs bg-yellow-500 text-black px-2 py-0.5 rounded-full">
+                                        Đang chờ xác nhận
+                                    </span>
+                                )}
+                            </span>
                             <button onClick={handleClose} className="hover:bg-white/20 p-1 rounded-full transition">
                                 <X size={18} />
                             </button>
@@ -69,13 +109,11 @@ export default function AIChatWidget({ externalOpen, onClose, currentUserId }) {
                                 <div key={msg.id} className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
                                     <div
                                         className={`max-w-[80%] p-3 rounded-2xl text-sm leading-relaxed
-                                            ${msg.sender === "user" 
-                                            ? "bg-blue-600 text-white rounded-br-none"
-                                            // 👇 THÊM class 'whitespace-pre-wrap' VÀO DÒNG DƯỚI ĐÂY
-                                            : "bg-white dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 border border-neutral-200 dark:border-neutral-700 rounded-bl-none shadow-sm whitespace-pre-wrap"
-                                        }`}
+                                            ${msg.sender === "user"
+                                                ? "bg-blue-600 text-white rounded-br-none"
+                                                : "bg-white dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 border border-neutral-200 dark:border-neutral-700 rounded-bl-none shadow-sm whitespace-pre-wrap"
+                                            }`}
                                     >
-                                        {/* Nếu muốn sạch sẽ hơn, bạn có thể dùng hàm replace để xóa dấu ** nếu AI lỡ gửi */}
                                         {msg.text.replace(/\*\*/g, "")}
                                     </div>
                                 </div>
@@ -97,7 +135,7 @@ export default function AIChatWidget({ externalOpen, onClose, currentUserId }) {
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyDown={handleKeyDown}
-                                placeholder="Hỏi về sản phẩm..."
+                                placeholder={pendingBid ? "Trả lời 'Có' hoặc 'Không'..." : "Hỏi về sản phẩm..."}
                                 className="flex-1 bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 px-4 py-2.5 rounded-full text-sm outline-none focus:ring-2 focus:ring-blue-500/50"
                             />
                             <button onClick={handleSend} disabled={!input.trim() || isLoading} className="p-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors">

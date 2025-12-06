@@ -24,11 +24,14 @@ import Settings from "../settings/Settings.jsx";
 import Utilities from "../utils/Utilities.jsx";
 import AboutUs from "../about/AboutUs.jsx";
 import { SearchDropdown } from "../widget/screens/searchAuction.jsx";
-import PostAuction from "../postAuction/screen/PostAuction.jsx";
+import PostAuction from "../seller/screens/PostAuction.jsx";
+import ManageAuction from "../seller/screens/ManageAuction.jsx";
+import SellerSideBar from "../slidebar/screens/SellerSideBar.jsx";
 import { useNavigate, useParams, createSearchParams } from "react-router-dom";
 import { ChatProvider } from "../widget/screens/ChatContext.jsx";
 import { NAV_URL_MAPPING } from "../slidebar/lib/NAV_URL_MAPPING.js";
 import { auctionMenu } from "../slidebar/lib/auctionMenu.js";
+import { sellerMenu } from "../slidebar/lib/sellerMenu.js";
 import { useTranslation } from "react-i18next";
 import UtilityMenu from "../widget/screens/UtilityMenu.jsx";
 
@@ -48,6 +51,7 @@ export default function MerchantProfile() {
     const [leftKey, setLeftKey] = React.useState("user");
     const [activeSub, setActiveSub] = React.useState("user");
     const [auctionView, setAuctionView] = React.useState("Dashboard");
+    const [sellerView, setSellerView] = React.useState("Manage Auction");
 
     const navigate = useNavigate();
     const params = useParams();
@@ -55,6 +59,7 @@ export default function MerchantProfile() {
     const slug = params?.slug;
 
     const [auctionSidebarOpen, setAuctionSidebarOpen] = React.useState(false);
+    const [sellerSidebarOpen, setSellerSidebarOpen] = React.useState(false);
     const [scrolled, setScrolled] = React.useState(false);
     const [isEditing, setIsEditing] = React.useState(false);
 
@@ -144,6 +149,17 @@ export default function MerchantProfile() {
                     setAuctionView("Dashboard");
                 }
             }
+        } else if (category === "seller") {
+            if (!slug) {
+                navigate("/dashboard/seller/manage", { replace: true });
+            } else {
+                const foundItem = sellerMenu.find(item => item.path === slug);
+                if (foundItem) {
+                    setSellerView(foundItem.label);
+                } else {
+                    setSellerView("Manage Auction");
+                }
+            }
         } else if (category === "user") {
             // Reset activeSub to 'user' when navigating to /dashboard/user
             setActiveSub("user");
@@ -155,10 +171,21 @@ export default function MerchantProfile() {
             let path = NAV_URL_MAPPING?.[key] || key;
             if (key === "auction") {
                 path = "auctions/main";
+            } else if (key === "seller") {
+                path = "seller/manage";
             }
             navigate(`/dashboard/${path}`);
         } else {
             setLeftKey(key);
+        }
+    };
+
+    const handleSellerMenuSelect = (label) => {
+        const item = sellerMenu.find(i => i.label === label);
+        if (item) {
+            navigate(`/dashboard/seller/${item.path}`);
+        } else {
+            setSellerView(label);
         }
     };
 
@@ -287,8 +314,10 @@ export default function MerchantProfile() {
                                 <CardShell variant="custom" customLeft={<AuctionSideBar active={auctionView} onSelect={handleAuctionMenuSelect} isOpen={auctionSidebarOpen} onToggle={() => setAuctionSidebarOpen(!auctionSidebarOpen)} />} plClass={`transition-all duration-500 ${auctionSidebarOpen ? "!pl-[220px]" : "!pl-4"}`}>
                                     <AuctionView view={auctionView} />
                                 </CardShell>
-                            ) : leftKey === "post" ? (
-                                <CardShell variant="custom" plClass="pl-0 md:pl-[4%]" stickyTop={contentPadTop}><PostAuction /></CardShell>
+                            ) : leftKey === "seller" ? (
+                                <CardShell variant="custom" customLeft={<SellerSideBar active={sellerView} onSelect={handleSellerMenuSelect} isOpen={sellerSidebarOpen} onToggle={() => setSellerSidebarOpen(!sellerSidebarOpen)} />} plClass={`transition-all duration-500 ${sellerSidebarOpen ? "!pl-[220px]" : "!pl-4"}`}>
+                                    {sellerView === "Manage Auction" ? <ManageAuction /> : <PostAuction />}
+                                </CardShell>
                             ) : leftKey === "user" ? (
                                 <CardShell subKey={activeSub} onSubChange={setActiveSub} plClass="pl-0 md:pl-[4%]" stickyTop={contentPadTop}>{renderSubPage()}</CardShell>
                             ) : leftKey === "trader" ? (
