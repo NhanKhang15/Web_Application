@@ -1,22 +1,13 @@
-// File: AuctionCard.jsx (Component con MỚI)
+// File: AuctionCard.jsx - Redesigned Premium Auction Card
 import React from "react";
-import { ArrowUp } from "lucide-react";
+import { ArrowUpRight, MapPin, ImageOff } from "lucide-react";
 import { PostAuctionApi } from "../../../seller/lib/PostAuctionApi.js";
 import { useTranslation } from "react-i18next";
 
 // helper
-const fmtDate = (s) => {
-    try {
-        const d = new Date(s);
-        return d.getFullYear();
-    } catch {
-        return s || "";
-    }
-};
-
 const formatCurrency = (amount) => {
-    if (!amount) return "0.00";
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+    if (!amount) return "0 ₫";
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
 };
 
 /**
@@ -30,13 +21,10 @@ export default function AuctionCard({ item, onClick, aosDelay }) {
     const { t } = useTranslation();
 
     // Extract data with fallbacks
-    // API returns: auctionId, itemId, currentPrice, buyNowPrice, title, thumbnail, sellerName
     const currentBid = item.currentPrice || 0;
-    const currency = item.currency || "AED";
-    const sellerName = item.sellerName || `Seller #${item.sellerId || "?"}`;
+    const sellerName = item.sellerName || `${t('seller_prefix')}${item.sellerId || "?"}`;
     const location = item.location || t('Unknown_location');
-    const title = item.title || "Untitled";
-    const year = item.year || ""; // Year not in API yet
+    const title = item.title || t('untitled');
     const price = item.buyNowPrice || 0;
 
     // API returns 'thumbnail' which is the image URL
@@ -48,57 +36,83 @@ export default function AuctionCard({ item, onClick, aosDelay }) {
     return (
         <div
             onClick={onClick}
-            className="bg-[#F4F6F8] dark:bg-[#14191F] rounded-xl p-4 flex flex-col gap-4 cursor-pointer hover:shadow-md transition-shadow duration-300"
+            className="group relative bg-gradient-to-br from-[#1a1f2e] to-[#0d1117] rounded-2xl overflow-hidden cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-red-500/10 border border-gray-800/50 hover:border-red-500/30"
             data-aos="fade-up"
             data-aos-delay={aosDelay}
+            style={{ minHeight: '380px' }}
         >
-            {/* Top Section: Current Bid */}
-            <div className="flex flex-col items-center justify-center py-2">
-                <div className="flex items-center gap-1">
-                    <ArrowUp className="w-8 h-8 text-[#4ADE80]" strokeWidth={3} />
-                    <div className="flex flex-col items-start">
-                        <span className="text-2xl font-bold text-[#EF4444] leading-none">{currentBid}</span>
-                        <span className="text-xs font-medium text-gray-500 uppercase">{currency}</span>
+            {/* Image Section - Takes ~65% of card */}
+            <div className="relative h-72 w-full overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900">
+                {imgUrl ? (
+                    <>
+                        <img
+                            src={imgUrl}
+                            alt={title}
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        />
+                        {/* Gradient Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#0d1117] via-transparent to-transparent opacity-80" />
+                    </>
+                ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-gray-600">
+                        <ImageOff className="w-12 h-12" />
+                        <span className="text-sm font-medium">{t('No_image')}</span>
+                    </div>
+                )}
+
+                {/* Current Bid Badge - Floating on Image */}
+                <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-black/60 backdrop-blur-md rounded-full px-3 py-1.5 border border-green-500/30">
+                    <ArrowUpRight className="w-4 h-4 text-green-400" strokeWidth={2.5} />
+                    <span className="text-sm font-bold text-green-400">{formatCurrency(currentBid)}</span>
+                </div>
+            </div>
+
+            {/* Content Section - Compact */}
+            <div className="p-3 flex flex-col gap-2">
+                {/* Title & Price Row */}
+                <div className="flex items-start justify-between gap-2">
+                    <h3 className="text-base font-semibold text-white leading-tight line-clamp-1 group-hover:text-red-400 transition-colors duration-300 flex-1">
+                        {title}
+                    </h3>
+                    {price > 0 && (
+                        <span className="text-sm font-bold text-orange-400 whitespace-nowrap">
+                            {formatCurrency(price)}
+                        </span>
+                    )}
+                </div>
+
+                {/* Seller Info - Compact */}
+                <div className="flex items-center justify-between pt-1 border-t border-gray-800">
+                    <div className="flex items-center gap-2">
+                        <div className="relative">
+                            <img
+                                src={`https://i.pravatar.cc/100?u=${item.sellerId || "x"}`}
+                                alt={sellerName}
+                                className="w-7 h-7 rounded-full object-cover ring-1 ring-gray-700"
+                            />
+                            <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full border border-[#0d1117]" />
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="text-xs font-medium text-gray-300 leading-tight">
+                                {sellerName}
+                            </span>
+                            <div className="flex items-center gap-0.5 text-gray-500">
+                                <MapPin className="w-2.5 h-2.5" />
+                                <span className="text-[10px]">{location}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Bid Button */}
+                    <div className="w-7 h-7 rounded-full bg-red-500/10 flex items-center justify-center group-hover:bg-red-500 transition-all duration-300">
+                        <ArrowUpRight className="w-3.5 h-3.5 text-red-400 group-hover:text-white transition-colors" />
                     </div>
                 </div>
             </div>
 
-            {/* Middle Section: Seller Info */}
-            <div className="flex items-center gap-3 justify-center">
-                <img
-                    src={`https://i.pravatar.cc/100?u=${item.sellerId || "x"}`}
-                    alt={sellerName}
-                    className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
-                />
-                <div className="flex flex-col">
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{sellerName}</span>
-                    <span className="text-xs text-gray-500">{location}</span>
-                </div>
-            </div>
-
-            {/* Bottom Section: Image & Details */}
-            <div className="flex flex-col gap-2 mt-2">
-                <div className="aspect-[4/3] w-full overflow-hidden rounded-lg bg-gray-200 dark:bg-gray-800">
-                    {imgUrl ? (
-                        <img
-                            src={imgUrl}
-                            alt={title}
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                        />
-                    ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-                            {t('No_image')}
-                        </div>
-                    )}
-                </div>
-
-                <div className="flex flex-col gap-0.5">
-                    <h3 className="text-lg font-medium text-[#374151] dark:text-gray-100 leading-tight">{title}</h3>
-                    <span className="text-sm text-gray-500">{year}</span>
-                    <span className="text-base font-semibold text-[#111827] dark:text-white mt-1">
-                        {formatCurrency(price)}
-                    </span>
-                </div>
+            {/* Hover Glow Effect */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+                <div className="absolute inset-0 bg-gradient-to-t from-red-500/5 via-transparent to-transparent" />
             </div>
         </div>
     );

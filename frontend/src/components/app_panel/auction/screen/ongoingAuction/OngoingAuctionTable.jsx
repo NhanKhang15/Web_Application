@@ -1,11 +1,12 @@
 import React from "react";
 import { Clock, MessageSquare, StopCircle, Trash2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 // Import Hook logic (Lưu ý đường dẫn ../.. để về thư mục auction/hook)
-import { useAuction } from "../../hook/useAuction.jsx"; 
+import { useAuction } from "../../hook/useAuction.jsx";
 
 // Helper format tiền tệ
 const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
 };
 
 // Helper format thời gian
@@ -19,7 +20,7 @@ const formatTime = (totalSeconds) => {
 };
 
 // --- Component con: Dòng dữ liệu (Row) ---
-const AuctionTableRow = ({ item }) => {
+const AuctionTableRow = ({ item, t }) => {
     // Gọi Hook useAuction cho từng sản phẩm
     const { secondsLeft, currentBid, isEnded } = useAuction({
         auctionId: item.id,
@@ -39,7 +40,7 @@ const AuctionTableRow = ({ item }) => {
                     <MessageSquare className="w-4 h-4" />
                 </div>
             </td>
-            
+
             {/* Title */}
             <td className="px-6 py-4">
                 <div className="font-semibold text-neutral-800 dark:text-neutral-200 w-56 truncate" title={item.title}>
@@ -62,14 +63,14 @@ const AuctionTableRow = ({ item }) => {
             <td className="px-6 py-4 font-medium text-neutral-800 dark:text-neutral-200">
                 {formatCurrency(item.base)}
             </td>
-            
+
             {/* Timer (Realtime từ Hook) */}
             <td className="px-6 py-4">
                 <div className="flex items-center gap-1 text-xs text-neutral-500 mb-1">
-                    <Clock className="w-3 h-3" /> Ends in
+                    <Clock className="w-3 h-3" /> {t("ends_in")}
                 </div>
                 <div className={`font-bold font-mono text-lg ${isEnded ? "text-gray-400" : secondsLeft < 300 ? "text-red-600 animate-pulse" : "text-blue-600"}`}>
-                    {isEnded ? "ENDED" : formatTime(secondsLeft)}
+                    {isEnded ? t("ended") : formatTime(secondsLeft)}
                 </div>
             </td>
 
@@ -82,10 +83,10 @@ const AuctionTableRow = ({ item }) => {
             <td className="px-6 py-4">
                 <div className="flex flex-col gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
                     <button className="flex items-center gap-2 text-[10px] font-bold text-neutral-600 hover:text-red-600">
-                        <StopCircle className="w-3 h-3" /> STOP
+                        <StopCircle className="w-3 h-3" /> {t("stop")}
                     </button>
                     <button className="flex items-center gap-2 text-[10px] font-bold text-neutral-400 hover:text-red-600">
-                        <Trash2 className="w-3 h-3" /> CANCEL
+                        <Trash2 className="w-3 h-3" /> {t("cancel_action")}
                     </button>
                 </div>
             </td>
@@ -95,25 +96,27 @@ const AuctionTableRow = ({ item }) => {
 
 // --- Component chính: Table Container ---
 export default function OngoingAuctionTable({ data }) {
+    const { t } = useTranslation();
+
     return (
         <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm overflow-hidden border border-neutral-200 dark:border-neutral-800">
             <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left min-w-[900px]">
                     <thead className="text-xs text-neutral-400 uppercase bg-neutral-50 dark:bg-neutral-800/50 border-b dark:border-neutral-800">
                         <tr>
-                            <th className="px-6 py-4 font-medium">Id</th>
-                            <th className="px-6 py-4 font-medium">Title</th>
-                            <th className="px-6 py-4 font-medium">Min Inc</th>
-                            <th className="px-6 py-4 font-medium">Trader</th>
-                            <th className="px-6 py-4 font-medium">Base Price</th>
-                            <th className="px-6 py-4 font-medium">Timer</th>
-                            <th className="px-6 py-4 font-medium">Current Price</th>
-                            <th className="px-6 py-4 font-medium">Action</th>
+                            <th className="px-6 py-4 font-medium">{t("th_id")}</th>
+                            <th className="px-6 py-4 font-medium">{t("th_title")}</th>
+                            <th className="px-6 py-4 font-medium">{t("th_min_inc")}</th>
+                            <th className="px-6 py-4 font-medium">{t("th_trader")}</th>
+                            <th className="px-6 py-4 font-medium">{t("th_base_price")}</th>
+                            <th className="px-6 py-4 font-medium">{t("th_timer")}</th>
+                            <th className="px-6 py-4 font-medium">{t("th_current_price")}</th>
+                            <th className="px-6 py-4 font-medium">{t("th_action")}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {data.map((item) => (
-                            <AuctionTableRow key={item.id} item={item} />
+                            <AuctionTableRow key={item.id} item={item} t={t} />
                         ))}
                     </tbody>
                 </table>

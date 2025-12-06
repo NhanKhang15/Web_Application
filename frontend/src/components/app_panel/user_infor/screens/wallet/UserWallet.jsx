@@ -1,5 +1,6 @@
 // frontend/src/components/dashboard/user_infor/screens/wallet/UserWallet.jsx
 import React, { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import StatCard from "./StatCard.jsx";
 import { BsCreditCard } from "react-icons/bs";
 import { FaHandHoldingUsd } from "react-icons/fa";
@@ -11,10 +12,12 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 
 export default function UserWallet({ profile }) {
+    const { t } = useTranslation();
+
     useEffect(() => {
-            AOS.init({ duration: 600, offset: 100, once: true });
-        }, []);
-    
+        AOS.init({ duration: 600, offset: 100, once: true });
+    }, []);
+
     return (
         <div className="flex flex-col gap-12 pt-12 pb-8 relative w-full overflow-x-hidden">
             {/* Header */}
@@ -32,42 +35,42 @@ export default function UserWallet({ profile }) {
                 />
                 <div className="leading-tight">
                     <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
-                        {profile?.fullName || "Unknown User"}
+                        {profile?.fullName || t("unknown_user")}
                     </h2>
                     <p className="text-sm text-neutral-500">
-                        {profile?.location || profile?.address || "Location unknown"}
+                        {profile?.location || profile?.address || t("location_unknown")}
                     </p>
                 </div>
             </motion.div>
 
             {/* Wallet Overview */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10 pt-4">
-                
+
                 {/* Credit Limit */}
                 <StatCard
-                    label="Credit Limit"
-                    value="$50,000"
+                    label={t("credit_limit")}
+                    value="1.250.000.000 ₫"
                     icon={<BsCreditCard className="text-blue-500" />}
                 />
 
                 {/* Deposit Amount */}
                 <StatCard
-                    label="Deposit Amount"
-                    value="$40,250"
+                    label={t("deposit_amount")}
+                    value="1.006.250.000 ₫"
                     icon={<FaHandHoldingUsd className="text-blue-500" />}
                 />
 
                 {/* Highest Bid Amount */}
                 <StatCard
-                    label="Highest Bid Amount"
-                    value="$154,300"
+                    label={t("highest_bid_amount")}
+                    value="3.857.500.000 ₫"
                     icon={<RiMoneyDollarCircleFill className="text-red-500" />}
                 />
 
                 {/* Average Bid Price */}
                 <StatCard
-                    label="Average Bid Price"
-                    value="$12,450"
+                    label={t("average_bid_price")}
+                    value="311.250.000 ₫"
                     icon={<IoAnalyticsSharp className="text-green-500" />}
                 />
 
@@ -75,3 +78,4 @@ export default function UserWallet({ profile }) {
         </div>
     );
 }
+

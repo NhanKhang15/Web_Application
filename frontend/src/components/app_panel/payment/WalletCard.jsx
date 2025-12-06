@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { Button } from "../user_infor/ui/Button";
 import { getToken, API_BASE_URL } from "../../../lib/api_url";
 import { RefreshCw, CreditCard, History } from "lucide-react";
@@ -8,6 +9,7 @@ import { Stomp } from '@stomp/stompjs';
 import { useUserProfile } from "../user_infor/lib/useUserProfile";
 
 export default function WalletCard() {
+    const { t } = useTranslation();
     const [balance, setBalance] = useState(0);
     const [loading, setLoading] = useState(false);
     const [amount, setAmount] = useState(""); // Raw numeric value
@@ -41,6 +43,47 @@ export default function WalletCard() {
     const handleQuickAmount = (val) => {
         setAmount(val.toString());
         setDisplayAmount(formatNumberWithSeparator(val));
+    };
+
+    // Convert number to English words
+    const numberToEnglishWords = (num) => {
+        if (!num || num === "0" || num === "") return "";
+
+        const ones = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+            "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
+        const tens = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
+        const scales = ["", "thousand", "million", "billion", "trillion"];
+
+        const number = parseInt(num.toString().replace(/\./g, ""), 10);
+        if (isNaN(number) || number === 0) return "";
+        if (number < 0) return "Invalid negative number";
+
+        const readHundreds = (n) => {
+            if (n === 0) return "";
+            if (n < 20) return ones[n];
+            if (n < 100) {
+                return tens[Math.floor(n / 10)] + (n % 10 !== 0 ? "-" + ones[n % 10] : "");
+            }
+            return ones[Math.floor(n / 100)] + " hundred" + (n % 100 !== 0 ? " " + readHundreds(n % 100) : "");
+        };
+
+        const groups = [];
+        let temp = number;
+        while (temp > 0) {
+            groups.push(temp % 1000);
+            temp = Math.floor(temp / 1000);
+        }
+
+        let result = "";
+        for (let i = groups.length - 1; i >= 0; i--) {
+            if (groups[i] > 0) {
+                result += readHundreds(groups[i]) + " " + scales[i] + " ";
+            }
+        }
+
+        result = result.trim();
+        result = result.charAt(0).toUpperCase() + result.slice(1);
+        return result + " VND";
     };
 
     // Convert number to Vietnamese words (like banks)
@@ -101,6 +144,12 @@ export default function WalletCard() {
         // Capitalize first letter
         result = result.charAt(0).toUpperCase() + result.slice(1);
         return result + " đồng";
+    };
+
+    // Wrapper function that uses the appropriate language
+    const numberToWords = (num) => {
+        const currentLang = localStorage.getItem("lang") || "vi";
+        return currentLang === "en" ? numberToEnglishWords(num) : numberToVietnameseWords(num);
     };
 
     useEffect(() => {
@@ -195,7 +244,7 @@ export default function WalletCard() {
 
     const handleTopup = async () => {
         if (!amount || isNaN(amount) || Number(amount) < 10000) {
-            alert("Số tiền nạp tối thiểu 10.000 VND");
+            alert(t("wallet_min_error"));
             return;
         }
 
@@ -213,7 +262,7 @@ export default function WalletCard() {
 
             if (!res.ok) {
                 const msg = await res.text();
-                alert("Lỗi: " + msg);
+                alert(t("wallet_error_prefix") + " " + msg);
                 setLoading(false);
                 return;
             }
@@ -222,7 +271,7 @@ export default function WalletCard() {
             window.location.href = data.checkoutUrl;
         } catch (err) {
             console.error(err);
-            alert("Có lỗi xảy ra, vui lòng thử lại.");
+            alert(t("wallet_error_generic"));
             setLoading(false);
         }
     };
@@ -240,7 +289,7 @@ export default function WalletCard() {
             >
                 <div className="flex items-center justify-between mb-2">
                     <h2 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100">
-                        Ví của bạn
+                        {t("wallet_your_wallet")}
                     </h2>
                     <button
                         onClick={fetchData}
@@ -249,7 +298,7 @@ export default function WalletCard() {
                         <RefreshCw size={18} className="text-neutral-500" />
                     </button>
                 </div>
-                <p className="text-sm text-neutral-500 dark:text-neutral-400">Số dư hiện tại</p>
+                <p className="text-sm text-neutral-500 dark:text-neutral-400">{t("wallet_current_balance")}</p>
                 <p className="text-4xl font-bold text-green-600 dark:text-green-400 mt-1">
                     {formatCurrency(balance)}
                 </p>
@@ -263,25 +312,25 @@ export default function WalletCard() {
                 className="p-6 rounded-xl bg-white dark:bg-neutral-900 shadow-sm border border-neutral-200 dark:border-neutral-800"
             >
                 <h3 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100 mb-4 flex items-center gap-2">
-                    <CreditCard size={20} /> Nạp tiền vào ví
+                    <CreditCard size={20} /> {t("wallet_topup")}
                 </h3>
 
                 <div className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                            Nhập số tiền (VND)
+                            {t("wallet_enter_amount")}
                         </label>
                         <input
                             type="text"
                             inputMode="numeric"
-                            placeholder="Tối thiểu 10.000"
+                            placeholder={t("wallet_min_amount")}
                             value={displayAmount}
                             onChange={handleAmountChange}
                             className="w-full px-4 py-3 border rounded-lg dark:bg-neutral-800 dark:border-neutral-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
                         />
                         {amount && (
                             <p className="mt-2 text-sm italic text-neutral-600 dark:text-neutral-400">
-                                Bằng chữ: <span className="font-medium text-blue-600 dark:text-blue-400">{numberToVietnameseWords(amount)}</span>
+                                {t("wallet_amount_in_words")} <span className="font-medium text-blue-600 dark:text-blue-400">{numberToWords(amount)}</span>
                             </p>
                         )}
                     </div>
@@ -303,10 +352,10 @@ export default function WalletCard() {
                         disabled={loading}
                         className="w-full h-12 text-lg font-semibold !bg-purple-600 hover:!bg-purple-700 !text-white shadow-md hover:shadow-lg transition-all"
                     >
-                        {loading ? "Processing..." : "Pay"}
+                        {loading ? t("wallet_processing") : t("wallet_pay")}
                     </Button>
                     <p className="text-xs text-center text-neutral-500">
-                        Bạn sẽ được chuyển hướng đến trang thanh toán an toàn của Stripe.
+                        {t("wallet_stripe_redirect")}
                     </p>
                 </div>
             </motion.div>
@@ -319,21 +368,21 @@ export default function WalletCard() {
                 className="p-6 rounded-xl bg-white dark:bg-neutral-900 shadow-sm border border-neutral-200 dark:border-neutral-800"
             >
                 <h3 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100 mb-4 flex items-center gap-2">
-                    <History size={20} /> Lịch sử giao dịch
+                    <History size={20} /> {t("wallet_transaction_history")}
                 </h3>
 
                 {transactions.length === 0 ? (
-                    <p className="text-center text-neutral-500 py-8">Chưa có giao dịch nào.</p>
+                    <p className="text-center text-neutral-500 py-8">{t("wallet_no_transactions")}</p>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left">
                             <thead className="text-xs text-neutral-500 uppercase bg-neutral-50 dark:bg-neutral-800">
                                 <tr>
-                                    <th className="px-4 py-3">Ngày giờ</th>
-                                    <th className="px-4 py-3 text-right">Số tiền</th>
-                                    <th className="px-4 py-3">Chiều</th>
-                                    <th className="px-4 py-3">Stripe ID</th>
-                                    <th className="px-4 py-3">Ghi chú</th>
+                                    <th className="px-4 py-3">{t("wallet_th_datetime")}</th>
+                                    <th className="px-4 py-3 text-right">{t("wallet_th_amount")}</th>
+                                    <th className="px-4 py-3">{t("wallet_th_direction")}</th>
+                                    <th className="px-4 py-3">{t("wallet_th_stripe_id")}</th>
+                                    <th className="px-4 py-3">{t("wallet_th_note")}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -350,7 +399,7 @@ export default function WalletCard() {
                                             <span className={`px-2 py-1 rounded text-xs ${tx.direction === 'IN' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
                                                 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                                                 }`}>
-                                                {tx.direction === 'IN' ? 'Nạp vào' : 'Rút ra'}
+                                                {tx.direction === 'IN' ? t("wallet_direction_in") : t("wallet_direction_out")}
                                             </span>
                                         </td>
                                         <td className="px-4 py-3 text-neutral-500 dark:text-neutral-400 font-mono text-xs">
@@ -369,3 +418,4 @@ export default function WalletCard() {
         </div>
     );
 }
+

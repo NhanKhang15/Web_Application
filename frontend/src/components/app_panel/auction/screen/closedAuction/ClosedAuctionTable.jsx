@@ -1,13 +1,14 @@
 import React from "react";
 import { CheckCircle2, XCircle, Eye, DollarSign, User } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 // Helper format tiền
 const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
 };
 
 // Component con: Dòng dữ liệu (Row)
-const ClosedAuctionRow = ({ item }) => {
+const ClosedAuctionRow = ({ item, t }) => {
     return (
         <tr className="border-b dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors group">
             {/* ID */}
@@ -16,14 +17,14 @@ const ClosedAuctionRow = ({ item }) => {
                     {item.id}
                 </span>
             </td>
-            
+
             {/* Title */}
             <td className="px-6 py-4">
                 <div className="font-semibold text-neutral-800 dark:text-neutral-200 w-56 truncate" title={item.title}>
                     {item.title}
                 </div>
                 <div className="text-xs text-neutral-400 mt-1">
-                    Ended: {new Date(item.endsAt).toLocaleDateString()}
+                    {t("ended_on")} {new Date(item.endsAt).toLocaleDateString()}
                 </div>
             </td>
 
@@ -36,11 +37,11 @@ const ClosedAuctionRow = ({ item }) => {
             <td className="px-6 py-4">
                 {item.isSold ? (
                     <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium border border-green-200">
-                        <CheckCircle2 className="w-3 h-3" /> Sold
+                        <CheckCircle2 className="w-3 h-3" /> {t("sold")}
                     </span>
                 ) : (
                     <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-red-100 text-red-700 text-xs font-medium border border-red-200">
-                        <XCircle className="w-3 h-3" /> Unsold
+                        <XCircle className="w-3 h-3" /> {t("unsold")}
                     </span>
                 )}
             </td>
@@ -60,7 +61,7 @@ const ClosedAuctionRow = ({ item }) => {
             {/* Actions */}
             <td className="px-6 py-4">
                 <button className="flex items-center gap-2 text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">
-                    <Eye className="w-3 h-3" /> View Result
+                    <Eye className="w-3 h-3" /> {t("view_result")}
                 </button>
             </td>
         </tr>
@@ -69,23 +70,25 @@ const ClosedAuctionRow = ({ item }) => {
 
 // Component chính: Table Container
 export default function ClosedAuctionTable({ data }) {
+    const { t } = useTranslation();
+
     return (
         <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm overflow-hidden border border-neutral-200 dark:border-neutral-800">
             <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left min-w-[900px]">
                     <thead className="text-xs text-neutral-400 uppercase bg-neutral-50 dark:bg-neutral-800/50 border-b dark:border-neutral-800">
                         <tr>
-                            <th className="px-6 py-4 font-medium">Id</th>
-                            <th className="px-6 py-4 font-medium">Title</th>
-                            <th className="px-6 py-4 font-medium">Final Price</th>
-                            <th className="px-6 py-4 font-medium">Status</th>
-                            <th className="px-6 py-4 font-medium">Winner</th>
-                            <th className="px-6 py-4 font-medium">Action</th>
+                            <th className="px-6 py-4 font-medium">{t("th_id")}</th>
+                            <th className="px-6 py-4 font-medium">{t("th_title")}</th>
+                            <th className="px-6 py-4 font-medium">{t("th_final_price")}</th>
+                            <th className="px-6 py-4 font-medium">{t("th_status")}</th>
+                            <th className="px-6 py-4 font-medium">{t("th_winner")}</th>
+                            <th className="px-6 py-4 font-medium">{t("th_action")}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {data.map((item) => (
-                            <ClosedAuctionRow key={item.id} item={item} />
+                            <ClosedAuctionRow key={item.id} item={item} t={t} />
                         ))}
                     </tbody>
                 </table>
