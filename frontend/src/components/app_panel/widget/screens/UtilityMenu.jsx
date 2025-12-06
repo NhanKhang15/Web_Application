@@ -59,6 +59,7 @@ export default function UtilityMenu({ currentUserId }) {
             <AIChatWidget
                 externalOpen={activeWidget === 'ai'}
                 onClose={() => setActiveWidget(null)}
+                currentUserId={currentUserId}
             />
 
             <SellerChatWidget
