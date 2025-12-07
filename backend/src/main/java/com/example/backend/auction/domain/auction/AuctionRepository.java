@@ -92,7 +92,8 @@ public interface AuctionRepository extends JpaRepository<Auction, Integer> {
                     u.Username AS sellerName,
                     a.StartingPrice AS startingPrice,
                     a.BuyNowPrice AS buyNowPrice,
-                    a.StartDate AS startDate
+                    a.StartDate AS startDate,
+                    a.EndDate AS endDate
                 FROM Auctions a
                 JOIN AuctionItems ai ON a.ItemID = ai.ItemID
                 JOIN Users u ON ai.SellerID = u.UserID

@@ -301,7 +301,6 @@ export default function MerchantProfile() {
                         </div>
                     </div>
                 </motion.div>
-
                 {/* BODY */}
                 <div className="flex flex-1 min-h-0">
                     <motion.div className="hidden md:block shrink-0 sticky" style={{ top: contentPadTop, willChange: "top", height: useTransform(scrollY, [0, 160], [`calc(100vh - ${EXPANDED_HEADER_VH}vh)`, `calc(100vh - ${COLLAPSED_HEADER_VH}px)`]) }}>
