@@ -8,7 +8,7 @@ const formatCurrency = (amount) => {
 };
 
 // Component con: Dòng dữ liệu (Row)
-const ClosedAuctionRow = ({ item, t }) => {
+const ClosedAuctionRow = ({ item, t, onViewResult }) => {
     return (
         <tr className="border-b dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors group">
             {/* ID */}
@@ -60,7 +60,7 @@ const ClosedAuctionRow = ({ item, t }) => {
 
             {/* Actions */}
             <td className="px-6 py-4">
-                <button className="flex items-center gap-2 text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">
+                <button onClick={() => onViewResult && onViewResult(item)} className="flex items-center gap-2 text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">
                     <Eye className="w-3 h-3" /> {t("view_result")}
                 </button>
             </td>
@@ -69,7 +69,7 @@ const ClosedAuctionRow = ({ item, t }) => {
 };
 
 // Component chính: Table Container
-export default function ClosedAuctionTable({ data }) {
+export default function ClosedAuctionTable({ data, onViewResult }) {
     const { t } = useTranslation();
 
     return (
@@ -88,7 +88,7 @@ export default function ClosedAuctionTable({ data }) {
                     </thead>
                     <tbody>
                         {data.map((item) => (
-                            <ClosedAuctionRow key={item.id} item={item} t={t} />
+                            <ClosedAuctionRow key={item.id} item={item} t={t} onViewResult={onViewResult} />
                         ))}
                     </tbody>
                 </table>
