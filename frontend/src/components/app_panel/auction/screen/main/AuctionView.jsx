@@ -13,7 +13,7 @@ import AuctionToolbar from "../../wid/componentView/AuctionToolbar.jsx";
 import AuctionGrid from "../../wid/componentView/AuctionGrid.jsx";
 import { useTranslation } from "react-i18next";
 import { getJSON } from "../../../../../lib/api_url.js";
-import OngoingAuctions from "../ongoingAuction/OngoingAuctions.jsx";
+import ScheduledAuctions from "../scheduledAuction/ScheduledAuctions.jsx";
 import ClosedAuctions from "../closedAuction/ClosedAuctions.jsx";
 
 export default function AuctionView() {
@@ -248,7 +248,7 @@ export default function AuctionView() {
                 >
                     <ArrowLeft className="w-4 h-4" /> {t('Back_to_Auctions')}
                 </button>
-                <OngoingAuctions />
+                <ScheduledAuctions />
             </div>
         );
     }
