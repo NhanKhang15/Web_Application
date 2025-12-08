@@ -21,12 +21,16 @@ const formatTime = (totalSeconds) => {
 
 // --- Component con: Dòng dữ liệu (Row) ---
 const AuctionTableRow = ({ item, t }) => {
+    // Guard: Nếu endsAt không hợp lệ, dùng giá trị mặc định (1 tiếng sau)
+    const endsAtDate = item.endsAt ? new Date(item.endsAt) : new Date(Date.now() + 3600000);
+    const endsAtISO = endsAtDate instanceof Date && !isNaN(endsAtDate) ? endsAtDate.toISOString() : new Date(Date.now() + 3600000).toISOString();
+
     // Gọi Hook useAuction cho từng sản phẩm
     const { secondsLeft, currentBid, isEnded } = useAuction({
         auctionId: item.id,
         initialPrice: item.base,
         minIncrement: item.increment,
-        endsAt: new Date(item.endsAt).toISOString(),
+        endsAt: endsAtISO,
     });
 
     return (
@@ -95,7 +99,7 @@ const AuctionTableRow = ({ item, t }) => {
 };
 
 // --- Component chính: Table Container ---
-export default function OngoingAuctionTable({ data }) {
+export default function ScheduledAuctionTable({ data }) {
     const { t } = useTranslation();
 
     return (
