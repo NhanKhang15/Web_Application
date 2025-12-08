@@ -16,4 +16,6 @@ public interface ScheduledAuctionDto {
     Double getBuyNowPrice();
 
     LocalDateTime getStartDate(); // Timer
+
+    LocalDateTime getEndDate(); // Ngày kết thúc (cần cho countdown)
 }

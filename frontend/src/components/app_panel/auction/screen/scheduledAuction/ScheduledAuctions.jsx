@@ -7,10 +7,10 @@ import AOS from "aos";
 // Components
 import AuctionToolbar from "../../wid/componentView/AuctionToolbar.jsx";
 import FilterSheet from "../../wid/FilterSheet.jsx";
-import OngoingAuctionTable from "./OngoingAuctionTable.jsx"; // Bảng dữ liệu
-import { fetchAuctionItems } from "../../lib/auctionItems.js"; // API
+import ScheduledAuctionTable from "./ScheduledAuctionTable.jsx"; // Bảng dữ liệu
+import { fetchScheduledAuctionItems } from "../../lib/scheduledAuctionItems.js"; // API
 
-export default function OngoingAuctions() {
+export default function ScheduledAuctions() {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -48,18 +48,82 @@ export default function OngoingAuctions() {
         setLoading(true);
         const keyword = searchParams.get("search") || "";
 
-        // Logic gọi API y hệt Dashboard
-        fetchAuctionItems({ 
-            page, size: 10, sort, 
-            filters: { ...filters, keyword } // Gửi kèm keyword nếu có search
+        // Kiểm tra xem có active filter không
+        const hasActiveFilters = 
+            (filters.categories && filters.categories.size > 0) ||
+            (filters.branches && filters.branches.size > 0) ||
+            filters.dateFrom ||
+            filters.dateTo;
+
+        // Nếu có filter -> fetch trang lớn (100) rồi filter client-side
+        // Nếu không -> fetch normal pagination
+        const fetchSize = hasActiveFilters ? 100 : 10;
+        const fetchPage = hasActiveFilters ? 0 : page;
+
+        fetchScheduledAuctionItems({ 
+            page: fetchPage, 
+            size: fetchSize, 
+            sort, 
+            filters: { ...filters, keyword }
         })
         .then((res) => {
             if (isMounted) {
-                setData(res);
+                // Nếu có filter, lọc client-side
+                if (hasActiveFilters) {
+                    let filtered = res.content || [];
+
+                    // Filter by Category
+                    if (filters.categories && filters.categories.size > 0) {
+                        const catArray = Array.from(filters.categories).map(c => c.toLowerCase());
+                        filtered = filtered.filter(item => 
+                            item.categoryName && catArray.includes(item.categoryName.toLowerCase())
+                        );
+                    }
+
+                    // Filter by Location
+                    if (filters.branches && filters.branches.size > 0) {
+                        const locArray = Array.from(filters.branches).map(l => l.toLowerCase());
+                        filtered = filtered.filter(item => 
+                            item.location && locArray.includes(item.location.toLowerCase())
+                        );
+                    }
+
+                    // Filter by Date Range
+                    if (filters.dateFrom || filters.dateTo) {
+                        filtered = filtered.filter(item => {
+                            if (!item.startDate) return false;
+                            const itemDate = new Date(item.startDate);
+                            if (filters.dateFrom) {
+                                const fromDate = new Date(filters.dateFrom);
+                                if (itemDate < fromDate) return false;
+                            }
+                            if (filters.dateTo) {
+                                const toDate = new Date(filters.dateTo);
+                                toDate.setHours(23, 59, 59, 999);
+                                if (itemDate > toDate) return false;
+                            }
+                            return true;
+                        });
+                    }
+
+                    setData({ 
+                        content: filtered, 
+                        number: 0, 
+                        totalPages: 1, 
+                        totalElements: filtered.length 
+                    });
+                } else {
+                    setData(res);
+                }
                 setLoading(false);
             }
         })
-        .catch(() => { if (isMounted) setLoading(false); });
+        .catch((err) => { 
+            if (isMounted) {
+                console.error("❌ Error fetching scheduled auctions:", err);
+                setLoading(false);
+            }
+        });
 
         return () => { isMounted = false; };
     }, [page, sort, filters, searchParams]);
@@ -71,8 +135,8 @@ export default function OngoingAuctions() {
             title: item.title,
             increment: item.minStep,
             trader: item.sellerName,
-            basePrice: item.currentPrice || item.startingPrice,
-            endsAt: item.endDate,
+            base: item.currentPrice || item.startingPrice,
+            endsAt: item.endDate, // Lấy endDate từ AuctionDto
             statusColor: "bg-blue-500"
         }));
     }, [data]);
@@ -92,8 +156,23 @@ export default function OngoingAuctions() {
                 setFilters={setFilters}
                 sort={sort}
                 setSort={setSort}
-                onApply={() => setOpenFilter(false)} // Đóng khi apply
-                onReset={() => setFilters({ ...filters, branches: new Set() })}
+                onApply={() => {
+                    setOpenFilter(false);
+                    setPage(0); // Reset pagination khi apply filter
+                }}
+                onReset={() => {
+                    setFilters({
+                        branches: new Set(),
+                        categories: new Set(),
+                        types: new Set(),
+                        negotiated: null,
+                        dateFrom: "",
+                        dateTo: "",
+                        timeFrom: "",
+                        timeTo: ""
+                    });
+                    setPage(0); // Reset pagination khi reset filter
+                }}
             />
 
             {/* --- NỘI DUNG CHÍNH (Trượt xuống khi Filter mở) --- */}
@@ -146,7 +225,7 @@ export default function OngoingAuctions() {
                         {loading ? (
                             <div className="h-64 flex items-center justify-center text-gray-400">Loading...</div>
                         ) : (
-                            <OngoingAuctionTable data={tableData} />
+                            <ScheduledAuctionTable data={tableData} />
                         )}
                     </div>
 
