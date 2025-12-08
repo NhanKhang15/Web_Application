@@ -4,6 +4,9 @@ import com.example.backend.auction.domain.auction.Auction;
 import com.example.backend.auction.domain.auction.AuctionRepository;
 import com.example.backend.auction.domain.auction.dto.AuctionDto;
 import com.example.backend.auction.domain.auction.dto.CreateAuctionRequest;
+import com.example.backend.auction.domain.auction.dto.EditAuctionRequest;
+import com.example.backend.auction.domain.auction.dto.ReopenAuctionRequest;
+import com.example.backend.auction.service.AuctionEndService;
 import com.example.backend.auction.service.AuctionWriteService;
 import com.example.backend.security.auth.User;
 import com.example.backend.security.auth.UserRepository;
@@ -27,12 +30,14 @@ import java.util.List;
 public class AuctionSellerController {
 
     private final AuctionWriteService writeService;
+    private final AuctionEndService auctionEndService;
     private final UserRepository userRepository;
     private final AuctionRepository auctionRepository;
 
-    public AuctionSellerController(AuctionWriteService writeService, UserRepository userRepository,
-            AuctionRepository auctionRepository) {
+    public AuctionSellerController(AuctionWriteService writeService, AuctionEndService auctionEndService,
+            UserRepository userRepository, AuctionRepository auctionRepository) {
         this.writeService = writeService;
+        this.auctionEndService = auctionEndService;
         this.userRepository = userRepository;
         this.auctionRepository = auctionRepository;
     }
@@ -184,5 +189,126 @@ public class AuctionSellerController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Lỗi tạo đấu giá: " + e.getMessage());
         }
+    }
+
+    // =====================================================================
+    // SELLER AUCTION ACTIONS
+    // =====================================================================
+
+    /**
+     * PUT /api/seller/auctions/{id}
+     * Edit auction details (title, prices)
+     */
+    @PutMapping("/auctions/{id}")
+    public ResponseEntity<?> editAuction(
+            @PathVariable("id") Integer auctionId,
+            @RequestBody EditAuctionRequest request,
+            @AuthenticationPrincipal org.springframework.security.core.userdetails.UserDetails userDetails) {
+        try {
+            Integer sellerId = getSellerIdFromUserDetails(userDetails);
+            if (sellerId == null) {
+                return ResponseEntity.status(401).body("Vui lòng đăng nhập.");
+            }
+
+            writeService.editAuction(auctionId, request, sellerId);
+            return ResponseEntity
+                    .ok(java.util.Map.of("success", true, "message", "Đã cập nhật thành công", "auctionId", auctionId));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi cập nhật đấu giá: " + e.getMessage());
+        }
+    }
+
+    /**
+     * POST /api/seller/auctions/{id}/early-end
+     * End auction early - highest bidder wins
+     * Uses AuctionEndService to ensure Deal, Refund, and Email are processed
+     */
+    @PostMapping("/auctions/{id}/early-end")
+    public ResponseEntity<?> earlyEndAuction(
+            @PathVariable("id") Integer auctionId,
+            @AuthenticationPrincipal org.springframework.security.core.userdetails.UserDetails userDetails) {
+        try {
+            Integer sellerId = getSellerIdFromUserDetails(userDetails);
+            if (sellerId == null) {
+                return ResponseEntity.status(401).body("Vui lòng đăng nhập.");
+            }
+
+            // Validate ownership
+            Auction auction = auctionRepository.findById(auctionId)
+                    .orElseThrow(() -> new RuntimeException("Auction not found"));
+            if (!auction.getItem().getSellerId().equals(sellerId)) {
+                return ResponseEntity.status(403).body("Bạn không phải chủ sở hữu phiên đấu giá này.");
+            }
+
+            // Call the SAME service that scheduler uses
+            auctionEndService.processAuctionEnd(auctionId);
+
+            return ResponseEntity.ok("Phiên đấu giá đã kết thúc thành công.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi kết thúc đấu giá: " + e.getMessage());
+        }
+    }
+
+    /**
+     * POST /api/seller/auctions/{id}/cancel
+     * Cancel auction - refund all bidders, no winner
+     */
+    @PostMapping("/auctions/{id}/cancel")
+    public ResponseEntity<?> cancelAuction(
+            @PathVariable("id") Integer auctionId,
+            @AuthenticationPrincipal org.springframework.security.core.userdetails.UserDetails userDetails) {
+        try {
+            Integer sellerId = getSellerIdFromUserDetails(userDetails);
+            if (sellerId == null) {
+                return ResponseEntity.status(401).body("Vui lòng đăng nhập.");
+            }
+
+            // Validate ownership
+            Auction auction = auctionRepository.findById(auctionId)
+                    .orElseThrow(() -> new RuntimeException("Auction not found"));
+            if (!auction.getItem().getSellerId().equals(sellerId)) {
+                return ResponseEntity.status(403).body("Bạn không phải chủ sở hữu phiên đấu giá này.");
+            }
+
+            // Call cancel service
+            auctionEndService.cancelAuction(auctionId);
+
+            return ResponseEntity.ok("Phiên đấu giá đã được hủy. Tất cả người đấu giá sẽ được hoàn tiền.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi hủy đấu giá: " + e.getMessage());
+        }
+    }
+
+    /**
+     * POST /api/seller/auctions/{id}/reopen
+     * Reopen a closed auction with new start/end dates
+     */
+    @PostMapping("/auctions/{id}/reopen")
+    public ResponseEntity<?> reopenAuction(
+            @PathVariable("id") Integer auctionId,
+            @RequestBody ReopenAuctionRequest request,
+            @AuthenticationPrincipal org.springframework.security.core.userdetails.UserDetails userDetails) {
+        try {
+            Integer sellerId = getSellerIdFromUserDetails(userDetails);
+            if (sellerId == null) {
+                return ResponseEntity.status(401).body("Vui lòng đăng nhập.");
+            }
+
+            writeService.reopenAuction(auctionId, request, sellerId);
+            return ResponseEntity.ok(java.util.Map.of("success", true, "message", "Đã mở lại đấu giá thành công",
+                    "auctionId", auctionId));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi mở lại đấu giá: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Helper to get seller ID from authenticated user
+     */
+    private Integer getSellerIdFromUserDetails(org.springframework.security.core.userdetails.UserDetails userDetails) {
+        if (userDetails == null)
+            return null;
+        User seller = userRepository.findByUsername(userDetails.getUsername()).orElse(null);
+        return seller != null ? seller.getUserId() : null;
     }
 }

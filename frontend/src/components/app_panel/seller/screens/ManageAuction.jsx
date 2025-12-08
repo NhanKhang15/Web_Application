@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { getJSON } from "../../../../lib/api_url";
 import { useUserProfile } from "../../user_infor/lib/useUserProfile";
 import { PostAuctionApi } from "../lib/PostAuctionApi";
+import EditAuctionModal from "./EditAuctionModal";
 import {
     Package,
     Clock,
@@ -28,6 +29,10 @@ export default function ManageAuction() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState("all"); // all, active, scheduled, ended
+
+    // Edit modal state
+    const [editModalOpen, setEditModalOpen] = useState(false);
+    const [selectedAuction, setSelectedAuction] = useState(null);
 
     // Fetch seller's auctions on mount
     useEffect(() => {
@@ -144,6 +149,17 @@ export default function ManageAuction() {
         if (slug) {
             navigate(`/dashboard/auctions/ongoing/${encodeURIComponent(slug)}`);
         }
+    };
+
+    // Open edit modal
+    const handleEdit = (auction) => {
+        setSelectedAuction(auction);
+        setEditModalOpen(true);
+    };
+
+    // Close edit modal and refresh
+    const handleEditSuccess = () => {
+        fetchMyAuctions();
     };
 
     const tabs = [
@@ -306,6 +322,7 @@ export default function ManageAuction() {
                                                 <span className="hidden md:inline">{t("view") || "View"}</span>
                                             </button>
                                             <button
+                                                onClick={() => handleEdit(auction)}
                                                 className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
                                                 title={t("edit") || "Edit"}
                                             >
@@ -350,6 +367,17 @@ export default function ManageAuction() {
                     </div>
                 </div>
             )}
+
+            {/* Edit Modal */}
+            <EditAuctionModal
+                auction={selectedAuction}
+                isOpen={editModalOpen}
+                onClose={() => {
+                    setEditModalOpen(false);
+                    setSelectedAuction(null);
+                }}
+                onSuccess={handleEditSuccess}
+            />
         </div>
     );
 }
