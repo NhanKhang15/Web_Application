@@ -34,12 +34,22 @@ public class RefundWorker {
         List<Integer> bidIds = event.getLoserBidIds();
 
         for (Integer bidId : bidIds) {
-            refundSingleBid(bidId);
+            refundSingleBid(bidId, "Refund for outbid auction #" + event.getAuctionId());
+        }
+    }
+
+    @Async
+    @EventListener
+    public void handleCancelledRefunds(com.example.backend.event.AuctionCancelledEvent event) {
+        List<Integer> bidIds = event.getAllBidIds();
+
+        for (Integer bidId : bidIds) {
+            refundSingleBid(bidId, "Refund for cancelled auction #" + event.getAuctionId());
         }
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void refundSingleBid(Integer bidId) {
+    public void refundSingleBid(Integer bidId, String note) {
         try {
             Bid bid = bidRepo.findById(bidId).orElse(null);
             if (bid == null)
@@ -60,7 +70,7 @@ public class RefundWorker {
             trx.setType(TransactionType.REFUND);
             trx.setDirection(Direction.IN);
             trx.setRelatedAuction(bid.getAuction());
-            trx.setNote("Refund for outbid auction #" + bid.getAuction().getAuctionID());
+            trx.setNote(note);
             transactionRepo.save(trx);
 
         } catch (Exception e) {
