@@ -4,7 +4,7 @@ import { ArrowLeft, CalendarDays, Construction, Filter, } from "lucide-react";
 import FilterSheet from "../../wid/FilterSheet.jsx";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import AuctionDetail from "./AuctionDetail.jsx";
+import AuctionDetail from "./onGoingDetail.jsx";
 import { fetchAuctionItems } from "../../lib/auctionItems.js";
 import { auctionMenu } from "../../../slidebar/lib/auctionMenu.js";
 

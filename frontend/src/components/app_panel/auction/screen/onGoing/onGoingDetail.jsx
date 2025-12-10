@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ItemsApi from "../../lib/itemDetail.js";
 import { PostAuctionApi } from "../../../seller/lib/PostAuctionApi.js";
-import { fetchAuctionItems } from "../../lib/auctionItems";
+import { fetchAuctionItems } from "../../lib/auctionItems.js";
 import AuctionBidPanel from "../../wid/componentDetail/AuctionBidPanel.jsx";
 import AuctionImageGallery from "../../wid/componentDetail/AuctionImageGallery.jsx";
 import ImageGalleryModal from "../../wid/componentDetail/ImageGalleryModal.jsx";

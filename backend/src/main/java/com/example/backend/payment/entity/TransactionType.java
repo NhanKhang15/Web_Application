@@ -5,5 +5,6 @@ public enum TransactionType {
     BID_FREEZE,
     BID_RELEASE,
     PAYMENT,
-    REFUND
+    REFUND,
+    SALE_INCOME
 }
