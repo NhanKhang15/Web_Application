@@ -1,6 +1,24 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 
+// Hook để tính thời gian còn lại đến khi scheduled auction bắt đầu
+export function useScheduledTimer(startsAtISO) {
+    const [now, setNow] = useState(Date.now());
+
+    useEffect(() => {
+        const timer = setInterval(() => setNow(Date.now()), 1000);
+        return () => clearInterval(timer);
+    }, []);
+
+    const secondsLeft = useMemo(() => {
+        if (!startsAtISO) return 0;
+        const startsAt = new Date(startsAtISO).getTime();
+        return Math.max(0, Math.floor((startsAt - now) / 1000));
+    }, [startsAtISO, now]);
+
+    return { secondsLeft, isStarted: secondsLeft === 0 };
+}
+
 export function useAuction({
     auctionId,
     initialPrice = 0,
