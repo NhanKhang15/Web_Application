@@ -1,8 +1,7 @@
 import React from "react";
-import { Clock, MessageSquare, StopCircle, Trash2 } from "lucide-react";
+import { Clock, MessageSquare } from "lucide-react";
 import { useTranslation } from "react-i18next";
-// Import Hook logic (Lưu ý đường dẫn ../.. để về thư mục auction/hook)
-import { useAuction } from "../../hook/useAuction.jsx";
+import { useScheduledTimer } from "../../hook/useAuction.jsx";
 
 // Helper format tiền tệ
 const formatCurrency = (amount) => {
@@ -21,17 +20,8 @@ const formatTime = (totalSeconds) => {
 
 // --- Component con: Dòng dữ liệu (Row) ---
 const AuctionTableRow = ({ item, t }) => {
-    // Guard: Nếu endsAt không hợp lệ, dùng giá trị mặc định (1 tiếng sau)
-    const endsAtDate = item.endsAt ? new Date(item.endsAt) : new Date(Date.now() + 3600000);
-    const endsAtISO = endsAtDate instanceof Date && !isNaN(endsAtDate) ? endsAtDate.toISOString() : new Date(Date.now() + 3600000).toISOString();
-
-    // Gọi Hook useAuction cho từng sản phẩm
-    const { secondsLeft, currentBid, isEnded } = useAuction({
-        auctionId: item.id,
-        initialPrice: item.base,
-        minIncrement: item.increment,
-        endsAt: endsAtISO,
-    });
+    // Hook để tính thời gian còn lại đến khi bắt đầu
+    const { secondsLeft, isStarted } = useScheduledTimer(item.startsAt);
 
     return (
         <tr className="border-b dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors group">
@@ -68,31 +58,19 @@ const AuctionTableRow = ({ item, t }) => {
                 {formatCurrency(item.base)}
             </td>
 
-            {/* Timer (Realtime từ Hook) */}
+            {/* Timer - Thời gian còn lại đến khi bắt đầu */}
             <td className="px-6 py-4">
                 <div className="flex items-center gap-1 text-xs text-neutral-500 mb-1">
-                    <Clock className="w-3 h-3" /> {t("ends_in")}
+                    <Clock className="w-3 h-3" /> {t("starts_in")}
                 </div>
-                <div className={`font-bold font-mono text-lg ${isEnded ? "text-gray-400" : secondsLeft < 300 ? "text-red-600 animate-pulse" : "text-blue-600"}`}>
-                    {isEnded ? t("ended") : formatTime(secondsLeft)}
+                <div className={`font-bold font-mono text-lg ${isStarted ? "text-green-600" : secondsLeft < 3600 ? "text-orange-600 animate-pulse" : "text-blue-600"}`}>
+                    {formatTime(secondsLeft)}
                 </div>
             </td>
 
-            {/* Current Price (Realtime từ Hook) */}
+            {/* Current Price */}
             <td className="px-6 py-4 font-bold text-neutral-900 dark:text-white">
-                {formatCurrency(currentBid)}
-            </td>
-
-            {/* Actions */}
-            <td className="px-6 py-4">
-                <div className="flex flex-col gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
-                    <button className="flex items-center gap-2 text-[10px] font-bold text-neutral-600 hover:text-red-600">
-                        <StopCircle className="w-3 h-3" /> {t("stop")}
-                    </button>
-                    <button className="flex items-center gap-2 text-[10px] font-bold text-neutral-400 hover:text-red-600">
-                        <Trash2 className="w-3 h-3" /> {t("cancel_action")}
-                    </button>
-                </div>
+                {formatCurrency(item.base)}
             </td>
         </tr>
     );
@@ -115,7 +93,6 @@ export default function ScheduledAuctionTable({ data }) {
                             <th className="px-6 py-4 font-medium">{t("th_base_price")}</th>
                             <th className="px-6 py-4 font-medium">{t("th_timer")}</th>
                             <th className="px-6 py-4 font-medium">{t("th_current_price")}</th>
-                            <th className="px-6 py-4 font-medium">{t("th_action")}</th>
                         </tr>
                     </thead>
                     <tbody>
