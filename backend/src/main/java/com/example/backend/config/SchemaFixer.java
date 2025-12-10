@@ -15,16 +15,31 @@ public class SchemaFixer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        // Fix Auctions.Status ENUM
+        fixAuctionsStatus();
+        // Fix WalletTransactions.Type ENUM
+        fixWalletTransactionType();
+    }
+
+    private void fixAuctionsStatus() {
         try {
-            System.out.println("Attempting to fix database schema for AuctionStatus...");
-            // Update the ENUM definition to include 'Processing'
+            System.out.println("Attempting to fix Auctions.Status ENUM...");
             String sql = "ALTER TABLE Auctions MODIFY COLUMN Status ENUM('Draft', 'Scheduled', 'Open', 'Ended', 'Closed', 'Cancelled', 'Processing')";
             jdbcTemplate.execute(sql);
-            System.out.println("Database schema fixed successfully!");
+            System.out.println("Auctions.Status ENUM fixed successfully!");
         } catch (Exception e) {
-            System.err.println("Failed to fix database schema: " + e.getMessage());
-            // Don't throw exception to avoid stopping the app if it's already fixed or
-            // another issue
+            System.err.println("Failed to fix Auctions.Status: " + e.getMessage());
+        }
+    }
+
+    private void fixWalletTransactionType() {
+        try {
+            System.out.println("Attempting to fix WalletTransactions.Type ENUM...");
+            String sql = "ALTER TABLE WalletTransactions MODIFY COLUMN Type ENUM('TOPUP', 'BID_FREEZE', 'BID_RELEASE', 'PAYMENT', 'REFUND', 'SALE_INCOME')";
+            jdbcTemplate.execute(sql);
+            System.out.println("WalletTransactions.Type ENUM fixed successfully!");
+        } catch (Exception e) {
+            System.err.println("Failed to fix WalletTransactions.Type: " + e.getMessage());
         }
     }
 }
