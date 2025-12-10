@@ -37,6 +37,13 @@ public class Message {
     @Column(name = "SentAt")
     private LocalDateTime sentAt;
 
+    @Column(name = "IsRead")
+    @lombok.Builder.Default
+    private Boolean isRead = false;
+
+    @Column(name = "ReadAt")
+    private LocalDateTime readAt;
+
     @PrePersist
     protected void onCreate() {
         sentAt = LocalDateTime.now();

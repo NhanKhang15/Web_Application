@@ -28,4 +28,11 @@ public interface MessageRepository extends JpaRepository<Message, Integer> {
 
         @Query("SELECT m FROM Message m WHERE m.sender.userId = :userId OR m.receiver.userId = :userId ORDER BY m.sentAt DESC")
         List<Message> findLatestMessagesByUser(@Param("userId") Integer userId);
+
+        // Search messages by keyword
+        @Query("SELECT m FROM Message m WHERE " +
+                        "(m.sender.userId = :userId OR m.receiver.userId = :userId) " +
+                        "AND LOWER(m.content) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+                        "ORDER BY m.sentAt DESC")
+        List<Message> searchMessages(@Param("userId") Integer userId, @Param("keyword") String keyword);
 }

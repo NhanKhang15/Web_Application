@@ -2,7 +2,7 @@ import React from "react";
 
 export function Card({ children, className = "", ...props }) {
   return (
-    <div className={`rounded-xl border border-white/10 bg-neutral-900/60 text-neutral-100 shadow ${className}`} {...props}>
+    <div className={`rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-900/60 text-neutral-900 dark:text-neutral-100 shadow ${className}`} {...props}>
       {children}
     </div>
   );
@@ -17,7 +17,7 @@ export function CardTitle({ children, className = "", ...props }) {
 }
 
 export function CardDescription({ children, className = "", ...props }) {
-  return <div className={`text-sm text-neutral-400 ${className}`} {...props}>{children}</div>;
+  return <div className={`text-sm text-neutral-600 dark:text-neutral-400 ${className}`} {...props}>{children}</div>;
 }
 
 export function CardContent({ children, className = "", ...props }) {

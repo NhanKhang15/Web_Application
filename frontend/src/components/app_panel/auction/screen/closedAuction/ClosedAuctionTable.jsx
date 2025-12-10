@@ -50,11 +50,11 @@ const ClosedAuctionRow = ({ item, t, onViewResult }) => {
             <td className="px-6 py-4">
                 {item.winner ? (
                     <div className="flex items-center gap-2 text-sm text-neutral-700 dark:text-neutral-300">
-                        <User className="w-3 h-3 text-gray-400" />
+                        <User className="w-3 h-3 text-gray-500 dark:text-gray-400" />
                         {item.winner}
                     </div>
                 ) : (
-                    <span className="text-gray-400 text-sm italic">—</span>
+                    <span className="text-gray-500 dark:text-gray-400 text-sm italic">—</span>
                 )}
             </td>
 

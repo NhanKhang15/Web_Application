@@ -104,7 +104,7 @@ export default function UtilityMenu({ currentUserId }) {
                     whileTap={{ scale: 0.9 }}
                     onClick={() => setIsOpen(!isOpen)}
                     className={`w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-colors duration-300 z-[10000]
-                        ${isOpen ? "bg-neutral-800 text-white rotate-45" : "bg-indigo-600 hover:bg-indigo-700 text-white rotate-0"}
+                        ${isOpen ? "bg-neutral-800 dark:bg-neutral-700 text-white rotate-45" : "bg-indigo-600 hover:bg-indigo-700 text-white rotate-0"}
                     `}
                 >
                     {isOpen ? <X size={28} /> : <LayoutGrid size={28} />}

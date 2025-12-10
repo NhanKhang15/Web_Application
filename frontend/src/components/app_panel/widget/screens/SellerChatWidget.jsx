@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { MessageCircle, X, Send, Minimize2, Search } from "lucide-react";
+import { MessageCircle, X, Send, Minimize2, Search, Loader2, AlertCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { postJSON, getJSON, API_BASE_URL } from "../../../../lib/api_url";
 import { useChat } from "./ChatContext.jsx";
 import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
+import { useCallback } from 'react';
 
 export default function GlobalChatWidget({ currentUserId, externalOpen, onClose }) {
     const { t } = useTranslation();
@@ -59,7 +60,17 @@ export default function GlobalChatWidget({ currentUserId, externalOpen, onClose 
     // eslint-disable-next-line no-unused-vars
     const [isSending, setIsSending] = useState(false);
     const [incomingProductInfo, setIncomingProductInfo] = useState(null);
+    const [sendStatus, setSendStatus] = useState('idle'); // 'idle' | 'sending' | 'sent' | 'failed'
+    const [failedMessage, setFailedMessage] = useState(null); // lưu tin nhắn thất bại để retry
+    const [isPartnerTyping, setIsPartnerTyping] = useState(false); // typing indicator
+    const [searchQuery, setSearchQuery] = useState(""); // message search
+    const [searchResults, setSearchResults] = useState([]); // kết quả tìm kiếm
+    const [isSearching, setIsSearching] = useState(false);
     const messagesEndRef = useRef(null);
+    const typingTimeoutRef = useRef(null); // để debounce typing event
+    const stompClientRef = useRef(null); // lưu reference để gửi typing
+    const searchTimeoutRef = useRef(null); // để debounce search
+    const activePartnerRef = useRef(null); // track activePartner cho WebSocket callbacks
 
     // --- 1. LOGIC WEBSOCKET ---
     useEffect(() => {
@@ -69,15 +80,37 @@ export default function GlobalChatWidget({ currentUserId, externalOpen, onClose 
         stompClient.debug = () => { };
 
         stompClient.connect({}, () => {
+            // Subscribe tin nhắn
             stompClient.subscribe(`/topic/user-${currentUserId}`, (msg) => {
                 const payload = JSON.parse(msg.body);
                 handleIncomingMessage(payload);
             });
+            // Subscribe typing indicator
+            stompClient.subscribe(`/topic/typing-${currentUserId}`, (msg) => {
+                const payload = JSON.parse(msg.body);
+                handleTypingEvent(payload);
+            });
+            stompClientRef.current = stompClient;
         }, (err) => console.error("❌ Socket Error:", err));
 
         return () => { if (stompClient.connected) stompClient.disconnect(); };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentUserId]);
+
+    // Xử lý typing event từ partner
+    const handleTypingEvent = (event) => {
+        // Sử dụng ref để lấy giá trị activePartner mới nhất (tránh stale closure)
+        const currentActivePartner = activePartnerRef.current;
+        console.log('Typing event received:', event, 'currentActivePartner:', currentActivePartner);
+
+        if (currentActivePartner && String(event.senderId) === String(currentActivePartner.id)) {
+            setIsPartnerTyping(event.typing);
+            // Tự động tắt sau 3s nếu không nhận được update
+            if (event.typing) {
+                setTimeout(() => setIsPartnerTyping(false), 3000);
+            }
+        }
+    };
 
     const handleIncomingMessage = (newMsg) => {
         if (String(newMsg.senderId) === String(currentUserId)) return;
@@ -138,7 +171,8 @@ export default function GlobalChatWidget({ currentUserId, externalOpen, onClose 
         const fetchHistory = async () => {
             if (!activePartner?.id || !currentUserId) return;
             try {
-                const url = `/api/messages/history?senderId=${currentUserId}&receiverId=${activePartner.id}`;
+                // Updated API: dùng partnerId thay vì senderId/receiverId
+                const url = `/api/messages/history?partnerId=${activePartner.id}`;
                 const data = await getJSON(url);
                 setChatHistory(Array.isArray(data) ? data : []);
             } catch (err) { setChatHistory([]); }
@@ -149,6 +183,55 @@ export default function GlobalChatWidget({ currentUserId, externalOpen, onClose 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [chatHistory]);
+
+    // Reset typing khi đổi partner và sync activePartnerRef
+    useEffect(() => {
+        setIsPartnerTyping(false);
+        activePartnerRef.current = activePartner; // sync ref với state
+    }, [activePartner]);
+
+    // Gửi typing event (debounced)
+    const sendTypingEvent = useCallback(async (isTyping) => {
+        if (!activePartner) return;
+        try {
+            await postJSON('/api/typing', {
+                receiverId: activePartner.id,
+                typing: isTyping
+            });
+        } catch (err) {
+            // Silent fail - typing indicator không quan trọng lắm
+        }
+    }, [activePartner]);
+
+    // Handle input change với typing indicator
+    const handleMessageChange = (e) => {
+        setMessage(e.target.value);
+
+        // Debounce typing event
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+        }
+
+        // Gửi typing=true
+        sendTypingEvent(true);
+
+        // Sau 2s không gõ, gửi typing=false
+        typingTimeoutRef.current = setTimeout(() => {
+            sendTypingEvent(false);
+        }, 2000);
+    };
+
+    // Handle search change - lọc danh sách conversations theo tên
+    const handleSearchChange = (e) => {
+        setSearchQuery(e.target.value);
+    };
+
+    // Lọc conversations theo search query
+    const filteredConversations = searchQuery.trim()
+        ? conversations.filter(conv =>
+            conv.partnerName.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        : conversations;
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
@@ -170,6 +253,7 @@ export default function GlobalChatWidget({ currentUserId, externalOpen, onClose 
 
         const msgToSend = message;
         setMessage("");
+        setSendStatus('sending');
         setIsSending(true);
 
         try {
@@ -178,7 +262,25 @@ export default function GlobalChatWidget({ currentUserId, externalOpen, onClose 
                 auctionId: chatState.auctionId || incomingProductInfo?.id,
                 content: msgToSend
             });
-        } catch (err) { console.error(err); } finally { setIsSending(false); }
+            setSendStatus('sent');
+            setFailedMessage(null);
+            // Reset status sau 2 giây
+            setTimeout(() => setSendStatus('idle'), 2000);
+        } catch (err) {
+            console.error(err);
+            setSendStatus('failed');
+            setFailedMessage(msgToSend);
+        } finally {
+            setIsSending(false);
+        }
+    };
+
+    const handleRetry = () => {
+        if (failedMessage && activePartner) {
+            setMessage(failedMessage);
+            setSendStatus('idle');
+            setFailedMessage(null);
+        }
     };
 
     const currentProduct = (activePartner && chatState.partnerId === activePartner.id && chatState.itemTitle)
@@ -197,25 +299,46 @@ export default function GlobalChatWidget({ currentUserId, externalOpen, onClose 
                 <div className="w-[280px] border-r border-gray-200 dark:border-gray-700 flex flex-col bg-gray-50 dark:bg-[#14191F]">
                     <div className="p-3 border-b border-gray-200 dark:border-gray-700">
                         <div className="relative">
-                            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                            <input type="text" placeholder={t('Search')} className="w-full pl-9 pr-3 py-1.5 text-xs bg-white dark:bg-[#0B0F13] border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:border-[#e43137]" />
+                            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder={t('chat_search_users', { defaultValue: 'Tìm người dùng...' })}
+                                value={searchQuery}
+                                onChange={handleSearchChange}
+                                className="w-full pl-9 pr-8 py-1.5 text-xs bg-white dark:bg-[#0B0F13] border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:border-[#e43137] text-gray-900 dark:text-white"
+                            />
+                            {searchQuery && (
+                                <button
+                                    onClick={() => setSearchQuery("")}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                >
+                                    <X className="w-3 h-3" />
+                                </button>
+                            )}
                         </div>
                     </div>
                     <div className="flex-1 overflow-y-auto">
-                        {conversations.map((conv) => (
-                            <div key={conv.partnerId} onClick={() => setActivePartner({ id: conv.partnerId, name: conv.partnerName })} className={`flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 ${activePartner?.id === conv.partnerId ? 'bg-white dark:bg-[#1A1F25] border-l-4 border-[#e43137]' : ''}`}>
-                                <div className="w-10 h-10 rounded-full bg-gray-300 flex-shrink-0 overflow-hidden">
-                                    <img src={`https://ui-avatars.com/api/?name=${conv.partnerName}&background=random`} alt="" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex justify-between items-baseline">
-                                        <h4 className={`text-sm truncate ${activePartner?.id === conv.partnerId ? 'font-bold dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}>{conv.partnerName}</h4>
-                                        <span className="text-[10px] text-gray-400">{conv.timeAgo}</span>
-                                    </div>
-                                    <p className="text-xs text-gray-500 truncate">{conv.lastMessage}</p>
-                                </div>
+                        {/* Lọc và hiển thị danh sách conversations */}
+                        {filteredConversations.length === 0 && searchQuery ? (
+                            <div className="p-4 text-center text-xs text-gray-500">
+                                {t('chat_no_user_found', { defaultValue: 'Không tìm thấy người dùng' })}
                             </div>
-                        ))}
+                        ) : (
+                            filteredConversations.map((conv) => (
+                                <div key={conv.partnerId} onClick={() => setActivePartner({ id: conv.partnerId, name: conv.partnerName })} className={`flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 ${activePartner?.id === conv.partnerId ? 'bg-white dark:bg-[#1A1F25] border-l-4 border-[#e43137]' : ''}`}>
+                                    <div className="w-10 h-10 rounded-full bg-gray-300 flex-shrink-0 overflow-hidden">
+                                        <img src={`https://ui-avatars.com/api/?name=${conv.partnerName}&background=random`} alt="" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex justify-between items-baseline">
+                                            <h4 className={`text-sm truncate ${activePartner?.id === conv.partnerId ? 'font-bold text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}>{conv.partnerName}</h4>
+                                            <span className="text-[10px] text-gray-500 dark:text-gray-400">{conv.timeAgo}</span>
+                                        </div>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{conv.lastMessage}</p>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
                 {/* CỘT PHẢI */}
@@ -238,19 +361,54 @@ export default function GlobalChatWidget({ currentUserId, externalOpen, onClose 
                             </div>
                         )}
                         {!activePartner ? (
-                            <div className="text-center text-sm text-gray-400 mt-20">Chọn một cuộc hội thoại để bắt đầu</div>
+                            <div className="text-center text-sm text-gray-500 dark:text-gray-400 mt-20">{t('chat_select_conversation')}</div>
                         ) : chatHistory.map((msg, index) => (
                             <div key={index} className={`flex ${msg.isMine ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-[75%] px-4 py-2 rounded-2xl text-sm shadow-sm ${msg.isMine ? 'bg-[#e43137] text-white rounded-tr-none' : 'bg-white dark:bg-gray-700 border dark:border-gray-600 rounded-tl-none'}`}>{msg.content}</div>
+                                <div className={`max-w-[75%] px-4 py-2 rounded-2xl text-sm shadow-sm ${msg.isMine ? 'bg-[#e43137] text-white rounded-tr-none' : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 rounded-tl-none'}`}>{msg.content}</div>
                             </div>
                         ))}
+                        {/* Typing Indicator */}
+                        {isPartnerTyping && activePartner && (
+                            <div className="flex justify-start">
+                                <div className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-2xl rounded-tl-none px-4 py-2 shadow-sm">
+                                    <div className="flex gap-1 items-center">
+                                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                         <div ref={messagesEndRef} />
                     </div>
                     {activePartner && (
                         <div className="p-3 border-t border-gray-200 dark:border-gray-700">
+                            {/* Error/Retry UI */}
+                            {sendStatus === 'failed' && (
+                                <div onClick={handleRetry} className="flex items-center gap-2 text-red-500 text-xs mb-2 cursor-pointer hover:text-red-600">
+                                    <AlertCircle className="w-4 h-4" />
+                                    <span>{t('chat_send_failed')}</span>
+                                </div>
+                            )}
                             <form onSubmit={handleSendMessage} className="flex gap-2">
-                                <input value={message} onChange={e => setMessage(e.target.value)} placeholder="Nhập tin nhắn..." className="flex-1 bg-gray-100 dark:bg-[#0B0F13] border-none rounded-full px-4 py-2 text-sm focus:ring-1 focus:ring-[#e43137]" />
-                                <button type="submit" disabled={!message.trim()} className="text-[#e43137] p-2 hover:bg-red-50 rounded-full"><Send className="w-5 h-5" /></button>
+                                <input
+                                    value={message}
+                                    onChange={handleMessageChange}
+                                    placeholder={t('chat_type_message')}
+                                    className="flex-1 bg-gray-100 dark:bg-[#0B0F13] border-none rounded-full px-4 py-2 text-sm focus:ring-1 focus:ring-[#e43137] text-gray-900 dark:text-white"
+                                    disabled={sendStatus === 'sending'}
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={!message.trim() || sendStatus === 'sending'}
+                                    className="text-[#e43137] p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full disabled:opacity-50"
+                                >
+                                    {sendStatus === 'sending' ? (
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                    ) : (
+                                        <Send className="w-5 h-5" />
+                                    )}
+                                </button>
                             </form>
                         </div>
                     )}

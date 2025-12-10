@@ -1,7 +1,7 @@
 // src/components/dashboard/trader/screens/PlatformUsers.jsx
 
 import React, { useEffect } from "react";
-import { ArrowLeft, Search, ChevronDown, MoreHorizontal, Star, ShieldCheck, Ban} from "lucide-react"; // Icon
+import { ArrowLeft, Search, ChevronDown, MoreHorizontal, Star, ShieldCheck, Ban } from "lucide-react"; // Icon
 import { motion } from "framer-motion";
 import AOS from "aos";
 import "aos/dist/aos.css";
@@ -35,11 +35,11 @@ export default function PlatformUsers() {
   const renderStatus = (status) => {
     switch (status) {
       case "active":
-        return <span className="bg-green-100 text-green-600 text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1"><ShieldCheck className="w-3 h-3"/> Verified</span>;
+        return <span className="bg-green-100 text-green-600 text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1"><ShieldCheck className="w-3 h-3" /> Verified</span>;
       case "pending":
         return <span className="bg-yellow-100 text-yellow-600 text-[10px] px-2 py-0.5 rounded-full font-bold">Pending</span>;
       case "banned":
-        return <span className="bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1"><Ban className="w-3 h-3"/> Banned</span>;
+        return <span className="bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1"><Ban className="w-3 h-3" /> Banned</span>;
       default:
         return null;
     }
@@ -47,20 +47,20 @@ export default function PlatformUsers() {
 
   return (
     <div className="w-full pt-2 pb-8 px-4">
-      
+
       {/* Header Toolbar */}
       <div className="flex items-center justify-between mb-8">
         <button className="p-2 -ml-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors">
           <ArrowLeft className="w-6 h-6 text-neutral-700 dark:text-neutral-300" />
         </button>
         <div className="flex gap-2">
-           {/* Thêm nút Add User nếu muốn */}
-           <button className="px-4 py-2 bg-black text-white text-sm rounded-lg hover:bg-neutral-800">
-              + Add User
-           </button>
-           <button className="p-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors">
-             <Search className="w-5 h-5 text-neutral-700 dark:text-neutral-300" />
-           </button>
+          {/* Thêm nút Add User nếu muốn */}
+          <button className="px-4 py-2 bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-sm rounded-lg hover:bg-neutral-700 dark:hover:bg-neutral-200 transition-colors">
+            + Add User
+          </button>
+          <button className="p-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors">
+            <Search className="w-5 h-5 text-neutral-700 dark:text-neutral-300" />
+          </button>
         </div>
       </div>
 
@@ -92,43 +92,43 @@ export default function PlatformUsers() {
           >
             {/* Action Menu (Hiện khi hover) */}
             <button className="absolute top-3 right-3 p-1 text-neutral-400 hover:text-neutral-800 opacity-0 group-hover:opacity-100 transition-opacity">
-                <MoreHorizontal className="w-5 h-5" />
+              <MoreHorizontal className="w-5 h-5" />
             </button>
 
             <div className="flex items-start gap-3">
-                {/* Avatar */}
-                <div className="relative shrink-0">
-                  <img
-                    src={user.avatar}
-                    alt={user.name}
-                    className="w-12 h-12 rounded-full object-cover shadow-sm"
-                  />
-                  {/* Online/Offline dot (Optional) */}
-                  <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
-                </div>
+              {/* Avatar */}
+              <div className="relative shrink-0">
+                <img
+                  src={user.avatar}
+                  alt={user.name}
+                  className="w-12 h-12 rounded-full object-cover shadow-sm"
+                />
+                {/* Online/Offline dot (Optional) */}
+                <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+              </div>
 
-                {/* Info */}
-                <div className="flex flex-col overflow-hidden w-full">
-                  <h4 className="text-[15px] font-semibold text-neutral-800 dark:text-neutral-200 truncate">
-                    {user.name}
-                  </h4>
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-1">
-                    {user.role}
-                  </p>
-                  
-                  {/* Status Badge */}
-                  <div className="flex items-center justify-between mt-1">
-                      {renderStatus(user.status)}
-                      
-                      {/* Rating Star */}
-                      {user.rating > 0 && (
-                          <div className="flex items-center text-xs font-medium text-neutral-600">
-                              <Star className="w-3 h-3 text-orange-400 fill-orange-400 mr-1" />
-                              {user.rating}
-                          </div>
-                      )}
-                  </div>
+              {/* Info */}
+              <div className="flex flex-col overflow-hidden w-full">
+                <h4 className="text-[15px] font-semibold text-neutral-800 dark:text-neutral-200 truncate">
+                  {user.name}
+                </h4>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-1">
+                  {user.role}
+                </p>
+
+                {/* Status Badge */}
+                <div className="flex items-center justify-between mt-1">
+                  {renderStatus(user.status)}
+
+                  {/* Rating Star */}
+                  {user.rating > 0 && (
+                    <div className="flex items-center text-xs font-medium text-neutral-600 dark:text-neutral-400">
+                      <Star className="w-3 h-3 text-orange-400 fill-orange-400 mr-1" />
+                      {user.rating}
+                    </div>
+                  )}
                 </div>
+              </div>
             </div>
           </motion.div>
         ))}

@@ -36,6 +36,9 @@ export default function AIChatWidget({ externalOpen, onClose, currentUserId }) {
         setIsLoading(true);
 
         try {
+            // 👇 Debug: Log pendingBid before sending
+            console.log("Sending to backend:", { message: userMessage, pendingBid });
+
             // 👇 Gửi pendingBid nếu có (cho flow xác nhận)
             const botReply = await sendMessageToBot(userMessage, currentHistory, currentUserId, pendingBid);
 
@@ -90,7 +93,7 @@ export default function AIChatWidget({ externalOpen, onClose, currentUserId }) {
                         className="mb-4 w-[350px] sm:w-[380px] bg-white dark:bg-neutral-900 rounded-2xl shadow-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden flex flex-col"
                         style={{ height: "500px", maxHeight: "80vh" }}
                     >
-                        <div className="bg-neutral-900 dark:bg-neutral-800 p-4 flex items-center justify-between text-white">
+                        <div className="bg-blue-600 dark:bg-neutral-800 p-4 flex items-center justify-between text-white">
                             <span className="font-semibold flex items-center gap-2">
                                 🤖 Trợ lý AI
                                 {pendingBid && (

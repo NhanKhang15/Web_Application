@@ -101,13 +101,13 @@ export default function ProfileSetup() {
   const finalStep = step === 4;
 
   return (
-    <div className="min-h-screen w-full relative bg-[#212121] flex items-center justify-center p-4">
+    <div className="min-h-screen w-full relative bg-neutral-100 dark:bg-[#212121] flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 z-0"
+        className="absolute inset-0 z-0 dark:block hidden"
         style={{ background: "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255, 80, 120, 0.25), transparent 70%), #000000" }}
       />
-      <div className="relative z-10 w-full max-w-xl rounded-3xl bg-neutral-900 shadow-xl p-6">
-        <div className="mb-6 flex items-center gap-3 text-sm font-medium text-neutral-400">
+      <div className="relative z-10 w-full max-w-xl rounded-3xl bg-white dark:bg-neutral-900 shadow-xl p-6 border border-neutral-200 dark:border-transparent">
+        <div className="mb-6 flex items-center gap-3 text-sm font-medium text-neutral-500 dark:text-neutral-400">
           {[1, 2, 3, 4].map((s) => (
             <React.Fragment key={s}>
               <Step label={`${t("profile_step")} ${s}`} active={step === s} done={step > s} />
@@ -118,7 +118,7 @@ export default function ProfileSetup() {
 
         <div className="mb-4">
           <p className="text-sm font-semibold text-[#E43137]">{t("profile_step")} {step}</p>
-          <h2 className="mt-1 text-2xl font-bold text-white">
+          <h2 className="mt-1 text-2xl font-bold text-neutral-900 dark:text-white">
             {step === 1 && t("whats_your_full_name")}
             {step === 2 && t("whats_your_phone_number")}
             {step === 3 && t("whats_your_address")}
@@ -127,7 +127,7 @@ export default function ProfileSetup() {
         </div>
 
         {err && (
-          <div className="mb-3 rounded-md border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+          <div className="mb-3 rounded-md border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-600 dark:text-red-200">
             {err}
           </div>
         )}
@@ -135,39 +135,39 @@ export default function ProfileSetup() {
         <form onSubmit={onSubmit} className="space-y-5">
           {step === 1 && (
             <div>
-              <label className="block text-sm font-medium text-neutral-200">{t("full_name_label")}</label>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-200">{t("full_name_label")}</label>
               <input
                 type="text"
                 placeholder={t("placeholder_full_name")}
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="mt-1 w-full rounded-md border border-neutral-700 bg-neutral-900 text-white px-4 py-2.5"
+                className="mt-1 w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white px-4 py-2.5 focus:ring-2 focus:ring-[#E43137]/50 outline-none transition-all"
               />
             </div>
           )}
 
           {step === 2 && (
             <div>
-              <label className="block text-sm font-medium text-neutral-200">{t("phone_number_label")}</label>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-200">{t("phone_number_label")}</label>
               <input
                 type="tel"
                 placeholder={t("placeholder_phone")}
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="mt-1 w-full rounded-md border border-neutral-700 bg-neutral-900 text-white px-4 py-2.5"
+                className="mt-1 w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white px-4 py-2.5 focus:ring-2 focus:ring-[#E43137]/50 outline-none transition-all"
               />
             </div>
           )}
 
           {step === 3 && (
             <div>
-              <label className="block text-sm font-medium text-neutral-200">{t("home_address")}</label>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-200">{t("home_address")}</label>
               <input
                 type="text"
                 placeholder={t("placeholder_address")}
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                className="mt-1 w-full rounded-md border border-neutral-700 bg-neutral-900 text-white px-4 py-2.5"
+                className="mt-1 w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white px-4 py-2.5 focus:ring-2 focus:ring-[#E43137]/50 outline-none transition-all"
               />
             </div>
           )}
@@ -175,34 +175,34 @@ export default function ProfileSetup() {
           {step === 4 && (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-neutral-200">{t("date_of_birth")}</label>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-200">{t("date_of_birth")}</label>
                 <input
                   type="date"
                   value={dob}
                   onChange={(e) => setDob(e.target.value)}
-                  className="mt-1 w-full rounded-md border border-neutral-700 bg-neutral-900 text-white px-4 py-2.5"
+                  className="mt-1 w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white px-4 py-2.5 focus:ring-2 focus:ring-[#E43137]/50 outline-none transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-neutral-200">{t("bio_optional")}</label>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-200">{t("bio_optional")}</label>
                 <textarea
                   placeholder={t("placeholder_bio")}
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
-                  className="mt-1 w-full rounded-md border border-neutral-700 bg-neutral-900 text-white px-4 py-2.5"
+                  className="mt-1 w-full rounded-md border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white px-4 py-2.5 focus:ring-2 focus:ring-[#E43137]/50 outline-none transition-all"
                   rows={3}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-neutral-200">{t("avatar_label")}</label>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-200">{t("avatar_label")}</label>
                 <div className="mt-2 flex items-center gap-4">
-                  <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-neutral-800 ring-1 ring-neutral-600">
+                  <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800 ring-1 ring-neutral-300 dark:ring-neutral-600">
                     {avatarPreviewUrl ? (
                       <img src={avatarPreviewUrl} alt="avatar preview" className="h-full w-full object-cover" />
                     ) : (
-                      <span className="text-lg font-semibold text-neutral-300">{initials}</span>
+                      <span className="text-lg font-semibold text-neutral-600 dark:text-neutral-300">{initials}</span>
                     )}
                   </div>
                   <div className="flex gap-2">
@@ -222,7 +222,7 @@ export default function ProfileSetup() {
                     />
                   </div>
                 </div>
-                <p className="mt-2 text-xs text-neutral-400">
+                <p className="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
                   {t("avatar_fallback_text")}
                 </p>
               </div>
@@ -234,7 +234,7 @@ export default function ProfileSetup() {
               <button
                 type="button"
                 onClick={prevStep}
-                className="rounded-md border border-neutral-500 px-4 py-2 text-sm text-neutral-200"
+                className="rounded-md border border-neutral-300 dark:border-neutral-500 px-4 py-2 text-sm text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
               >
                 {t("back_button")}
               </button>
@@ -264,12 +264,12 @@ export default function ProfileSetup() {
 }
 
 function Dash() {
-  return <div className="h-0.5 w-10 rounded-full bg-neutral-600" />;
+  return <div className="h-0.5 w-10 rounded-full bg-neutral-300 dark:bg-neutral-600" />;
 }
 
 function Step({ label, active, done }) {
   return (
-    <div className={`flex items-center gap-2 ${active ? "text-white" : done ? "text-[#E43137]" : "text-neutral-500"}`}>
+    <div className={`flex items-center gap-2 ${active ? "text-neutral-900 dark:text-white" : done ? "text-[#E43137]" : "text-neutral-500"}`}>
       <div
         className={`grid h-6 w-6 place-items-center rounded-full border-2 ${active ? "border-[#E43137]" : done ? "border-[#E43137] bg-[#E43137]" : "border-neutral-500"
           }`}

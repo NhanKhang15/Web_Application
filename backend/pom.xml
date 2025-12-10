@@ -151,6 +151,39 @@
       <version>24.13.0</version>
     </dependency>
 
+    <!-- WebFlux for WebClient (reactive HTTP client) -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-webflux</artifactId>
+    </dependency>
+
+    <!-- Bucket4j for Rate Limiting -->
+    <dependency>
+      <groupId>com.bucket4j</groupId>
+      <artifactId>bucket4j-core</artifactId>
+      <version>8.10.1</version>
+    </dependency>
+
+    <!-- Caffeine Cache (in-memory with TTL) -->
+    <dependency>
+      <groupId>com.github.ben-manes.caffeine</groupId>
+      <artifactId>caffeine</artifactId>
+      <version>3.1.8</version>
+    </dependency>
+
+    <!-- Spring Cache Support -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-cache</artifactId>
+    </dependency>
+
+    <!-- Mockito for testing -->
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <build>

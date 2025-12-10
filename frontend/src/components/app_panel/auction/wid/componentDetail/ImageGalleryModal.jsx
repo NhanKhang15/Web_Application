@@ -8,7 +8,7 @@ function NextArrow({ onClick }) {
     return (
         <button
             type="button"
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-gray-800/60 hover:bg-gray-800 text-white rounded-full p-2 z-10"
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-gray-800/60 hover:bg-white dark:hover:bg-gray-800 text-gray-800 dark:text-white rounded-full p-2 z-10 shadow-md transition-colors"
             onClick={onClick} aria-label="Next"
         >
             <ChevronRight className="w-5 h-5" />
@@ -19,7 +19,7 @@ function PrevArrow({ onClick }) {
     return (
         <button
             type="button"
-            className="absolute left-2 top-1/2 -translate-y-1/2 bg-gray-800/60 hover:bg-gray-800 text-white rounded-full p-2 z-10"
+            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-gray-800/60 hover:bg-white dark:hover:bg-gray-800 text-gray-800 dark:text-white rounded-full p-2 z-10 shadow-md transition-colors"
             onClick={onClick} aria-label="Previous"
         >
             <ChevronLeft className="w-5 h-5" />

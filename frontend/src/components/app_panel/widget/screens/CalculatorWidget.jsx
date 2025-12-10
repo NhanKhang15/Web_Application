@@ -5,7 +5,7 @@ import { Calculator, X } from "lucide-react";
 import * as Toast from "@radix-ui/react-toast";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import {useTranslation} from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 export default function CalculatorWidget({ externalOpen, onClose }) {
     const { t } = useTranslation();
@@ -124,11 +124,11 @@ export default function CalculatorWidget({ externalOpen, onClose }) {
                         {/* Phím bấm */}
                         <div className="grid grid-cols-4 gap-2 text-sm">
                             {buttons.map((btn) => (
-                                <button key={btn} onClick={() => {/*logic cũ*/}} className="rounded-lg py-3 font-medium bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
+                                <button key={btn} onClick={() => {/*logic cũ*/ }} className="rounded-lg py-3 font-medium bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition">
                                     {btn}
                                 </button>
                             ))}
-                            <button className="col-span-4 rounded-lg py-3 font-semibold bg-blue-600 text-white">=</button>
+                            <button className="col-span-4 rounded-lg py-3 font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors">=</button>
                         </div>
                     </motion.div>
                 )}

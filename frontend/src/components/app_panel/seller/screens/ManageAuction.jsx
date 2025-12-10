@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { getJSON } from "../../../../lib/api_url";
@@ -19,6 +19,8 @@ import {
     AlertCircle,
     TrendingUp
 } from "lucide-react";
+
+const FALLBACK_IMAGE = "https://via.placeholder.com/100x100?text=No+Image";
 
 export default function ManageAuction() {
     const { t } = useTranslation();
@@ -134,14 +136,21 @@ export default function ManageAuction() {
         });
     };
 
-    // Get thumbnail URL - use same approach as AuctionCard
-    const getThumbnail = (auction) => {
+    // Get thumbnail URL - memoized to prevent re-renders
+    const getThumbnail = useCallback((auction) => {
         const rawImg = auction.thumbnail || auction.imgUrl;
         if (rawImg && rawImg !== "placeholder.jpg") {
             return PostAuctionApi.getFullImageUrl(rawImg);
         }
-        return "https://via.placeholder.com/100x100?text=No+Image";
-    };
+        return FALLBACK_IMAGE;
+    }, []);
+
+    // Image error handler - prevents infinite loop
+    const handleImageError = useCallback((e) => {
+        if (e.target.src !== FALLBACK_IMAGE) {
+            e.target.src = FALLBACK_IMAGE;
+        }
+    }, []);
 
     // View auction detail
     const handleView = (auction) => {
@@ -255,9 +264,7 @@ export default function ManageAuction() {
                                         src={getThumbnail(auction)}
                                         alt={auction.title}
                                         className="w-full h-full object-cover"
-                                        onError={(e) => {
-                                            e.target.src = "https://via.placeholder.com/100x100?text=No+Image";
-                                        }}
+                                        onError={handleImageError}
                                     />
                                 </div>
 

@@ -23,6 +23,35 @@ export default function PostAuction() {
         images: []
     });
 
+    // Display values with thousand separators
+    const [displayPrices, setDisplayPrices] = React.useState({
+        startingPrice: "",
+        minStep: "100",
+        reservePrice: "",
+        buyNowPrice: ""
+    });
+
+    // Format number with thousand separators (Vietnamese style: dots)
+    const formatWithSeparator = (value) => {
+        if (!value) return "";
+        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    };
+
+    // Remove formatting to get raw number
+    const parseFormattedNumber = (formattedValue) => {
+        return formattedValue.replace(/\./g, "");
+    };
+
+    // Handle price input change with formatting
+    const handlePriceChange = (field, value) => {
+        const rawValue = parseFormattedNumber(value);
+        // Only allow digits
+        if (rawValue && !/^\d+$/.test(rawValue)) return;
+
+        setFormData(prev => ({ ...prev, [field]: rawValue }));
+        setDisplayPrices(prev => ({ ...prev, [field]: formatWithSeparator(rawValue) }));
+    };
+
     const [categories, setCategories] = React.useState([]);
     const [loading, setLoading] = React.useState(false);
 
@@ -172,6 +201,12 @@ export default function PostAuction() {
             location: "",
             images: []
         });
+        setDisplayPrices({
+            startingPrice: "",
+            minStep: "100",
+            reservePrice: "",
+            buyNowPrice: ""
+        });
         setImagePreviews([]);
     };
 
@@ -267,12 +302,11 @@ export default function PostAuction() {
                                 {t('Starting_Price')} *
                             </label>
                             <input
-                                type="number"
-                                value={formData.startingPrice}
-                                onChange={(e) => setFormData({ ...formData, startingPrice: e.target.value })}
-                                placeholder="0.00"
-                                min="0"
-                                step="0.01"
+                                type="text"
+                                inputMode="numeric"
+                                value={displayPrices.startingPrice}
+                                onChange={(e) => handlePriceChange('startingPrice', e.target.value)}
+                                placeholder="0"
                                 className="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700
                                          bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100
                                          focus:ring-2 focus:ring-[#e43137] focus:border-transparent outline-none"
@@ -285,12 +319,11 @@ export default function PostAuction() {
                                 {t('Min_Bid_Step')}
                             </label>
                             <input
-                                type="number"
-                                value={formData.minStep}
-                                onChange={(e) => setFormData({ ...formData, minStep: e.target.value })}
+                                type="text"
+                                inputMode="numeric"
+                                value={displayPrices.minStep}
+                                onChange={(e) => handlePriceChange('minStep', e.target.value)}
                                 placeholder="100"
-                                min="1"
-                                step="1"
                                 className="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700
                                          bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100
                                          focus:ring-2 focus:ring-[#e43137] focus:border-transparent outline-none"
@@ -305,12 +338,11 @@ export default function PostAuction() {
                                 {t('Reserve_Price_Optional')}
                             </label>
                             <input
-                                type="number"
-                                value={formData.reservePrice}
-                                onChange={(e) => setFormData({ ...formData, reservePrice: e.target.value })}
+                                type="text"
+                                inputMode="numeric"
+                                value={displayPrices.reservePrice}
+                                onChange={(e) => handlePriceChange('reservePrice', e.target.value)}
                                 placeholder={t('Reserve_Price_Desc')}
-                                min="0"
-                                step="0.01"
                                 className="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700
                                          bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100
                                          focus:ring-2 focus:ring-[#e43137] focus:border-transparent outline-none"
@@ -322,12 +354,11 @@ export default function PostAuction() {
                                 {t('Buy_Now_Price_Optional')}
                             </label>
                             <input
-                                type="number"
-                                value={formData.buyNowPrice}
-                                onChange={(e) => setFormData({ ...formData, buyNowPrice: e.target.value })}
+                                type="text"
+                                inputMode="numeric"
+                                value={displayPrices.buyNowPrice}
+                                onChange={(e) => handlePriceChange('buyNowPrice', e.target.value)}
                                 placeholder={t('Buy_Now_Price_Desc')}
-                                min="0"
-                                step="0.01"
                                 className="w-full px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700
                                          bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100
                                          focus:ring-2 focus:ring-[#e43137] focus:border-transparent outline-none"

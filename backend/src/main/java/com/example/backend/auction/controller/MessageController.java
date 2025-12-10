@@ -71,13 +71,10 @@ public class MessageController {
                 auctionId,
                 itemTitle);
 
-        messagingTemplate.convertAndSend("/topic/user-" + receiver.getUserId(), socketDto);
-        messagingTemplate.convertAndSend("/topic/user-" + sender.getUserId(), socketDto);
-
         // Gửi cho người NHẬN (để họ thấy tin nhắn mới)
         messagingTemplate.convertAndSend("/topic/user-" + receiver.getUserId(), socketDto);
 
-        // (Tùy chọn) Gửi cho chính người GỬI (để đồng bộ nếu họ mở tab khác)
+        // Gửi cho chính người GỬI (để đồng bộ nếu họ mở tab khác)
         messagingTemplate.convertAndSend("/topic/user-" + sender.getUserId(), socketDto);
 
         return ResponseEntity.ok("Sent");
@@ -85,26 +82,39 @@ public class MessageController {
 
     @GetMapping("/history")
     public ResponseEntity<?> getChatHistory(
-            @RequestParam Integer senderId,
-            @RequestParam Integer receiverId,
+            @RequestParam Integer partnerId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         if (userDetails == null)
             return ResponseEntity.status(401).build();
 
-        List<Message> messages = messageRepository.findConversation(senderId, receiverId);
+        // Sử dụng currentUser thay vì senderId parameter (fix security issue)
+        User currentUser = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Integer currentUserId = currentUser.getUserId();
+
+        List<Message> messages = messageRepository.findConversation(currentUserId, partnerId);
+
+        // Apply pagination - lấy tin nhắn MỚI NHẤT (từ cuối danh sách)
+        // Vì findConversation đã sort ASC (cũ nhất trước), ta cần lấy từ cuối
+        int totalMessages = messages.size();
+
+        // Tính start/end từ cuối danh sách để lấy tin mới nhất
+        // page 0 = lấy N tin cuối cùng, page 1 = lấy N tin trước đó, etc.
+        int end = Math.max(0, totalMessages - (page * size));
+        int start = Math.max(0, end - size);
+
+        List<Message> pagedMessages = messages.subList(start, end);
 
         // Map sang DTO đơn giản để trả về JSON
-        List<MessageDto> response = messages.stream().map(m -> {
+        List<MessageDto> response = pagedMessages.stream().map(m -> {
             MessageDto dto = new MessageDto();
             dto.setContent(m.getContent());
             dto.setSenderId(m.getSender().getUserId());
             dto.setCreatedAt(m.getSentAt() != null ? m.getSentAt().toString() : null);
-            // Đánh dấu xem tin nhắn này có phải của "tôi" không
-            User currentUser = userRepository.findByUsername(userDetails.getUsername()).orElse(null);
-            if (currentUser != null) {
-                dto.setMine(m.getSender().getUserId().equals(currentUser.getUserId()));
-            }
+            dto.setMine(m.getSender().getUserId().equals(currentUserId));
             return dto;
         }).collect(Collectors.toList());
 
@@ -186,5 +196,57 @@ public class MessageController {
         private LocalDateTime createdAt;
         private Integer auctionId;
         private String itemTitle;
+    }
+
+    // === MESSAGE SEARCH ===
+    @GetMapping("/search")
+    public ResponseEntity<?> searchMessages(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "20") int limit,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        if (userDetails == null)
+            return ResponseEntity.status(401).build();
+
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Keyword is required");
+        }
+
+        User currentUser = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<Message> messages = messageRepository.searchMessages(currentUser.getUserId(), keyword.trim());
+
+        // Limit results
+        List<Message> limitedMessages = messages.stream()
+                .limit(limit)
+                .collect(Collectors.toList());
+
+        // Map to DTO với thông tin partner
+        List<SearchResultDto> response = limitedMessages.stream().map(m -> {
+            User partner = m.getSender().getUserId().equals(currentUser.getUserId())
+                    ? m.getReceiver()
+                    : m.getSender();
+            return new SearchResultDto(
+                    m.getContent(),
+                    m.getSentAt() != null ? m.getSentAt().toString() : null,
+                    partner.getUserId(),
+                    partner.getUsername(),
+                    m.getSender().getUserId().equals(currentUser.getUserId()));
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    static class SearchResultDto {
+        private String content;
+        private String createdAt;
+        private Integer partnerId;
+        private String partnerName;
+        @JsonProperty("isMine")
+        private boolean isMine;
     }
 }

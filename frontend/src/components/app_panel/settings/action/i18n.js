@@ -509,6 +509,17 @@ const resources = {
             wallet_min_error: "Minimum top-up amount is 10,000 VND",
             wallet_error_prefix: "Error:",
             wallet_error_generic: "An error occurred, please try again.",
+
+            // --- Chat Widget ---
+            chat_select_conversation: "Select a conversation to start",
+            chat_type_message: "Type a message...",
+            chat_sending: "Sending...",
+            chat_send_failed: "Failed to send. Tap to retry.",
+            chat_search_messages: "Search messages...",
+            chat_searching: "Searching...",
+            chat_search_results: "Search results",
+            chat_no_results: "No results found",
+            chat_you: "You",
         },
     },
     vi: {
@@ -1014,6 +1025,12 @@ const resources = {
             wallet_min_error: "Số tiền nạp tối thiểu 10.000 VND",
             wallet_error_prefix: "Lỗi:",
             wallet_error_generic: "Có lỗi xảy ra, vui lòng thử lại.",
+
+            // --- Chat Widget ---
+            chat_select_conversation: "Để bắt đầu, hãy chọn một cuộc hội thoại",
+            chat_type_message: "Nhập tin nhắn...",
+            chat_sending: "Đang gửi...",
+            chat_send_failed: "Gửi thất bại. Nhấn để thử lại.",
         },
     },
 };

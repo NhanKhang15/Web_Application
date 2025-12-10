@@ -85,7 +85,7 @@ export default function AuctionBidPanel({ product, bids = [], onPlaceBid, isOwne
                     <p className="text-gray-500 dark:text-gray-400">{product.model}</p>
                 )}
 
-                <div className="flex items-center gap-2 mt-3 text-sm text-gray-500">
+                <div className="flex items-center gap-2 mt-3 text-sm text-gray-600 dark:text-gray-500">
                     <Clock className="w-4 h-4" />
                     <span>{t('Closes_in')}</span>
                     <span className={`font-semibold ${isEnded ? "text-red-500" : "text-green-600"}`}>
@@ -103,13 +103,13 @@ export default function AuctionBidPanel({ product, bids = [], onPlaceBid, isOwne
 
             {/* Bid section */}
             <div className="p-5 border-t border-gray-200 dark:border-gray-700 pt-4">
-                <p className="text-sm text-gray-500 mb-1">{t('CURRENT_BID')}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-500 mb-1">{t('CURRENT_BID')}</p>
                 <h2 className="text-3xl font-extrabold text-green-600">
                     {formatVND(currentPrice)}
                 </h2>
-                <p className="text-xs text-gray-400">{bids.length} {t('bids')}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{bids.length} {t('bids')}</p>
 
-                <div className="grid grid-cols-2 gap-2 mt-4 text-xs text-gray-500">
+                <div className="grid grid-cols-2 gap-2 mt-4 text-xs text-gray-600 dark:text-gray-500">
                     <div>
                         <span className="font-semibold">{t('Starting_Price')}:</span> {formatVND(product.startingPrice)}
                     </div>
@@ -124,7 +124,7 @@ export default function AuctionBidPanel({ product, bids = [], onPlaceBid, isOwne
                     </div>
                 </div>
 
-                <div className="flex items-center text-xs text-gray-500 mt-3">
+                <div className="flex items-center text-xs text-gray-600 dark:text-gray-500 mt-3">
                     <Timer className="w-4 h-4 mr-1" /> {t('Next_min_bid')} {formatVND(nextMinBid)}
                 </div>
 

@@ -374,9 +374,14 @@ export default function WalletCard() {
                 {transactions.length === 0 ? (
                     <p className="text-center text-neutral-500 py-8">{t("wallet_no_transactions")}</p>
                 ) : (
-                    <div className="overflow-x-auto">
+                    <div className="max-h-[400px] overflow-y-auto overflow-x-auto scrollbar-thin scrollbar-thumb-neutral-300 dark:scrollbar-thumb-neutral-600 scrollbar-track-transparent hover:scrollbar-thumb-neutral-400 dark:hover:scrollbar-thumb-neutral-500 scroll-smooth"
+                        style={{
+                            scrollbarWidth: 'thin',
+                            scrollbarColor: 'rgb(163 163 163) transparent'
+                        }}
+                    >
                         <table className="w-full text-sm text-left">
-                            <thead className="text-xs text-neutral-500 uppercase bg-neutral-50 dark:bg-neutral-800">
+                            <thead className="text-xs text-neutral-500 uppercase bg-neutral-50 dark:bg-neutral-800 sticky top-0 z-10">
                                 <tr>
                                     <th className="px-4 py-3">{t("wallet_th_datetime")}</th>
                                     <th className="px-4 py-3 text-right">{t("wallet_th_amount")}</th>
