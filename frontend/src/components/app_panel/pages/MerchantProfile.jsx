@@ -16,7 +16,7 @@ import {
 import { useUserProfile } from "../user_infor/lib/useUserProfile.js";
 import UserOverview from "../user_infor/screens/user/UserOverview.jsx";
 import UserAttachment from "../user_infor/screens/attachment/UserAttachment.jsx";
-import AuctionView from "../auction/screen/main/AuctionView.jsx";
+import AuctionView from "../auction/screen/onGoing/onGoingView.jsx";
 import PlatformUsers from "../trader/screens/PlatformUsers.jsx";
 import UserWallet from "../user_infor/screens/wallet/UserWallet.jsx";
 import UserChart from "../user_infor/screens/performance/UserChart.jsx";

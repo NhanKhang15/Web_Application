@@ -1,0 +1,85 @@
+# Seller Auction Actions - Walkthrough
+
+I have implemented the seller auction actions as requested. Here's a summary of the changes:
+
+## New Files Created
+
+| File | Purpose |
+|------|---------|
+| [AuctionCancelledEvent.java](file:///e:/Web_Application/backend/src/main/java/com/example/backend/event/AuctionCancelledEvent.java) | Event for auction cancellation |
+| [EditAuctionRequest.java](file:///e:/Web_Application/backend/src/main/java/com/example/backend/auction/domain/auction/dto/EditAuctionRequest.java) | DTO for edit auction request |
+| [ReopenAuctionRequest.java](file:///e:/Web_Application/backend/src/main/java/com/example/backend/auction/domain/auction/dto/ReopenAuctionRequest.java) | DTO for reopen auction request |
+| [SchemaFixer.java](file:///e:/Web_Application/backend/src/main/java/com/example/backend/config/SchemaFixer.java) | DB schema updater for new ENUM values |
+
+## Modified Files
+
+### [TransactionType.java](file:///e:/Web_Application/backend/src/main/java/com/example/backend/payment/entity/TransactionType.java)
+Added `SALE_INCOME` for tracking seller revenue.
+
+### [AuctionEndService.java](file:///e:/Web_Application/backend/src/main/java/com/example/backend/auction/service/AuctionEndService.java)
+- Added payment transfer logic (buyer → seller)
+- Added [cancelAuction()](file:///e:/Web_Application/backend/src/main/java/com/example/backend/auction/service/AuctionEndService.java#102-130) method for refunding all bidders
+- Both buyer and seller get transaction records
+
+### [RefundWorker.java](file:///e:/Web_Application/backend/src/main/java/com/example/backend/auction/service/RefundWorker.java)
+Added handler for [AuctionCancelledEvent](file:///e:/Web_Application/backend/src/main/java/com/example/backend/event/AuctionCancelledEvent.java#6-24) to refund all bidders when auction is cancelled.
+
+### [AuctionWriteService.java](file:///e:/Web_Application/backend/src/main/java/com/example/backend/auction/service/AuctionWriteService.java)
+- Added [editAuction()](file:///e:/Web_Application/backend/src/main/java/com/example/backend/auction/controller/AuctionSellerController.java#198-219) - updates title (regenerates slug), prices
+- Added [reopenAuction()](file:///e:/Web_Application/backend/src/main/java/com/example/backend/auction/controller/AuctionSellerController.java#281-302) - reopens closed auction with new dates
+
+### [AuctionSellerController.java](file:///e:/Web_Application/backend/src/main/java/com/example/backend/auction/controller/AuctionSellerController.java)
+New endpoints:
+
+| Endpoint | Action |
+|----------|--------|
+| `PUT /api/seller/auctions/{id}` | Edit auction details |
+| `POST /api/seller/auctions/{id}/early-end` | End auction early (winner gets deal) |
+| `POST /api/seller/auctions/{id}/cancel` | Cancel auction (refund all) |
+| `POST /api/seller/auctions/{id}/reopen` | Reopen closed auction |
+
+## Key Design Decisions
+
+> [!IMPORTANT]
+> All auction endings go through `AuctionEndService.processAuctionEnd()` to ensure proper Deal creation, refunds, and emails.
+
+1. **Early End**: Calls the same [processAuctionEnd()](file:///e:/Web_Application/backend/src/main/java/com/example/backend/auction/service/AuctionEndService.java#42-101) that the scheduler uses
+2. **Cancel**: Uses new [cancelAuction()](file:///e:/Web_Application/backend/src/main/java/com/example/backend/auction/service/AuctionEndService.java#102-130) method that refunds ALL bidders
+3. **Payment Transfer**: When auction ends successfully, money is transferred from buyer to seller with transaction records for both
+4. **Reopen**: Only works for `Closed` auctions (no winner, no money involved)
+
+## API Usage Examples
+
+### Edit Auction
+```http
+PUT /api/seller/auctions/123
+Content-Type: application/json
+
+{
+  "title": "New Title",
+  "startingPrice": 100000,
+  "minStep": 10000,
+  "buyNowPrice": 500000
+}
+```
+
+### Early End
+```http
+POST /api/seller/auctions/123/early-end
+```
+
+### Cancel Auction
+```http
+POST /api/seller/auctions/123/cancel
+```
+
+### Reopen Auction
+```http
+POST /api/seller/auctions/123/reopen
+Content-Type: application/json
+
+{
+  "startDate": "2025-12-07T10:00:00",
+  "endDate": "2025-12-14T18:00:00"
+}
+```
