@@ -106,10 +106,10 @@ export default function ClosedAuctions() {
         id: apiItem.auctionId || apiItem.itemId,
         title: apiItem.title || "Untitled",
         slug: apiItem.slug || apiItem.itemId,
-        finalPrice: apiItem.currentPrice || apiItem.startingPrice || 0,
+        finalPrice: apiItem.finalPrice || 0, // Lấy từ EndedAuctionDto (giá cuối cùng)
         endsAt: apiItem.endDate,
-        isSold: apiItem.status === 'SOLD' || !!apiItem.winnerId, 
-        winner: apiItem.winnerName || (apiItem.winnerId ? `User #${apiItem.winnerId}` : null),
+        isSold: !!apiItem.winnerName, // Nếu có winnerName = có người mua
+        winner: apiItem.winnerName || null, // Lấy trực tiếp winnerName
         location: apiItem.location || "Unknown",
         category: apiItem.categoryName
     });

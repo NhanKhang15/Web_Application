@@ -136,7 +136,7 @@ export default function ScheduledAuctions() {
             increment: item.minStep,
             trader: item.sellerName,
             base: item.currentPrice || item.startingPrice,
-            endsAt: item.endDate, // Lấy endDate từ AuctionDto
+            startsAt: item.startDate, // Lấy startDate để tính thời gian bắt đầu
             statusColor: "bg-blue-500"
         }));
     }, [data]);
