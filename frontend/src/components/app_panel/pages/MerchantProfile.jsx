@@ -318,7 +318,7 @@ export default function MerchantProfile() {
                                     {sellerView === "Manage Auction" ? <ManageAuction /> : <PostAuction />}
                                 </CardShell>
                             ) : leftKey === "user" ? (
-                                <CardShell subKey={activeSub} onSubChange={setActiveSub} plClass="pl-0 md:pl-[4%]" stickyTop={contentPadTop}>{renderSubPage()}</CardShell>
+                                <CardShell subKey={activeSub} onSubChange={setActiveSub} stickyTop={contentPadTop}>{renderSubPage()}</CardShell>
                             ) : leftKey === "trader" ? (
                                 <CardShell variant="custom" plClass="pl-0 md:pl-[4%]" stickyTop={contentPadTop}><PlatformUsers /></CardShell>
                             ) : leftKey === "settings" ? (

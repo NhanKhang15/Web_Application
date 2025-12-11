@@ -3,14 +3,14 @@ import { motion } from "framer-motion";
 import SubSidebar from "../../slidebar/screens/SubSidebar";
 
 export default function CardShell({
-                                      children,
-                                      subKey,
-                                      onSubChange,
-                                      variant = "sub",
-                                      customLeft = null,
-                                      plClass,
-                                      stickyTop,
-                                  }) {
+    children,
+    subKey,
+    onSubChange,
+    variant = "sub",
+    customLeft = null,
+    plClass,
+    stickyTop,
+}) {
     const { cardClasses, contentClasses, extraPaddingClasses } = useMemo(() => {
         const defaultLeftPad =
             variant === "sub"
@@ -18,7 +18,7 @@ export default function CardShell({
                 : "pl-6 md:pl-10 lg:pl-[320px]";
         const leftPad = plClass ?? defaultLeftPad;
 
-        const PC_EXTRA_PL = "pl-[clamp(60px,4.7vw,96px)]";
+        const PC_EXTRA_PL = "pl-0 md:pl-[clamp(60px,4.7vw,96px)]";
 
         return {
             cardClasses:

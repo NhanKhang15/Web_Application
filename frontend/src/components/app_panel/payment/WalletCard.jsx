@@ -280,7 +280,7 @@ export default function WalletCard() {
         new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
 
     return (
-        <div className="space-y-6 mt-6">
+        <div className="space-y-6 mt-6 w-full max-w-full">
             {/* Block 1: Balance */}
             <motion.div
                 initial={{ opacity: 0, y: 15 }}

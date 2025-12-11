@@ -15,7 +15,7 @@ export default function UserOverview({ profile, email, isEditing, setIsEditing, 
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="p-4 rounded-xl bg-white dark:bg-neutral-900 shadow-sm"
+            className="p-4 rounded-xl bg-white dark:bg-neutral-900 shadow-sm overflow-hidden min-w-0"
         >
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
