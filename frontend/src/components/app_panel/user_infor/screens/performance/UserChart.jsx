@@ -41,7 +41,7 @@ export default function UserChart({ profile }) {
     }, []);
 
     return (
-        <div className="flex flex-col gap-12 pt-12 pb-8 relative w-full overflow-x-hidden">
+        <div className="flex flex-col gap-6 md:gap-12 pt-4 md:pt-12 pb-8 relative w-full overflow-x-hidden">
             {/* Header */}
             <motion.div
                 initial={{ opacity: 0, y: 15 }}

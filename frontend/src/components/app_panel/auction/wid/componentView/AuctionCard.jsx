@@ -1,6 +1,6 @@
 // File: AuctionCard.jsx - Redesigned Premium Auction Card
 import React from "react";
-import { ArrowUpRight, MapPin, ImageOff } from "lucide-react";
+import { ArrowUpRight, MapPin, ImageOff, ShoppingCart } from "lucide-react";
 import { PostAuctionApi } from "../../../seller/lib/PostAuctionApi.js";
 import { useTranslation } from "react-i18next";
 
@@ -39,10 +39,10 @@ export default function AuctionCard({ item, onClick, aosDelay }) {
             className="group relative bg-gradient-to-br from-gray-100 to-white dark:from-[#1a1f2e] dark:to-[#0d1117] rounded-2xl overflow-hidden cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-red-500/20 dark:hover:shadow-red-500/10 border border-gray-200 dark:border-gray-800/50 hover:border-red-500/30"
             data-aos="fade-up"
             data-aos-delay={aosDelay}
-            style={{ minHeight: '380px' }}
+            style={{ minHeight: '280px' }}
         >
-            {/* Image Section - Takes ~65% of card */}
-            <div className="relative h-72 w-full overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-800 dark:to-gray-900">
+            {/* Image Section - Reduced height for better text visibility */}
+            <div className="relative h-40 md:h-48 w-full overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-800 dark:to-gray-900">
                 {imgUrl ? (
                     <img
                         src={imgUrl}
@@ -56,26 +56,27 @@ export default function AuctionCard({ item, onClick, aosDelay }) {
                     </div>
                 )}
 
-                {/* Current Bid Badge - Floating on Image */}
-                <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-white/95 dark:bg-black/80 rounded-full px-3 py-1.5 border border-green-500/30 shadow-sm">
-                    <ArrowUpRight className="w-4 h-4 text-green-600 dark:text-green-400" strokeWidth={2.5} />
-                    <span className="text-sm font-bold text-green-600 dark:text-green-400">{formatCurrency(currentBid)}</span>
+                {/* Current Bid Badge - Floating on Image with blur effect */}
+                <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-black/40 backdrop-blur-md rounded-full px-3 py-1.5 border border-white/20 shadow-lg">
+                    <ArrowUpRight className="w-4 h-4 text-green-400" strokeWidth={2.5} />
+                    <span className="text-sm font-bold text-green-400">{formatCurrency(currentBid)}</span>
                 </div>
             </div>
 
             {/* Content Section - Compact */}
             <div className="p-3 flex flex-col gap-2">
-                {/* Title & Price Row */}
-                <div className="flex items-start justify-between gap-2">
-                    <h3 className="text-base font-semibold text-gray-900 dark:text-white leading-tight line-clamp-1 group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors duration-300 flex-1">
-                        {title}
-                    </h3>
-                    {price > 0 && (
-                        <span className="text-sm font-bold text-orange-500 dark:text-orange-400 whitespace-nowrap">
-                            {formatCurrency(price)}
-                        </span>
-                    )}
-                </div>
+                {/* Title */}
+                <h3 className="text-sm md:text-base font-semibold text-gray-900 dark:text-white leading-tight line-clamp-2 group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors duration-300">
+                    {title}
+                </h3>
+
+                {/* Buy Now Price - Below title with cart icon */}
+                {price > 0 && (
+                    <div className="flex items-center gap-1.5 text-orange-500 dark:text-orange-400">
+                        <ShoppingCart className="w-3.5 h-3.5" />
+                        <span className="text-sm font-bold">{formatCurrency(price)}</span>
+                    </div>
+                )}
 
                 {/* Seller Info - Compact */}
                 <div className="flex items-center justify-between pt-1 border-t border-gray-200 dark:border-gray-800">

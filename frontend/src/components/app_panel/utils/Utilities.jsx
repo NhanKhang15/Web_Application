@@ -1,5 +1,5 @@
 import React from "react";
-import { Wrench, Calculator, ClipboardList } from "lucide-react";
+import { Wrench, Calculator, ClipboardList, Bot, MessageCircle, Globe, Moon, Wallet } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 
@@ -22,6 +22,31 @@ export default function Utilities() {
             title: t("task_utilities_title"),
             desc: t("task_utilities_desc"),
         },
+        {
+            icon: <Bot className="w-5 h-5 text-purple-500" />,
+            title: t("ai_chatbot_title"),
+            desc: t("ai_chatbot_desc"),
+        },
+        {
+            icon: <MessageCircle className="w-5 h-5 text-orange-500" />,
+            title: t("seller_chat_title"),
+            desc: t("seller_chat_desc"),
+        },
+        {
+            icon: <Globe className="w-5 h-5 text-cyan-500" />,
+            title: t("multi_language_title"),
+            desc: t("multi_language_desc"),
+        },
+        {
+            icon: <Moon className="w-5 h-5 text-indigo-500" />,
+            title: t("dark_mode_title"),
+            desc: t("dark_mode_desc"),
+        },
+        {
+            icon: <Wallet className="w-5 h-5 text-emerald-500" />,
+            title: t("wallet_feature_title"),
+            desc: t("wallet_feature_desc"),
+        },
     ];
 
     return (
@@ -29,14 +54,17 @@ export default function Utilities() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="flex flex-col gap-6"
+            className="flex flex-col gap-4 md:gap-6 px-1"
         >
             {/* Header */}
             <div>
-                <h2 className="text-2xl font-bold text-neutral-800 dark:text-neutral-100">
-                    {t("utilities_title")}
-                </h2>
-                <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+                <div className="flex items-center gap-3">
+                    <Wrench className="w-7 h-7 text-red-500 dark:text-red-400" />
+                    <h2 className="text-xl md:text-2xl font-bold text-neutral-800 dark:text-neutral-100">
+                        {t("utilities_title")}
+                    </h2>
+                </div>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1 ml-10">
                     {t("utilities_description")}
                 </p>
             </div>

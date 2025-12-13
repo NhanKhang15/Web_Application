@@ -371,6 +371,7 @@ const resources = {
 
             logout_success: "Logout successful!",
             auction_menu: "Auction Menu",
+            user_menu: "User Menu",
 
             // Placeholder & States
             empty_state: "(empty)",
@@ -520,6 +521,42 @@ const resources = {
             chat_search_results: "Search results",
             chat_no_results: "No results found",
             chat_you: "You",
+
+            // --- Utility Menu ---
+            utility_messages: "Messages",
+            utility_ai_assistant: "AI Assistant",
+            utility_calculator: "Calculator",
+
+            // --- InfoCardBody - Verify Email ---
+            verify_email_button: "Verify Email",
+
+            // --- EditAuctionModal ---
+            confirm_early_end: "Confirm early end?",
+            confirm_cancel_auction: "Confirm cancel auction?",
+            action_confirm: "Confirm",
+            action_cancel: "Cancel",
+            early_end_success: "Auction ended early successfully!",
+            cancel_auction_success: "Auction cancelled successfully!",
+            action_failed: "Action failed. Please try again.",
+
+            // --- Utilities Page - New Features ---
+            ai_chatbot_title: "AI Chatbot",
+            ai_chatbot_desc: "AI assistant for auction help, answering questions and guiding system usage.",
+            seller_chat_title: "Chat with Seller",
+            seller_chat_desc: "Direct messaging with sellers to discuss auction items.",
+            multi_language_title: "Multi-language",
+            multi_language_desc: "Switch interface language between Vietnamese and English.",
+            dark_mode_title: "Dark/Light Mode",
+            dark_mode_desc: "Dark/light mode to protect eyes and customize interface to preference.",
+            wallet_feature_title: "Digital Wallet",
+            wallet_feature_desc: "Manage balance, top up and track transaction history.",
+
+            // --- Scheduled Auction ---
+            starts_in: "Starts in",
+            back_to_auctions: "Back to Auctions",
+
+            // --- PostAuction ---
+            Email_not_verified_auction: "Please verify your email before posting auctions! Go to User profile to verify.",
         },
     },
     vi: {
@@ -887,6 +924,7 @@ const resources = {
 
             logout_success: "Đăng xuất thành công!",
             auction_menu: "Danh mục Đấu giá",
+            user_menu: "Danh mục Người dùng",
 
             // Placeholder & States
             empty_state: "(để trống)",
@@ -1031,13 +1069,59 @@ const resources = {
             chat_type_message: "Nhập tin nhắn...",
             chat_sending: "Đang gửi...",
             chat_send_failed: "Gửi thất bại. Nhấn để thử lại.",
+
+            // --- Utility Menu ---
+            utility_messages: "Tin nhắn",
+            utility_ai_assistant: "Trợ lý AI",
+            utility_calculator: "Máy tính",
+
+            // --- InfoCardBody - Verify Email ---
+            verify_email_button: "Xác thực Email",
+
+            // --- EditAuctionModal ---
+            confirm_early_end: "Xác nhận kết thúc sớm?",
+            confirm_cancel_auction: "Xác nhận hủy đấu giá?",
+            action_confirm: "Xác nhận",
+            action_cancel: "Hủy bỏ",
+            early_end_success: "Kết thúc đấu giá sớm thành công!",
+            cancel_auction_success: "Hủy đấu giá thành công!",
+            action_failed: "Thao tác thất bại. Vui lòng thử lại.",
+
+            // --- Utilities Page - New Features ---
+            ai_chatbot_title: "AI Chatbot",
+            ai_chatbot_desc: "Trợ lý AI hỗ trợ đấu giá, trả lời câu hỏi và hướng dẫn sử dụng hệ thống.",
+            seller_chat_title: "Chat với Seller",
+            seller_chat_desc: "Nhắn tin trực tiếp với người bán để trao đổi về sản phẩm đấu giá.",
+            multi_language_title: "Đa ngôn ngữ",
+            multi_language_desc: "Chuyển đổi ngôn ngữ giao diện giữa Tiếng Việt và English.",
+            dark_mode_title: "Chế độ tối/sáng",
+            dark_mode_desc: "Chế độ tối/sáng giúp bảo vệ mắt và tùy chỉnh giao diện theo sở thích.",
+            wallet_feature_title: "Ví điện tử",
+            wallet_feature_desc: "Quản lý số dư, nạp tiền và theo dõi lịch sử giao dịch.",
+
+            // --- Scheduled Auction ---
+            starts_in: "Bắt đầu sau",
+            back_to_auctions: "Quay lại Đấu giá",
+
+            // --- PostAuction ---
+            Email_not_verified_auction: "Vui lòng xác thực email trước khi đăng đấu giá! Vào mục Hồ sơ cá nhân (User) để xác thực.",
         },
     },
 };
 
 i18n.use(initReactI18next).init({
     resources,
-    lng: localStorage.getItem("lang") || "vi",
+    lng: (() => {
+        try {
+            const user = JSON.parse(sessionStorage.getItem("user"));
+            if (user && user.userId) {
+                return localStorage.getItem(`lang_${user.userId}`) || "vi";
+            }
+            return localStorage.getItem("lang") || "vi";
+        } catch {
+            return localStorage.getItem("lang") || "vi";
+        }
+    })(),
     fallbackLng: "en",
     interpolation: { escapeValue: false },
 });

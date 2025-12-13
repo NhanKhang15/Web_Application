@@ -179,19 +179,19 @@ export default function ManageAuction() {
     ];
 
     return (
-        <div className="max-w-6xl mx-auto p-6">
+        <div className="w-full max-w-6xl mx-auto p-3 md:p-6 overflow-hidden">
             {/* Header */}
             <div className="mb-8">
-                <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">
+                <h1 className="text-xl md:text-3xl font-bold text-neutral-900 dark:text-neutral-100">
                     {t("manage_auction_title") || "Manage Your Auctions"}
                 </h1>
-                <p className="text-neutral-600 dark:text-neutral-400 mt-2">
+                <p className="text-sm md:text-base text-neutral-600 dark:text-neutral-400 mt-1 md:mt-2">
                     {t("manage_auction_desc") || "View and manage all your posted auctions"}
                 </p>
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+            <div className="flex flex-wrap gap-2 mb-4 md:mb-6">
                 {tabs.map((tab) => {
                     const Icon = tab.icon;
                     const isActive = activeTab === tab.key;
@@ -283,7 +283,7 @@ export default function ManageAuction() {
                                                 {auction.title || t("untitled") || "Untitled"}
                                             </h3>
 
-                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                            <div className="grid grid-cols-2 gap-2 md:gap-4 text-sm">
                                                 <div>
                                                     <span className="text-neutral-500 dark:text-neutral-400 block">
                                                         {t("starting_price") || "Starting"}
@@ -347,7 +347,7 @@ export default function ManageAuction() {
 
             {/* Summary Stats */}
             {!loading && auctions.length > 0 && (
-                <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="mt-6 md:mt-8 grid grid-cols-2 gap-2 md:gap-4">
                     <div className="bg-white dark:bg-neutral-900 rounded-xl p-4 border border-neutral-200 dark:border-neutral-800">
                         <div className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
                             {auctions.length}

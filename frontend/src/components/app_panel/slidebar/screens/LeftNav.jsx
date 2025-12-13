@@ -1,9 +1,7 @@
 import React from "react";
-import {useNavigate} from "react-router-dom";
-import {navigationItems} from "../lib/navigationItems.js";
-
-import {NAV_URL_MAPPING} from "../lib/NAV_URL_MAPPING.js";
-import {useTranslation} from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { navigationItems } from "../lib/navigationItems.js";
+import { useTranslation } from "react-i18next";
 
 export default function LeftNav({ activeKey: controlledKey, onChange }) {
     const { t } = useTranslation();
@@ -24,9 +22,10 @@ export default function LeftNav({ activeKey: controlledKey, onChange }) {
     const selectItem = (key) => {
         if (!controlledKey) setInternalKey(key);
 
-        // Navigate to the mapped URL if Router is available
+        // Navigate to the mapped URL using path from navigationItems
         if (navigate) {
-            const path = NAV_URL_MAPPING[key] || key;
+            const navItem = navigationItems.find(item => item.key === key);
+            const path = navItem?.path || key;
             navigate(`/dashboard/${path}`);
         }
 
@@ -66,19 +65,17 @@ export default function LeftNav({ activeKey: controlledKey, onChange }) {
                                         onClick={() => selectItem(n.key)}
                                         className={`h-[8vh] min-h-14 w-full relative z-10 flex flex-col items-center justify-center mb-6 outline-none
                                         ${isActive
-                                            ? "text-[#e43137]"
-                                            : "text-neutral-800 dark:text-neutral-200 hover:text-[#e43137]/80"}
+                                                ? "text-[#e43137]"
+                                                : "text-neutral-800 dark:text-neutral-200 hover:text-[#e43137]/80"}
                                             focus-visible:ring-2 focus-visible:ring-[#e43137]/40`}
                                     >
                                         <Icon
-                                            className={`w-5 h-5 mb-1 transition duration-200 ${
-                                                isActive ? "text-[#e43137]" : "text-neutral-800 dark:text-neutral-200"
-                                            }`}
+                                            className={`w-5 h-5 mb-1 transition duration-200 ${isActive ? "text-[#e43137]" : "text-neutral-800 dark:text-neutral-200"
+                                                }`}
                                         />
                                         <span
-                                            className={`text-[0.7rem] tracking-wide ${
-                                                isActive ? "font-bold text-[#e43137]" : "font-normal"
-                                            }`}
+                                            className={`text-[0.7rem] tracking-wide ${isActive ? "font-bold text-[#e43137]" : "font-normal"
+                                                }`}
                                         >
                                             {t(n.transKey) || n.label}
                                         </span>

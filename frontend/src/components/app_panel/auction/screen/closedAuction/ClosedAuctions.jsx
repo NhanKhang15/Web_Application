@@ -22,7 +22,7 @@ export default function ClosedAuctions() {
     const [openFilter, setOpenFilter] = useState(false);
     const [sort, setSort] = useState("created_desc");
     const [page, setPage] = useState(0);
-    
+
     // State for data
     const [auctions, setAuctions] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -93,8 +93,8 @@ export default function ClosedAuctions() {
             .then(res => {
                 if (res) {
                     setFilterOptions({
-                        locations: res.locations || [], 
-                        categories: res.categories || [] 
+                        locations: res.locations || [],
+                        categories: res.categories || []
                     });
                 }
             })
@@ -125,28 +125,28 @@ export default function ClosedAuctions() {
             dateFrom: appliedFilters.dateFrom,
             dateTo: appliedFilters.dateTo,
             negotiated: appliedFilters.negotiated,
-            keyword: keyword 
+            keyword: keyword
         };
 
-        fetchClosedAuctionItems({ 
-            page, 
-            size: 10, 
-            sort, 
-            filters: apiFilters 
+        fetchClosedAuctionItems({
+            page,
+            size: 10,
+            sort,
+            filters: apiFilters
         })
-        .then((res) => {
-            if (isMounted) {
-                const rawContent = res.content || [];
-                setAuctions(rawContent.map(mapDataToUI));
-                setTotalPages(res.totalPages || 1);
-                setTotalElements(res.totalElements || 0);
-                setLoading(false);
-            }
-        })
-        .catch((err) => {
-            console.error("Error fetching closed auctions:", err);
-            if (isMounted) setLoading(false);
-        });
+            .then((res) => {
+                if (isMounted) {
+                    const rawContent = res.content || [];
+                    setAuctions(rawContent.map(mapDataToUI));
+                    setTotalPages(res.totalPages || 1);
+                    setTotalElements(res.totalElements || 0);
+                    setLoading(false);
+                }
+            })
+            .catch((err) => {
+                console.error("Error fetching closed auctions:", err);
+                if (isMounted) setLoading(false);
+            });
 
         return () => { isMounted = false; };
     }, [page, sort, appliedFilters, keyword]);
@@ -186,7 +186,7 @@ export default function ClosedAuctions() {
     // --- RENDER ---
     return (
         <div className="w-full h-full flex flex-col overflow-hidden relative bg-gray-50 dark:bg-[#0B0F13] text-[#212121] dark:text-gray-200 transition-colors duration-300 rounded-xl pb-10">
-            
+
             {/* 1. FILTER SHEET */}
             <FilterSheet
                 open={openFilter}
@@ -203,8 +203,8 @@ export default function ClosedAuctions() {
 
             {/* 2. MAIN CONTENT */}
             <div className={`flex flex-col w-full transition-[padding] duration-300 ease-out ${openFilter ? "pt-[35vh]" : "pt-0"}`}>
-                
-                <div className="p-6 flex flex-col gap-4">
+
+                <div className="p-3 md:p-6 flex flex-col gap-4">
                     {/* HEADER ROW */}
                     <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
                         <div className="flex items-center gap-4">
@@ -228,7 +228,7 @@ export default function ClosedAuctions() {
                         {loading ? (
                             <div className="h-64 flex items-center justify-center text-gray-400">Loading closed auctions...</div>
                         ) : auctions.length > 0 ? (
-                             <ClosedAuctionTable data={auctions} onViewResult={handleViewResult} />
+                            <ClosedAuctionTable data={auctions} onViewResult={handleViewResult} />
                         ) : (
                             <div className="h-64 flex items-center justify-center text-gray-400">No closed auctions found.</div>
                         )}

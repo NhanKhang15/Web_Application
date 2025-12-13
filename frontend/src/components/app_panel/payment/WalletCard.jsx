@@ -280,12 +280,12 @@ export default function WalletCard() {
         new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
 
     return (
-        <div className="space-y-6 mt-6 w-full max-w-full">
+        <div className="space-y-4 md:space-y-6 mt-4 md:mt-6 w-full min-w-0 overflow-hidden">
             {/* Block 1: Balance */}
             <motion.div
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-6 rounded-xl bg-white dark:bg-neutral-900 shadow-sm border border-neutral-200 dark:border-neutral-800"
+                className="p-4 md:p-6 rounded-xl bg-white dark:bg-neutral-900 shadow-sm border border-neutral-200 dark:border-neutral-800"
             >
                 <div className="flex items-center justify-between mb-2">
                     <h2 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100">
@@ -299,7 +299,7 @@ export default function WalletCard() {
                     </button>
                 </div>
                 <p className="text-sm text-neutral-500 dark:text-neutral-400">{t("wallet_current_balance")}</p>
-                <p className="text-4xl font-bold text-green-600 dark:text-green-400 mt-1">
+                <p className="text-2xl md:text-4xl font-bold text-green-600 dark:text-green-400 mt-1 break-all">
                     {formatCurrency(balance)}
                 </p>
             </motion.div>
@@ -309,7 +309,7 @@ export default function WalletCard() {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="p-6 rounded-xl bg-white dark:bg-neutral-900 shadow-sm border border-neutral-200 dark:border-neutral-800"
+                className="p-4 md:p-6 rounded-xl bg-white dark:bg-neutral-900 shadow-sm border border-neutral-200 dark:border-neutral-800"
             >
                 <h3 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100 mb-4 flex items-center gap-2">
                     <CreditCard size={20} /> {t("wallet_topup")}
@@ -365,7 +365,7 @@ export default function WalletCard() {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="p-6 rounded-xl bg-white dark:bg-neutral-900 shadow-sm border border-neutral-200 dark:border-neutral-800"
+                className="p-4 md:p-6 rounded-xl bg-white dark:bg-neutral-900 shadow-sm border border-neutral-200 dark:border-neutral-800"
             >
                 <h3 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100 mb-4 flex items-center gap-2">
                     <History size={20} /> {t("wallet_transaction_history")}
@@ -383,34 +383,34 @@ export default function WalletCard() {
                         <table className="w-full text-sm text-left">
                             <thead className="text-xs text-neutral-500 uppercase bg-neutral-50 dark:bg-neutral-800 sticky top-0 z-10">
                                 <tr>
-                                    <th className="px-4 py-3">{t("wallet_th_datetime")}</th>
-                                    <th className="px-4 py-3 text-right">{t("wallet_th_amount")}</th>
-                                    <th className="px-4 py-3">{t("wallet_th_direction")}</th>
-                                    <th className="px-4 py-3">{t("wallet_th_stripe_id")}</th>
-                                    <th className="px-4 py-3">{t("wallet_th_note")}</th>
+                                    <th className="px-2 md:px-4 py-3">{t("wallet_th_datetime")}</th>
+                                    <th className="px-2 md:px-4 py-3 text-right">{t("wallet_th_amount")}</th>
+                                    <th className="px-2 md:px-4 py-3">{t("wallet_th_direction")}</th>
+                                    <th className="px-2 md:px-4 py-3 hidden md:table-cell">{t("wallet_th_stripe_id")}</th>
+                                    <th className="px-2 md:px-4 py-3 hidden md:table-cell">{t("wallet_th_note")}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {transactions.map((tx, index) => (
                                     <tr key={index} className="border-b dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800/50">
-                                        <td className="px-4 py-3 text-neutral-600 dark:text-neutral-300">
+                                        <td className="px-2 md:px-4 py-3 text-neutral-600 dark:text-neutral-300 text-xs md:text-sm">
                                             {new Date(tx.updatedAt).toLocaleString('vi-VN')}
                                         </td>
-                                        <td className={`px-4 py-3 text-right font-semibold ${tx.direction === 'IN' ? 'text-green-600' : 'text-red-600'
+                                        <td className={`px-2 md:px-4 py-3 text-right font-semibold text-xs md:text-sm ${tx.direction === 'IN' ? 'text-green-600' : 'text-red-600'
                                             }`}>
                                             {formatCurrency(tx.amount)}
                                         </td>
-                                        <td className="px-4 py-3 font-medium">
+                                        <td className="px-2 md:px-4 py-3 font-medium">
                                             <span className={`px-2 py-1 rounded text-xs ${tx.direction === 'IN' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
                                                 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                                                 }`}>
                                                 {tx.direction === 'IN' ? t("wallet_direction_in") : t("wallet_direction_out")}
                                             </span>
                                         </td>
-                                        <td className="px-4 py-3 text-neutral-500 dark:text-neutral-400 font-mono text-xs">
+                                        <td className="px-2 md:px-4 py-3 text-neutral-500 dark:text-neutral-400 font-mono text-xs hidden md:table-cell">
                                             {tx.stripePaymentIntentId || '-'}
                                         </td>
-                                        <td className="px-4 py-3 text-neutral-500 dark:text-neutral-400 truncate max-w-[200px]">
+                                        <td className="px-2 md:px-4 py-3 text-neutral-500 dark:text-neutral-400 truncate max-w-[200px] hidden md:table-cell">
                                             {tx.note}
                                         </td>
                                     </tr>

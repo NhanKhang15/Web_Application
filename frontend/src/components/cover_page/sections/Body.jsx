@@ -122,14 +122,16 @@ export default function Body({ onRequireAuth }) {
     return (
         <div className="w-full overflow-x-hidden">
             {/* Hero Slider */}
-            <section className="relative w-full min-h-[480px]">
+            <section className="relative w-full">
                 <Slider {...heroSettings}>
                     {t("slides", { returnObjects: true }).map((s, i) => (
                         <div key={i}>
-                            <div className="relative w-full bg-cover bg-center"
-                                 style={{ backgroundImage: `url(${heroImages[i]})` }}> {/* Dùng state heroImages */}
-                                <div className="absolute inset-0 bg-gradient-to-r from-black to-transparent" />
-                                <div className="relative z-10 px-4 md:px-12 pt-10 md:pt-16">
+                            <div
+                                className="relative w-full min-h-[60vh] md:min-h-[70vh] bg-cover bg-center flex items-center"
+                                style={{ backgroundImage: `url(${heroImages[i]})` }}
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
+                                <div className="relative z-10 px-4 md:px-12 py-12 md:py-16 w-full">
                                     <HeroBanner {...s} />
                                 </div>
                             </div>
@@ -147,7 +149,7 @@ export default function Body({ onRequireAuth }) {
                     {CATEGORIES.map((c, i) => (
                         <Card key={i} onClick={onRequireAuth} className="overflow-hidden relative group hover:scale-[1.02] transition-transform cursor-pointer">
                             <div className="absolute inset-0 bg-cover bg-center"
-                                 style={{ backgroundImage: `url(${categoryImages[i]})` }}> {/* Dùng state categoryImages */}
+                                style={{ backgroundImage: `url(${categoryImages[i]})` }}> {/* Dùng state categoryImages */}
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                             </div>
                             <CardContent className="relative min-h-[260px] flex items-end justify-center">
@@ -170,7 +172,7 @@ export default function Body({ onRequireAuth }) {
                         <div key={i}>
                             <div className="relative w-full rounded-md overflow-hidden">
                                 <div className="absolute inset-0 bg-cover bg-center"
-                                     style={{ backgroundImage: `url(${featuredImages[i]})` }} /> {/* Dùng state featuredImages */}
+                                    style={{ backgroundImage: `url(${featuredImages[i]})` }} /> {/* Dùng state featuredImages */}
                                 <div className="absolute inset-0 bg-gradient-to-r from-black to-transparent" />
                                 <div className="relative z-10 h-full flex items-center p-6 sm:p-12">
                                     <FeaturedAuctionContent slide={slide} />

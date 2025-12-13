@@ -1,7 +1,7 @@
 // File: AuctionGrid.jsx (Component con MỚI)
 import React from "react";
 import AuctionCard from "../componentView/AuctionCard.jsx";
-import {useTranslation} from "react-i18next"; // Import thẻ Card
+import { useTranslation } from "react-i18next"; // Import thẻ Card
 
 /**
  * Component này hiển thị Lưới các vật phẩm
@@ -31,8 +31,8 @@ export default function AuctionGrid({ list, goItem, loading, error }) {
     // Grid
     return (
         <div className="
-        grid grid-cols-1 md:grid-cols-4 gap-6
-        px-6 pb-6">
+        grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-6
+        px-3 md:px-6 pb-6">
             {list.map((item, i) => (
                 <AuctionCard
                     key={item.itemId}

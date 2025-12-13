@@ -21,7 +21,7 @@ export default function ScheduledAuctions() {
     const [page, setPage] = useState(0);
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState(null);
-    
+
     // State bộ lọc (nháp và chính thức)
     const [filters, setFilters] = useState({
         branches: new Set(), categories: new Set(), types: new Set(), negotiated: null,
@@ -49,7 +49,7 @@ export default function ScheduledAuctions() {
         const keyword = searchParams.get("search") || "";
 
         // Kiểm tra xem có active filter không
-        const hasActiveFilters = 
+        const hasActiveFilters =
             (filters.categories && filters.categories.size > 0) ||
             (filters.branches && filters.branches.size > 0) ||
             filters.dateFrom ||
@@ -60,70 +60,70 @@ export default function ScheduledAuctions() {
         const fetchSize = hasActiveFilters ? 100 : 10;
         const fetchPage = hasActiveFilters ? 0 : page;
 
-        fetchScheduledAuctionItems({ 
-            page: fetchPage, 
-            size: fetchSize, 
-            sort, 
+        fetchScheduledAuctionItems({
+            page: fetchPage,
+            size: fetchSize,
+            sort,
             filters: { ...filters, keyword }
         })
-        .then((res) => {
-            if (isMounted) {
-                // Nếu có filter, lọc client-side
-                if (hasActiveFilters) {
-                    let filtered = res.content || [];
+            .then((res) => {
+                if (isMounted) {
+                    // Nếu có filter, lọc client-side
+                    if (hasActiveFilters) {
+                        let filtered = res.content || [];
 
-                    // Filter by Category
-                    if (filters.categories && filters.categories.size > 0) {
-                        const catArray = Array.from(filters.categories).map(c => c.toLowerCase());
-                        filtered = filtered.filter(item => 
-                            item.categoryName && catArray.includes(item.categoryName.toLowerCase())
-                        );
-                    }
+                        // Filter by Category
+                        if (filters.categories && filters.categories.size > 0) {
+                            const catArray = Array.from(filters.categories).map(c => c.toLowerCase());
+                            filtered = filtered.filter(item =>
+                                item.categoryName && catArray.includes(item.categoryName.toLowerCase())
+                            );
+                        }
 
-                    // Filter by Location
-                    if (filters.branches && filters.branches.size > 0) {
-                        const locArray = Array.from(filters.branches).map(l => l.toLowerCase());
-                        filtered = filtered.filter(item => 
-                            item.location && locArray.includes(item.location.toLowerCase())
-                        );
-                    }
+                        // Filter by Location
+                        if (filters.branches && filters.branches.size > 0) {
+                            const locArray = Array.from(filters.branches).map(l => l.toLowerCase());
+                            filtered = filtered.filter(item =>
+                                item.location && locArray.includes(item.location.toLowerCase())
+                            );
+                        }
 
-                    // Filter by Date Range
-                    if (filters.dateFrom || filters.dateTo) {
-                        filtered = filtered.filter(item => {
-                            if (!item.startDate) return false;
-                            const itemDate = new Date(item.startDate);
-                            if (filters.dateFrom) {
-                                const fromDate = new Date(filters.dateFrom);
-                                if (itemDate < fromDate) return false;
-                            }
-                            if (filters.dateTo) {
-                                const toDate = new Date(filters.dateTo);
-                                toDate.setHours(23, 59, 59, 999);
-                                if (itemDate > toDate) return false;
-                            }
-                            return true;
+                        // Filter by Date Range
+                        if (filters.dateFrom || filters.dateTo) {
+                            filtered = filtered.filter(item => {
+                                if (!item.startDate) return false;
+                                const itemDate = new Date(item.startDate);
+                                if (filters.dateFrom) {
+                                    const fromDate = new Date(filters.dateFrom);
+                                    if (itemDate < fromDate) return false;
+                                }
+                                if (filters.dateTo) {
+                                    const toDate = new Date(filters.dateTo);
+                                    toDate.setHours(23, 59, 59, 999);
+                                    if (itemDate > toDate) return false;
+                                }
+                                return true;
+                            });
+                        }
+
+                        setData({
+                            content: filtered,
+                            number: 0,
+                            totalPages: 1,
+                            totalElements: filtered.length
                         });
+                    } else {
+                        setData(res);
                     }
-
-                    setData({ 
-                        content: filtered, 
-                        number: 0, 
-                        totalPages: 1, 
-                        totalElements: filtered.length 
-                    });
-                } else {
-                    setData(res);
+                    setLoading(false);
                 }
-                setLoading(false);
-            }
-        })
-        .catch((err) => { 
-            if (isMounted) {
-                console.error("❌ Error fetching scheduled auctions:", err);
-                setLoading(false);
-            }
-        });
+            })
+            .catch((err) => {
+                if (isMounted) {
+                    console.error("❌ Error fetching scheduled auctions:", err);
+                    setLoading(false);
+                }
+            });
 
         return () => { isMounted = false; };
     }, [page, sort, filters, searchParams]);
@@ -146,8 +146,8 @@ export default function ScheduledAuctions() {
 
     // --- 3. RENDER GIAO DIỆN ---
     return (
-        <div className="w-full h-full flex flex-col overflow-hidden relative bg-gray-50 dark:bg-[#0B0F13] text-[#212121] dark:text-gray-200 transition-colors duration-300 rounded-xl pb-10">
-            
+        <div className="w-full h-full flex flex-col overflow-x-hidden overflow-y-auto relative bg-gray-50 dark:bg-[#0B0F13] text-[#212121] dark:text-gray-200 transition-colors duration-300 rounded-xl pb-10">
+
             {/* --- FILTER SHEET (Ẩn/Hiện theo state openFilter) --- */}
             <FilterSheet
                 open={openFilter}
@@ -176,10 +176,10 @@ export default function ScheduledAuctions() {
             />
 
             {/* --- NỘI DUNG CHÍNH (Trượt xuống khi Filter mở) --- */}
-            <div className={`flex flex-col w-full transition-[padding] duration-300 ease-out ${openFilter ? "pt-[35vh]" : "pt-0"}`}>
-                
-                <div className="p-6 flex flex-col gap-4">
-                    
+            <div className={`flex flex-col w-full overflow-x-hidden transition-[padding] duration-300 ease-out ${openFilter ? "pt-[35vh]" : "pt-0"}`}>
+
+                <div className="p-3 md:p-6 flex flex-col gap-4">
+
                     {/* --- HEADER ROW: Back + Date + Filter Button --- */}
                     <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
                         <div className="flex items-center gap-4">
@@ -197,8 +197,8 @@ export default function ScheduledAuctions() {
                             type="button"
                             onClick={() => setOpenFilter(!openFilter)}
                             className={`inline-flex items-center gap-2 text-[12px] font-medium rounded-md px-3 py-1.5 transition-colors
-                                ${openFilter 
-                                    ? "bg-black text-white dark:bg-white dark:text-black" 
+                                ${openFilter
+                                    ? "bg-black text-white dark:bg-white dark:text-black"
                                     : "text-[#9AA3B2] dark:text-gray-400 hover:bg-neutral-100 dark:hover:bg-[#1E242A]"
                                 }`}
                         >
@@ -209,14 +209,14 @@ export default function ScheduledAuctions() {
 
                     {/* --- TOOLBAR TRÊN (Sort) --- */}
                     <div className="bg-white dark:bg-neutral-900 rounded-t-xl shadow-sm pt-2 border-b border-neutral-100 dark:border-neutral-800">
-                        <AuctionToolbar 
+                        <AuctionToolbar
                             sort={sort}
                             setSort={setSort}
                             pageData={pageData}
                             setPage={setPage}
                             loading={loading}
                             hideSort={false} // Hiện Sort
-                            // onOpenFilter không cần vì nút Filter đã ở Header
+                        // onOpenFilter không cần vì nút Filter đã ở Header
                         />
                     </div>
 
@@ -231,7 +231,7 @@ export default function ScheduledAuctions() {
 
                     {/* --- TOOLBAR DƯỚI (Pagination) --- */}
                     <div className="bg-white dark:bg-neutral-900 rounded-b-xl shadow-sm pt-2 border-t border-neutral-100 dark:border-neutral-800">
-                        <AuctionToolbar 
+                        <AuctionToolbar
                             sort={sort}
                             setSort={setSort}
                             pageData={pageData}

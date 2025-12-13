@@ -46,17 +46,17 @@ export default function AboutUs() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="flex flex-col gap-8"
+            className="flex flex-col gap-4 md:gap-8 px-1"
         >
             {/* Header */}
             <div className="flex items-center gap-3">
                 <Info className="w-7 h-7 text-blue-600 dark:text-blue-400" />
-                <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
+                <h2 className="text-xl md:text-2xl font-bold text-neutral-900 dark:text-neutral-100">
                     {t("about_us_title")}
                 </h2>
             </div>
 
-            <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed">
+            <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed ml-10">
                 {t("about_us_intro")}
             </p>
 

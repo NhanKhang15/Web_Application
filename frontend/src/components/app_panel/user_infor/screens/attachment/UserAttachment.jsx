@@ -38,7 +38,7 @@ export default function UserAttachment({ profile }) {
     ];
 
     return (
-        <div className="flex flex-col gap-12 pt-12 pb-8 relative w-full overflow-x-hidden">
+        <div className="flex flex-col gap-6 md:gap-12 pt-4 md:pt-12 pb-8 relative w-full overflow-x-hidden">
             {/* Header */}
             <motion.div
                 initial={{ opacity: 0, y: 15 }}
@@ -63,7 +63,7 @@ export default function UserAttachment({ profile }) {
             </motion.div>
 
             {/* Documents */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 justify-items-center min-w-0">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-6 justify-items-center min-w-0">
                 {documentStatuses.map((doc, idx) => {
                     const hasAttachment = attachments[doc.label]?.length > 0;
                     const Icon = doc.icon;
@@ -81,11 +81,10 @@ export default function UserAttachment({ profile }) {
                         >
                             <div className="flex flex-col items-center mb-4 mt-1">
                                 <div
-                                    className={`w-14 h-14 md:w-16 md:h-16 flex items-center justify-center rounded-lg transition-all duration-300 ${
-                                        hasAttachment
-                                            ? "bg-emerald-50 dark:bg-[#1a2a1f] text-emerald-500"
-                                            : "bg-neutral-100 dark:bg-[#1a1f25] text-neutral-400"
-                                    }`}
+                                    className={`w-14 h-14 md:w-16 md:h-16 flex items-center justify-center rounded-lg transition-all duration-300 ${hasAttachment
+                                        ? "bg-emerald-50 dark:bg-[#1a2a1f] text-emerald-500"
+                                        : "bg-neutral-100 dark:bg-[#1a1f25] text-neutral-400"
+                                        }`}
                                 >
                                     <Icon className="w-8 h-8" />
                                 </div>
@@ -109,7 +108,7 @@ export default function UserAttachment({ profile }) {
                                     ))}
                                 </div>
                             ) : (
-                                <div className="w-56 h-36 rounded-md flex items-center justify-center text-sm text-neutral-400">
+                                <div className="w-full max-w-[220px] h-24 md:h-36 rounded-md flex items-center justify-center text-xs md:text-sm text-neutral-400">
                                     {t('empty_state')}
                                 </div>
                             )}

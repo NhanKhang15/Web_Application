@@ -6,8 +6,10 @@ import CalculatorWidget from "./CalculatorWidget";
 import SellerChatWidget from "./SellerChatWidget";
 // 👇 BỔ SUNG IMPORT QUAN TRỌNG NÀY
 import { useChat } from "./ChatContext.jsx";
+import { useTranslation } from "react-i18next";
 
 export default function UtilityMenu({ currentUserId }) {
+    const { t } = useTranslation();
     // Lấy state từ Context để biết khi nào cần tự động mở Chat
     const { isOpen: isChatOpenFromContext } = useChat();
 
@@ -15,12 +17,8 @@ export default function UtilityMenu({ currentUserId }) {
     const [activeWidget, setActiveWidget] = useState(null); // 'ai' | 'chat' | 'calc' | null
 
     const toggleWidget = (key) => {
-        if (activeWidget === key) {
-            setActiveWidget(null);
-        } else {
-            setActiveWidget(key);
-            setIsOpen(false);
-        }
+        setActiveWidget(activeWidget === key ? null : key);
+        setIsOpen(false);
     };
 
     // 👇 EFFECT QUAN TRỌNG: Tự động mở Widget Chat khi Context yêu cầu
@@ -34,21 +32,21 @@ export default function UtilityMenu({ currentUserId }) {
         {
             key: "ai",
             icon: <Bot size={20} />,
-            label: "Trợ lý AI",
+            label: t("utility_ai_assistant"),
             color: "bg-blue-600",
             onClick: () => toggleWidget("ai"),
         },
         {
             key: "chat",
             icon: <MessageCircle size={20} />,
-            label: "Tin nhắn",
+            label: t("utility_messages"),
             color: "bg-red-600",
             onClick: () => toggleWidget("chat"),
         },
         {
             key: "calc",
             icon: <Calculator size={20} />,
-            label: "Máy tính",
+            label: t("utility_calculator"),
             color: "bg-emerald-600",
             onClick: () => toggleWidget("calc"),
         },
@@ -74,7 +72,7 @@ export default function UtilityMenu({ currentUserId }) {
                 onClose={() => setActiveWidget(null)}
             />
 
-            <div className="fixed bottom-6 right-6 z-[9999] flex flex-col items-end gap-3 font-sans">
+            <div className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-[9999] flex flex-col items-end gap-3 font-sans">
                 <AnimatePresence>
                     {isOpen && (
                         <div className="flex flex-col gap-3 items-end mb-2">
@@ -91,7 +89,7 @@ export default function UtilityMenu({ currentUserId }) {
                                     <span className="px-3 py-1.5 rounded-lg bg-white dark:bg-neutral-800 text-neutral-700 dark:text-neutral-200 text-sm font-medium shadow-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                                         {item.label}
                                     </span>
-                                    <div className={`w-10 h-10 rounded-full ${item.color} text-white flex items-center justify-center shadow-lg hover:brightness-110 transition-all`}>
+                                    <div className={`w-9 h-9 md:w-10 md:h-10 rounded-full ${item.color} text-white flex items-center justify-center shadow-lg hover:brightness-110 transition-all`}>
                                         {item.icon}
                                     </div>
                                 </motion.div>
@@ -103,11 +101,11 @@ export default function UtilityMenu({ currentUserId }) {
                 <motion.button
                     whileTap={{ scale: 0.9 }}
                     onClick={() => setIsOpen(!isOpen)}
-                    className={`w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-colors duration-300 z-[10000]
+                    className={`w-12 h-12 md:w-14 md:h-14 rounded-full shadow-2xl flex items-center justify-center transition-colors duration-300 z-[10000]
                         ${isOpen ? "bg-neutral-800 dark:bg-neutral-700 text-white rotate-45" : "bg-indigo-600 hover:bg-indigo-700 text-white rotate-0"}
                     `}
                 >
-                    {isOpen ? <X size={28} /> : <LayoutGrid size={28} />}
+                    {isOpen ? <X size={24} className="md:w-7 md:h-7" /> : <LayoutGrid size={24} className="md:w-7 md:h-7" />}
                 </motion.button>
             </div>
         </>

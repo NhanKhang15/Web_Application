@@ -45,12 +45,12 @@ export default function EditUserDialog({ open, onOpenChange, profile, onSave }) 
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-md bg-transparent shadow-none text-neutral-900 dark:text-neutral-100">
+            <DialogContent>
                 <motion.div
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
-                    className="space-y-4 mt-2 p-6 rounded-xl bg-white dark:bg-neutral-900 shadow-none border border-neutral-200 dark:border-neutral-800"
+                    className="space-y-4"
                 >
                     <DialogHeader>
                         <DialogTitle className="text-xl font-bold text-center mb-2">

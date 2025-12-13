@@ -10,6 +10,7 @@ import Avatar from "../../../widget/screens/Avatar.jsx";
 import { motion } from "framer-motion";
 import AOS from "aos";
 import "aos/dist/aos.css";
+import WalletCard from "../../../payment/WalletCard.jsx";
 
 export default function UserWallet({ profile }) {
     const { t } = useTranslation();
@@ -19,7 +20,7 @@ export default function UserWallet({ profile }) {
     }, []);
 
     return (
-        <div className="flex flex-col gap-12 pt-12 pb-8 relative w-full overflow-x-hidden">
+        <div className="flex flex-col gap-6 md:gap-12 pt-4 md:pt-12 pb-8 relative w-full overflow-x-hidden">
             {/* Header */}
             <motion.div
                 initial={{ opacity: 0, y: 15 }}
@@ -43,8 +44,8 @@ export default function UserWallet({ profile }) {
                 </div>
             </motion.div>
 
-            {/* Wallet Overview */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-10 pt-4">
+            {/* Wallet Overview Stats */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-x-8 md:gap-y-10 pt-2 md:pt-4">
 
                 {/* Credit Limit */}
                 <StatCard
@@ -75,7 +76,9 @@ export default function UserWallet({ profile }) {
                 />
 
             </div>
+
+            {/* Wallet Card - handles Stripe payment verification */}
+            <WalletCard />
         </div>
     );
 }
-

@@ -64,7 +64,7 @@ export default function InfoCardBody({ profile }) {
                                 onClick={() => navigate("/verify-email")}
                                 className="px-4 py-2 text-sm font-medium text-white bg-[#E43137] rounded-md hover:bg-[#c92b30] transition-colors"
                             >
-                                Verify Email
+                                {t("verify_email_button")}
                             </button>
                         )}
                     </div>

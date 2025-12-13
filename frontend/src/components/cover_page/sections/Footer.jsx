@@ -1,36 +1,27 @@
 import React, { useState } from "react";
 import { Separator } from "../ui/separator.jsx";
 import { useTranslation } from "react-i18next";
+import { Facebook, Twitter, Instagram } from "lucide-react";
 
 function VSeparator() {
     return <Separator orientation="vertical" className="hidden lg:block h-[126px] mx-8" />;
 }
 
+// Social media icons using Lucide
+const SOCIAL_ICONS = [
+    { Icon: Facebook, alt: "Facebook", href: "#" },
+    { Icon: Twitter, alt: "Twitter / X", href: "#" },
+    { Icon: Instagram, alt: "Instagram", href: "#" },
+];
+
 export default function Footer({
-                                   links = [
-                                       { key: "terms", href: "#" },
-                                       { key: "privacy", href: "#" },
-                                       { key: "contact", href: "#" },
-                                   ],
-                                   socials = [
-                                       {
-                                           src: "https://c.animaapp.com/mfkwrxnikNfmdD/img/image-1.png",
-                                           alt: "Facebook",
-                                           href: "#",
-                                       },
-                                       {
-                                           src: "https://c.animaapp.com/mfkwrxnikNfmdD/img/image-2.png",
-                                           alt: "Twitter / X",
-                                           href: "#",
-                                       },
-                                       {
-                                           src: "https://c.animaapp.com/mfkwrxnikNfmdD/img/image-4.png",
-                                           alt: "Instagram",
-                                           href: "#",
-                                       },
-                                   ],
-                               }) {
-    const { t } = useTranslation(); // ✅ hook i18n
+    links = [
+        { key: "terms", href: "#" },
+        { key: "privacy", href: "#" },
+        { key: "contact", href: "#" },
+    ],
+}) {
+    const { t } = useTranslation();
     const year = new Date().getFullYear();
     const [, setOpen] = useState(false);
 
@@ -82,21 +73,17 @@ export default function Footer({
                         <h3 className="font-semibold text-[#FF3B30] text-base sm:text-lg text-center">
                             {t("footer.social_accounts")}
                         </h3>
-                        <div className="flex items-center gap-2.5">
-                            {socials.map((s) => (
+                        <div className="flex items-center gap-3">
+                            {SOCIAL_ICONS.map(({ Icon, alt, href }) => (
                                 <a
-                                    key={s.alt}
-                                    href={s.href}
+                                    key={alt}
+                                    href={href}
                                     onClick={(e) => e.preventDefault()}
-                                    className="inline-flex rounded-md hover:scale-105 transition-transform"
-                                    aria-label={s.alt}
-                                    title={s.alt}
+                                    className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-[#FF3B30] hover:text-white text-gray-600 transition-all duration-200 hover:scale-110"
+                                    aria-label={alt}
+                                    title={alt}
                                 >
-                                    <img
-                                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-md object-cover"
-                                        alt={s.alt}
-                                        src={s.src}
-                                    />
+                                    <Icon className="w-5 h-5" />
                                 </a>
                             ))}
                         </div>

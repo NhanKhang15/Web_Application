@@ -38,7 +38,16 @@ export default function Settings() {
 
     const handleLanguageChange = (lang) => {
         i18n.changeLanguage(lang);
-        localStorage.setItem("lang", lang);
+        try {
+            const user = JSON.parse(sessionStorage.getItem("user"));
+            if (user && user.userId) {
+                localStorage.setItem(`lang_${user.userId}`, lang);
+            } else {
+                localStorage.setItem("lang", lang);
+            }
+        } catch (e) {
+            localStorage.setItem("lang", lang);
+        }
         setToastOpen(true);
     };
 

@@ -241,7 +241,7 @@ export default function AuctionView() {
 
     if (slug === 'scheduled') {
         return (
-            <div className="p-6">
+            <div className="p-3 md:p-6">
                 <button
                     onClick={() => navigate(`/dashboard/auctions/ongoing`)}
                     className="flex items-center gap-2 text-sm text-gray-500 hover:text-blue-500 mb-4"
@@ -255,7 +255,7 @@ export default function AuctionView() {
 
     if (slug === 'closed') {
         return (
-            <div className="p-6">
+            <div className="p-3 md:p-6">
                 <button
                     onClick={() => navigate(`/dashboard/auctions/ongoing`)}
                     className="flex items-center gap-2 text-sm text-gray-500 hover:text-blue-500 mb-4"
@@ -269,7 +269,7 @@ export default function AuctionView() {
 
     if (itemSlug) {
         return (
-            <div className="p-6">
+            <div className="p-3 md:p-6">
                 <button
                     onClick={() => navigate(`/dashboard/auctions/ongoing`)}
                     className="flex items-center gap-2 text-sm text-gray-500 hover:text-blue-500 mb-4"
@@ -288,7 +288,7 @@ export default function AuctionView() {
                 <div className="bg-neutral-200 dark:bg-neutral-800 p-6 rounded-full mb-4">
                     <Construction className="w-12 h-12 text-neutral-500" />
                 </div>
-                <h2 className="text-2xl font-bold text-neutral-600 dark:text-neutral-300 mb-2">
+                <h2 className="text-xl md:text-2xl font-bold text-neutral-600 dark:text-neutral-300 mb-2">
                     {currentMenu?.label || slug}
                 </h2>
                 <p className="text-sm text-neutral-500">{t("feature_developing")}</p>
@@ -316,17 +316,18 @@ export default function AuctionView() {
             />
 
             <div className={`flex flex-col w-full transition-[padding] duration-300 ease-out ${openFilter ? "pt-[35vh]" : "pt-0"}`}>
-                <div className="flex flex-wrap items-center justify-between gap-4 mb-4 px-6 pt-6 flex-shrink-0" data-aos="fade-down">                    <div className="flex items-center gap-32 justify-between">
-                    <div className="flex items-center rounded-md bg-[#ECEFF1] dark:bg-[#1A1F25] px-2 py-1 shadow-sm" data-aos="zoom-in">
-                        <CalendarDays className="w-4 h-4 mr-2 text-[#96A0AE] dark:text-gray-400" />
-                        <div className="flex items-center">
-                            <div className="bg-white dark:bg-[#0F141A] border border-neutral-200 dark:border-neutral-700 rounded-md px-2 py-1 text-[12px] font-semibold mr-2">
-                                {day}
+                <div className="flex flex-wrap items-center justify-between gap-2 md:gap-4 mb-4 px-3 md:px-6 pt-4 md:pt-6 flex-shrink-0" data-aos="fade-down">
+                    <div className="flex items-center gap-4 md:gap-8 justify-between">
+                        <div className="flex items-center rounded-md bg-[#ECEFF1] dark:bg-[#1A1F25] px-2 py-1 shadow-sm" data-aos="zoom-in">
+                            <CalendarDays className="w-4 h-4 mr-2 text-[#96A0AE] dark:text-gray-400" />
+                            <div className="flex items-center">
+                                <div className="bg-white dark:bg-[#0F141A] border border-neutral-200 dark:border-neutral-700 rounded-md px-2 py-1 text-[12px] font-semibold mr-2">
+                                    {day}
+                                </div>
+                                <span className="text-[12px] font-semibold tracking-wide text-[#212121] dark:text-gray-200">{monthYear}</span>
                             </div>
-                            <span className="text-[12px] font-semibold tracking-wide text-[#212121] dark:text-gray-200">{monthYear}</span>
                         </div>
                     </div>
-                </div>
                     <button
                         type="button"
                         onClick={() => setOpenFilter(true)}
@@ -341,7 +342,7 @@ export default function AuctionView() {
                 <DashboardStats />
 
                 {keyword && (
-                    <div className="px-6 pb-2 flex items-center gap-2">
+                    <div className="px-3 md:px-6 pb-2 flex items-center gap-2">
                         <span className="text-sm text-neutral-500">
                             {t('Results_for')}: <b className="text-neutral-900 dark:text-white">"{keyword}"</b>
                         </span>
@@ -383,6 +384,6 @@ export default function AuctionView() {
                     />
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

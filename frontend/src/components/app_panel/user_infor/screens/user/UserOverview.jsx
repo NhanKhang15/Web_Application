@@ -18,7 +18,7 @@ export default function UserOverview({ profile, email, isEditing, setIsEditing, 
             className="p-4 rounded-xl bg-white dark:bg-neutral-900 shadow-sm overflow-hidden min-w-0"
         >
             {/* Header */}
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
                 <h2 className="text-xl font-semibold text-neutral-800 dark:text-neutral-100">
                     {t("user_info")}
                 </h2>
@@ -26,7 +26,7 @@ export default function UserOverview({ profile, email, isEditing, setIsEditing, 
                     variant="outline"
                     size="sm"
                     onClick={() => setIsEditing(true)}
-                    className="text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-neutral-800"
+                    className="shrink-0 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-neutral-800"
                 >
                     {t("edit_user_info")}
                 </Button>
@@ -42,8 +42,6 @@ export default function UserOverview({ profile, email, isEditing, setIsEditing, 
                 profile={profile}
                 onSave={updateProfile}
             />
-
-            <WalletCard />
         </motion.div>
     );
 }

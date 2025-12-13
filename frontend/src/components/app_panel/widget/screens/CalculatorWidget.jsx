@@ -100,8 +100,8 @@ export default function CalculatorWidget({ externalOpen, onClose }) {
                     <motion.div
                         drag
                         dragMomentum={false}
-                        // Chỉnh vị trí: bottom-24 right-24
-                        className="fixed bottom-24 right-24 z-[9998] w-72 p-4 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 shadow-md backdrop-blur-sm select-none cursor-grab active:cursor-grabbing"
+                        // Responsive positioning - bottom-20 to avoid FAB overlap on mobile
+                        className="fixed bottom-20 md:bottom-24 right-4 md:right-24 z-[9998] w-64 md:w-72 p-3 md:p-4 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 shadow-md backdrop-blur-sm select-none cursor-grab active:cursor-grabbing"
                         initial={{ opacity: 0, y: 40, scale: 0.8 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 30, scale: 0.9 }}

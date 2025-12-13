@@ -83,15 +83,15 @@ export default function AIChatWidget({ externalOpen, onClose, currentUserId }) {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed bottom-24 right-24 z-[9990] flex flex-col items-end pointer-events-auto">
+        <div className="fixed inset-0 md:inset-auto md:bottom-24 md:right-24 z-[9990] flex flex-col items-center md:items-end pointer-events-auto">
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
                         initial={{ opacity: 0, y: 20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                        className="mb-4 w-[350px] sm:w-[380px] bg-white dark:bg-neutral-900 rounded-2xl shadow-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden flex flex-col"
-                        style={{ height: "500px", maxHeight: "80vh" }}
+                        className="w-full h-full md:mb-4 md:w-[350px] lg:w-[380px] md:h-auto bg-white dark:bg-neutral-900 md:rounded-2xl shadow-2xl border-0 md:border border-neutral-200 dark:border-neutral-800 overflow-hidden flex flex-col"
+                        style={{ maxHeight: "100vh" }}
                     >
                         <div className="bg-blue-600 dark:bg-neutral-800 p-4 flex items-center justify-between text-white">
                             <span className="font-semibold flex items-center gap-2">

@@ -16,7 +16,8 @@ export function Dialog({ open, onOpenChange, children }) {
             {/* Modal wrapper */}
             <div
                 className="
-                relative w-full max-w-lg mx-auto p-6
+                relative w-full max-w-lg mx-3 md:mx-auto p-4 md:p-6
+                max-h-[85vh] overflow-y-auto
                 bg-white dark:bg-neutral-900
                 text-neutral-900 dark:text-neutral-100
                 rounded-xl shadow-2xl

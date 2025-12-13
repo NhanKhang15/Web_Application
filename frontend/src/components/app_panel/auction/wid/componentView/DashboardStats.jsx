@@ -58,20 +58,20 @@ export default function DashboardStats() {
     ];
 
     return (
-        <div className="flex flex-wrap gap-16 items-start justify-start mb-8 px-6 flex-shrink-0">
+        <div className="flex flex-wrap gap-4 md:gap-8 lg:gap-16 items-start justify-start mb-6 md:mb-8 px-3 md:px-6 flex-shrink-0">
             {stats.map((s, i) => (
                 <div
                     key={i}
-                    className="flex flex-col min-w-[160px]"
+                    className="flex flex-col min-w-[120px] md:min-w-[160px]"
                     data-aos="fade-up"
                     data-aos-delay={i * 100}
                 >
-                    <p className="uppercase text-[11px] tracking-wider text-[#9AA3B2] dark:text-gray-400 font-semibold mb-1">
+                    <p className="uppercase text-[10px] md:text-[11px] tracking-wider text-[#9AA3B2] dark:text-gray-400 font-semibold mb-1">
                         {s.label}
                     </p>
                     <div className="flex items-center gap-2">
                         {s.icon}
-                        <p className={`text-[24px] font-extrabold ${s.className}`}>{s.value}</p>
+                        <p className={`text-[18px] md:text-[24px] font-extrabold ${s.className}`}>{s.value}</p>
                     </div>
                 </div>
             ))}

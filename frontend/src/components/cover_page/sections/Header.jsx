@@ -96,11 +96,10 @@ export default function Header({ active = "home", onLogin, onRegister, onRequire
                                 key={item.key}
                                 href={item.href}
                                 onClick={(e) => handleNavClick(e, item.href, item.key)}
-                                className={`font-semibold text-sm md:text-[17px] transition-colors ${
-                                    isActive
-                                        ? "text-[#FF3B30]"
-                                        : "text-[#394149] hover:text-[#d6482c]"
-                                }`}
+                                className={`font-semibold text-sm md:text-[17px] transition-colors ${isActive
+                                    ? "text-[#FF3B30]"
+                                    : "text-[#394149] hover:text-[#d6482c]"
+                                    }`}
                                 aria-current={isActive ? "page" : undefined}
                             >
                                 {item.label}
@@ -111,8 +110,8 @@ export default function Header({ active = "home", onLogin, onRegister, onRequire
 
                 {/* Right side */}
                 <div className="flex items-center gap-3 md:gap-6 relative">
-                    {/* 🌐 Language Selector */}
-                    <div className="relative">
+                    {/* 🌐 Language Selector - Desktop only */}
+                    <div className="relative hidden md:block">
                         <button
                             onClick={() => setLangOpen(!langOpen)}
                             className="flex items-center gap-1 px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium text-sm"
@@ -122,24 +121,22 @@ export default function Header({ active = "home", onLogin, onRegister, onRequire
                         </button>
 
                         {langOpen && (
-                            <div className="absolute right-0 mt-2 w-32 bg-white rounded-md shadow-lg border border-gray-200 overflow-hidden">
+                            <div className="absolute right-0 mt-2 w-32 bg-white rounded-md shadow-lg border border-gray-200 overflow-hidden z-50">
                                 <button
                                     onClick={() => handleLanguageChange("en")}
-                                    className={`block w-full text-left px-4 py-2 text-sm ${
-                                        i18n.language === "en"
-                                            ? "bg-blue-600 text-white"
-                                            : "hover:bg-gray-100 text-gray-700"
-                                    }`}
+                                    className={`block w-full text-left px-4 py-2 text-sm ${i18n.language === "en"
+                                        ? "bg-blue-600 text-white"
+                                        : "hover:bg-gray-100 text-gray-700"
+                                        }`}
                                 >
                                     🇬🇧 English
                                 </button>
                                 <button
                                     onClick={() => handleLanguageChange("vi")}
-                                    className={`block w-full text-left px-4 py-2 text-sm ${
-                                        i18n.language === "vi"
-                                            ? "bg-blue-600 text-white"
-                                            : "hover:bg-gray-100 text-gray-700"
-                                    }`}
+                                    className={`block w-full text-left px-4 py-2 text-sm ${i18n.language === "vi"
+                                        ? "bg-blue-600 text-white"
+                                        : "hover:bg-gray-100 text-gray-700"
+                                        }`}
                                 >
                                     🇻🇳 Tiếng Việt
                                 </button>
@@ -197,11 +194,10 @@ export default function Header({ active = "home", onLogin, onRegister, onRequire
                                         key={item.key}
                                         href={item.href}
                                         onClick={(e) => handleNavClick(e, item.href, item.key)}
-                                        className={`block rounded-md px-3 py-2 font-semibold text-sm transition-colors ${
-                                            isActive
-                                                ? "text-[#FF3B30] bg-gray-50"
-                                                : "text-[#394149] hover:text-[#d6482c] hover:bg-gray-50"
-                                        }`}
+                                        className={`block rounded-md px-3 py-2 font-semibold text-sm transition-colors ${isActive
+                                            ? "text-[#FF3B30] bg-gray-50"
+                                            : "text-[#394149] hover:text-[#d6482c] hover:bg-gray-50"
+                                            }`}
                                     >
                                         {item.label}
                                     </a>
@@ -215,21 +211,19 @@ export default function Header({ active = "home", onLogin, onRegister, onRequire
                         <div className="flex flex-col gap-2 mb-3">
                             <button
                                 onClick={() => handleLanguageChange("en")}
-                                className={`w-full rounded-md px-3 py-2 text-sm ${
-                                    i18n.language === "en"
-                                        ? "bg-blue-600 text-white"
-                                        : "hover:bg-gray-100 text-gray-700"
-                                }`}
+                                className={`w-full rounded-md px-3 py-2 text-sm ${i18n.language === "en"
+                                    ? "bg-blue-600 text-white"
+                                    : "hover:bg-gray-100 text-gray-700"
+                                    }`}
                             >
-                                🇬🇧 English
+                                🇺🇸 English
                             </button>
                             <button
                                 onClick={() => handleLanguageChange("vi")}
-                                className={`w-full rounded-md px-3 py-2 text-sm ${
-                                    i18n.language === "vi"
-                                        ? "bg-blue-600 text-white"
-                                        : "hover:bg-gray-100 text-gray-700"
-                                }`}
+                                className={`w-full rounded-md px-3 py-2 text-sm ${i18n.language === "vi"
+                                    ? "bg-blue-600 text-white"
+                                    : "hover:bg-gray-100 text-gray-700"
+                                    }`}
                             >
                                 🇻🇳 Tiếng Việt
                             </button>

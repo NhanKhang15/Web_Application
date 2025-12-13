@@ -46,16 +46,16 @@ export default function PlatformUsers() {
   };
 
   return (
-    <div className="w-full pt-2 pb-8 px-4">
+    <div className="w-full pt-2 pb-8 px-2 md:px-4">
 
       {/* Header Toolbar */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-4 md:mb-8">
         <button className="p-2 -ml-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors">
           <ArrowLeft className="w-6 h-6 text-neutral-700 dark:text-neutral-300" />
         </button>
         <div className="flex gap-2">
           {/* Thêm nút Add User nếu muốn */}
-          <button className="px-4 py-2 bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-sm rounded-lg hover:bg-neutral-700 dark:hover:bg-neutral-200 transition-colors">
+          <button className="px-3 md:px-4 py-2 bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-xs md:text-sm rounded-lg hover:bg-neutral-700 dark:hover:bg-neutral-200 transition-colors">
             + Add User
           </button>
           <button className="p-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors">
@@ -65,7 +65,7 @@ export default function PlatformUsers() {
       </div>
 
       {/* Title & Filter */}
-      <div className="mb-8" data-aos="fade-up">
+      <div className="mb-4 md:mb-8" data-aos="fade-up">
         <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-3">
           Platform Users
         </h3>
@@ -80,7 +80,7 @@ export default function PlatformUsers() {
       </div>
 
       {/* User Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
         {users.map((user, index) => (
           <motion.div
             key={user.id}
