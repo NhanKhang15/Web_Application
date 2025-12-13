@@ -11,7 +11,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.beans.factory.annotation.Value;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -21,13 +23,16 @@ public class SecurityConfig {
   private final OAuth2SuccessHandler successHandler;
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
+  @Value("${app.cors.allowed-origins}")
+  private String corsOrigins;
+
   @Bean
   SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http
         .csrf(csrf -> csrf.disable())
         .cors(cors -> cors.configurationSource(request -> {
           CorsConfiguration c = new CorsConfiguration();
-          c.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:5174")); // FE origin
+          c.setAllowedOrigins(Arrays.asList(corsOrigins.split(",")));
           c.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
           c.setAllowedHeaders(List.of("*"));
           c.setAllowCredentials(true);

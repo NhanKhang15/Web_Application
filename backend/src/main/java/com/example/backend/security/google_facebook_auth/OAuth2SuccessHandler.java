@@ -1,6 +1,5 @@
 package com.example.backend.security.google_facebook_auth;
 
-
 import com.example.backend.security.auth.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,7 +24,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
   @Override
   public void onAuthenticationSuccess(HttpServletRequest req, HttpServletResponse res,
-                                      Authentication auth) throws IOException, ServletException {
+      Authentication auth) throws IOException, ServletException {
     OAuth2User principal = (OAuth2User) auth.getPrincipal();
     // upsert user theo Google attributes
     User u = socialService.upsertFromGoogleAttributes(principal.getAttributes());

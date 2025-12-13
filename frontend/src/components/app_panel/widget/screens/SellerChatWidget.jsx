@@ -291,6 +291,7 @@ export default function GlobalChatWidget({ currentUserId, externalOpen, onClose 
             : null;
 
     if (!currentUserId) return null;
+    if (!isOpen) return null;
 
     return createPortal(
         <AnimatePresence>

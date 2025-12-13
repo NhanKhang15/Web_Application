@@ -134,19 +134,19 @@ export default function ClosedAuctions() {
             sort,
             filters: apiFilters
         })
-            .then((res) => {
-                if (isMounted) {
-                    const rawContent = res.content || [];
-                    setAuctions(rawContent.map(mapDataToUI));
-                    setTotalPages(res.totalPages || 1);
-                    setTotalElements(res.totalElements || 0);
-                    setLoading(false);
-                }
-            })
-            .catch((err) => {
-                console.error("Error fetching closed auctions:", err);
-                if (isMounted) setLoading(false);
-            });
+        .then((res) => {
+            if (isMounted) {
+                const rawContent = res.content || [];
+                setAuctions(rawContent.map(mapDataToUI));
+                setTotalPages(res.totalPages || 1);
+                setTotalElements(res.totalElements || 0);
+                setLoading(false);
+            }
+        })
+        .catch((err) => {
+            console.error("Error fetching closed auctions:", err);
+            if (isMounted) setLoading(false);
+        });
 
         return () => { isMounted = false; };
     }, [page, sort, appliedFilters, keyword]);
@@ -228,7 +228,7 @@ export default function ClosedAuctions() {
                         {loading ? (
                             <div className="h-64 flex items-center justify-center text-gray-400">Loading closed auctions...</div>
                         ) : auctions.length > 0 ? (
-                            <ClosedAuctionTable data={auctions} onViewResult={handleViewResult} />
+                             <ClosedAuctionTable data={auctions} onViewResult={handleViewResult} />
                         ) : (
                             <div className="h-64 flex items-center justify-center text-gray-400">No closed auctions found.</div>
                         )}

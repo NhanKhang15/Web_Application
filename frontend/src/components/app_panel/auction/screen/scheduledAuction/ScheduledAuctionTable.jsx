@@ -30,6 +30,9 @@ const AuctionTableRow = ({ item, t }) => {
                 <span className={`px-1.5 py-0.5 rounded text-white text-[9px] font-bold ${item.statusColor}`}>
                     {item.id}
                 </span>
+                <div className="mt-2 text-neutral-400 cursor-pointer hover:text-blue-500">
+                    <MessageSquare className="w-4 h-4" />
+                </div>
             </td>
 
             {/* Title */}

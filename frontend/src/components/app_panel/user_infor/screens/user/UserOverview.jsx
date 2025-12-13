@@ -42,6 +42,8 @@ export default function UserOverview({ profile, email, isEditing, setIsEditing, 
                 profile={profile}
                 onSave={updateProfile}
             />
+
+            <WalletCard />
         </motion.div>
     );
 }

@@ -66,64 +66,64 @@ export default function ScheduledAuctions() {
             sort,
             filters: { ...filters, keyword }
         })
-            .then((res) => {
-                if (isMounted) {
-                    // Nếu có filter, lọc client-side
-                    if (hasActiveFilters) {
-                        let filtered = res.content || [];
+        .then((res) => {
+            if (isMounted) {
+                // Nếu có filter, lọc client-side
+                if (hasActiveFilters) {
+                    let filtered = res.content || [];
 
-                        // Filter by Category
-                        if (filters.categories && filters.categories.size > 0) {
-                            const catArray = Array.from(filters.categories).map(c => c.toLowerCase());
-                            filtered = filtered.filter(item =>
-                                item.categoryName && catArray.includes(item.categoryName.toLowerCase())
-                            );
-                        }
-
-                        // Filter by Location
-                        if (filters.branches && filters.branches.size > 0) {
-                            const locArray = Array.from(filters.branches).map(l => l.toLowerCase());
-                            filtered = filtered.filter(item =>
-                                item.location && locArray.includes(item.location.toLowerCase())
-                            );
-                        }
-
-                        // Filter by Date Range
-                        if (filters.dateFrom || filters.dateTo) {
-                            filtered = filtered.filter(item => {
-                                if (!item.startDate) return false;
-                                const itemDate = new Date(item.startDate);
-                                if (filters.dateFrom) {
-                                    const fromDate = new Date(filters.dateFrom);
-                                    if (itemDate < fromDate) return false;
-                                }
-                                if (filters.dateTo) {
-                                    const toDate = new Date(filters.dateTo);
-                                    toDate.setHours(23, 59, 59, 999);
-                                    if (itemDate > toDate) return false;
-                                }
-                                return true;
-                            });
-                        }
-
-                        setData({
-                            content: filtered,
-                            number: 0,
-                            totalPages: 1,
-                            totalElements: filtered.length
-                        });
-                    } else {
-                        setData(res);
+                    // Filter by Category
+                    if (filters.categories && filters.categories.size > 0) {
+                        const catArray = Array.from(filters.categories).map(c => c.toLowerCase());
+                        filtered = filtered.filter(item =>
+                            item.categoryName && catArray.includes(item.categoryName.toLowerCase())
+                        );
                     }
-                    setLoading(false);
+
+                    // Filter by Location
+                    if (filters.branches && filters.branches.size > 0) {
+                        const locArray = Array.from(filters.branches).map(l => l.toLowerCase());
+                        filtered = filtered.filter(item =>
+                            item.location && locArray.includes(item.location.toLowerCase())
+                        );
+                    }
+
+                    // Filter by Date Range
+                    if (filters.dateFrom || filters.dateTo) {
+                        filtered = filtered.filter(item => {
+                            if (!item.startDate) return false;
+                            const itemDate = new Date(item.startDate);
+                            if (filters.dateFrom) {
+                                const fromDate = new Date(filters.dateFrom);
+                                if (itemDate < fromDate) return false;
+                            }
+                            if (filters.dateTo) {
+                                const toDate = new Date(filters.dateTo);
+                                toDate.setHours(23, 59, 59, 999);
+                                if (itemDate > toDate) return false;
+                            }
+                            return true;
+                        });
+                    }
+
+                    setData({
+                        content: filtered,
+                        number: 0,
+                        totalPages: 1,
+                        totalElements: filtered.length
+                    });
+                } else {
+                    setData(res);
                 }
-            })
-            .catch((err) => {
-                if (isMounted) {
-                    console.error("❌ Error fetching scheduled auctions:", err);
-                    setLoading(false);
-                }
-            });
+                setLoading(false);
+            }
+        })
+        .catch((err) => {
+            if (isMounted) {
+                console.error("❌ Error fetching scheduled auctions:", err);
+                setLoading(false);
+            }
+        });
 
         return () => { isMounted = false; };
     }, [page, sort, filters, searchParams]);
@@ -197,8 +197,8 @@ export default function ScheduledAuctions() {
                             type="button"
                             onClick={() => setOpenFilter(!openFilter)}
                             className={`inline-flex items-center gap-2 text-[12px] font-medium rounded-md px-3 py-1.5 transition-colors
-                                ${openFilter
-                                    ? "bg-black text-white dark:bg-white dark:text-black"
+                                ${openFilter 
+                                    ? "bg-black text-white dark:bg-white dark:text-black" 
                                     : "text-[#9AA3B2] dark:text-gray-400 hover:bg-neutral-100 dark:hover:bg-[#1E242A]"
                                 }`}
                         >
@@ -216,7 +216,7 @@ export default function ScheduledAuctions() {
                             setPage={setPage}
                             loading={loading}
                             hideSort={false} // Hiện Sort
-                        // onOpenFilter không cần vì nút Filter đã ở Header
+                            // onOpenFilter không cần vì nút Filter đã ở Header
                         />
                     </div>
 
