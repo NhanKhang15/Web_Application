@@ -42,3 +42,16 @@ build/
 docker-compose*.yml
 docker-compose*.yaml
 /out/
+
+# Node modules
+node_modules/
+
+# Uploads folders
+/uploads/
+/uploads*/
+frontend/uploads/
+backend/uploads/
+backend/uploads*/
+
+# Text files
+*.txt

@@ -40,9 +40,12 @@ public class WalletService {
             String stripeSessionId,
             String paymentIntentId) {
 
+        System.out.println("🔄 [WALLET] addBalance called - UserId: " + userId + ", Amount: " + amount);
+
         // 1. Find or create wallet
         Wallet wallet = walletRepo.findByUser_UserId(userId)
                 .orElseGet(() -> {
+                    System.out.println("📦 [WALLET] Creating new wallet for userId: " + userId);
                     User user = userRepo.findById(userId)
                             .orElseThrow(() -> new RuntimeException("User not found"));
                     Wallet w = new Wallet();
@@ -51,9 +54,12 @@ public class WalletService {
                     return walletRepo.save(w);
                 });
 
+        BigDecimal oldBalance = wallet.getBalance();
+
         // 2. Add balance
         wallet.setBalance(wallet.getBalance().add(amount));
         walletRepo.save(wallet);
+        System.out.println("💵 [WALLET] Balance updated: " + oldBalance + " -> " + wallet.getBalance());
 
         // 3. Log transaction
         WalletTransaction tx = new WalletTransaction();
@@ -71,5 +77,6 @@ public class WalletService {
         tx.setStripePaymentIntentId(paymentIntentId);
         tx.setNote("Topup via Stripe");
         wtRepo.save(tx);
+        System.out.println("📝 [WALLET] Transaction logged successfully");
     }
 }

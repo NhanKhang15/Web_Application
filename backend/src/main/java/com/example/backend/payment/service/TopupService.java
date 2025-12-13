@@ -89,43 +89,72 @@ public class TopupService {
 
         @Transactional
         public void handleSuccessfulTopup(Long topupId, String paymentIntentId) {
+                System.out.println("💰 [TOPUP] handleSuccessfulTopup called - topupId: " + topupId
+                                + ", paymentIntentId: " + paymentIntentId);
+
                 TopupOrder topup = topupRepo.findById(topupId).orElse(null);
-                if (topup == null)
+                if (topup == null) {
+                        System.out.println("❌ [TOPUP] Topup not found for id: " + topupId);
                         return;
+                }
 
                 // Prevent double processing
-                if (!topup.getStatus().equals(TopupStatus.PENDING))
+                if (!topup.getStatus().equals(TopupStatus.PENDING)) {
+                        System.out.println("⚠️ [TOPUP] Topup already processed. Current status: " + topup.getStatus());
                         return;
+                }
 
                 topup.setStatus(TopupStatus.PAID);
                 topup.setStripePaymentIntentId(paymentIntentId);
                 topupRepo.save(topup);
+                System.out.println("✅ [TOPUP] Topup status updated to PAID");
 
                 // Add balance to wallet
+                System.out.println("💳 [TOPUP] Adding balance to wallet - UserId: " + topup.getUser().getUserId()
+                                + ", Amount: " + topup.getAmount());
                 walletService.addBalance(topup.getUser().getUserId(), topup.getAmount(),
                                 topup.getTopupId(), topup.getStripeSessionId(), paymentIntentId);
+                System.out.println("✅ [TOPUP] Balance added successfully!");
         }
 
         @Transactional
         public boolean verifyTopupSession(Long topupId) {
+                System.out.println("🔍 [VERIFY] Starting verification for topupId: " + topupId);
                 try {
                         TopupOrder topup = topupRepo.findById(topupId).orElse(null);
-                        if (topup == null)
+                        if (topup == null) {
+                                System.out.println("❌ [VERIFY] Topup not found for id: " + topupId);
                                 return false;
+                        }
+                        System.out.println("📋 [VERIFY] Topup found - Status: " + topup.getStatus() + ", Amount: "
+                                        + topup.getAmount());
 
-                        if (topup.getStatus() == TopupStatus.PAID)
-                                return true;
-
-                        String sessionId = topup.getStripeSessionId();
-                        if (sessionId == null)
-                                return false;
-
-                        Session session = Session.retrieve(sessionId);
-                        if ("paid".equals(session.getPaymentStatus())) {
-                                handleSuccessfulTopup(topupId, session.getPaymentIntent());
+                        if (topup.getStatus() == TopupStatus.PAID) {
+                                System.out.println("✅ [VERIFY] Topup already PAID, returning true");
                                 return true;
                         }
+
+                        String sessionId = topup.getStripeSessionId();
+                        if (sessionId == null) {
+                                System.out.println("❌ [VERIFY] Stripe session ID is null");
+                                return false;
+                        }
+                        System.out.println("🔗 [VERIFY] Stripe Session ID: " + sessionId);
+
+                        Session session = Session.retrieve(sessionId);
+                        System.out.println("💳 [VERIFY] Stripe payment status: " + session.getPaymentStatus());
+
+                        if ("paid".equals(session.getPaymentStatus())) {
+                                System.out.println("✅ [VERIFY] Payment confirmed! Processing topup...");
+                                handleSuccessfulTopup(topupId, session.getPaymentIntent());
+                                System.out.println("✅ [VERIFY] Topup processed successfully!");
+                                return true;
+                        } else {
+                                System.out.println("⏳ [VERIFY] Payment not yet paid. Status: "
+                                                + session.getPaymentStatus());
+                        }
                 } catch (Exception e) {
+                        System.out.println("❌ [VERIFY] Exception occurred: " + e.getMessage());
                         e.printStackTrace();
                 }
                 return false;
