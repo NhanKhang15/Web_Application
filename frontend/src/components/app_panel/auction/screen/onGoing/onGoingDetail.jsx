@@ -99,7 +99,7 @@ export default function AuctionDetail() {
                 // Fetch initial bids
                 const auctionId = data.auctionId ?? data.itemId;
                 if (auctionId) {
-                    fetch(`/api/bids/history/${auctionId}`, {
+                    fetch(`${API_BASE_URL}/api/bids/history/${auctionId}`, {
                         headers: {
                             ...authHeaders()
                         },
@@ -337,7 +337,7 @@ export default function AuctionDetail() {
         }
 
         try {
-            const response = await fetch('/api/bids', {
+            const response = await fetch(`${API_BASE_URL}/api/bids`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
