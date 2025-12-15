@@ -1,12 +1,7 @@
 package com.example.backend.auction.service;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +15,7 @@ import com.example.backend.auction.domain.item.AuctionImgRepository;
 import com.example.backend.auction.domain.item.AuctionItems;
 import com.example.backend.auction.domain.item.AuctionItemsRepository;
 import com.example.backend.auction.domain.item.AuctionStatus;
+import com.example.backend.image.CloudinaryService;
 import com.example.backend.utils.SlugUtils;
 
 @Service
@@ -28,18 +24,17 @@ public class AuctionWriteService {
     private final AuctionRepository auctionRepo;
     private final AuctionItemsRepository itemRepo;
     private final AuctionImgRepository imgRepo;
-
-    // Đường dẫn lưu ảnh (Config trong properties thì tốt hơn, ở đây hardcode ví dụ)
-    private final String UPLOAD_DIR = "uploads/";
+    private final CloudinaryService cloudinaryService;
 
     public AuctionWriteService(AuctionRepository auctionRepo, AuctionItemsRepository itemRepo,
-            AuctionImgRepository imgRepo) {
+            AuctionImgRepository imgRepo, CloudinaryService cloudinaryService) {
         this.auctionRepo = auctionRepo;
         this.itemRepo = itemRepo;
         this.imgRepo = imgRepo;
+        this.cloudinaryService = cloudinaryService;
     }
 
-    @Transactional(rollbackFor = Exception.class) // Nếu lỗi bất kỳ bước nào thì rollback sạch
+    @Transactional(rollbackFor = Exception.class)
     public Auction createAuction(CreateAuctionRequest request, MultipartFile[] files) throws IOException {
 
         // Validate Prices
@@ -71,7 +66,7 @@ public class AuctionWriteService {
         // BƯỚC 1: Tạo và lưu AuctionItems
         AuctionItems newItem = new AuctionItems();
         newItem.setSellerId(request.getSellerId());
-        newItem.setCategoryId(request.getCategoryId()); // Lưu CategoryID
+        newItem.setCategoryId(request.getCategoryId());
         newItem.setTitle(request.getTitle());
         newItem.setDescription(request.getDescription());
         newItem.setLocation(request.getLocation());
@@ -86,34 +81,26 @@ public class AuctionWriteService {
         // Lưu Item để lấy ID
         newItem = itemRepo.save(newItem);
 
-        // BƯỚC 2: Xử lý Upload Ảnh (Lưu vào bảng ItemImages)
+        // BƯỚC 2: Xử lý Upload Ảnh lên Cloudinary
         String mainThumbnail = "";
 
         if (files != null && files.length > 0) {
-            // Tạo thư mục nếu chưa có
-            Path uploadPath = Paths.get(UPLOAD_DIR);
-            if (!Files.exists(uploadPath))
-                Files.createDirectories(uploadPath);
-
             for (int i = 0; i < files.length; i++) {
                 MultipartFile file = files[i];
-                // Tạo tên file duy nhất
-                String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-                Path filePath = uploadPath.resolve(fileName);
-                Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-                String fileUrl = "/uploads/" + fileName;
+                // Upload trực tiếp lên Cloudinary (không lưu local)
+                String cloudinaryUrl = cloudinaryService.uploadImage(file, "auctions");
 
                 // Lưu vào bảng ItemImages
                 AuctionImg img = new AuctionImg();
                 img.setItemId(newItem.getItemId());
-                img.setImgUrl(fileUrl);
+                img.setImgUrl(cloudinaryUrl); // Lưu Cloudinary URL
                 img.setCreatedAt(LocalDateTime.now());
 
                 // Ảnh đầu tiên là ảnh chính (Main)
                 if (i == 0) {
                     img.setMain(true);
-                    mainThumbnail = fileUrl;
+                    mainThumbnail = cloudinaryUrl;
                 } else {
                     img.setMain(false);
                 }
@@ -121,14 +108,14 @@ public class AuctionWriteService {
             }
 
             // Update ngược lại thumbnail cho Item (để query nhanh)
-            newItem.setImgUrl(mainThumbnail); // Cột ImgUrl trong bảng Items
+            newItem.setImgUrl(mainThumbnail);
             newItem.setThumbnail(mainThumbnail);
             itemRepo.save(newItem);
         }
 
         // BƯỚC 3: Tạo và lưu Auctions
         Auction newAuction = new Auction();
-        newAuction.setItem(newItem); // Link với Item vừa tạo
+        newAuction.setItem(newItem);
         newAuction.setStartingPrice(request.getStartingPrice());
         newAuction.setMinStep(request.getMinStep());
         newAuction.setReservePrice(request.getReservePrice());
@@ -137,8 +124,7 @@ public class AuctionWriteService {
         // Mặc định giá hiện tại = giá khởi điểm
         newAuction.setCurrentPrice(request.getStartingPrice());
 
-        // Assign start/end directly from request (frontend sends naive LocalDateTime
-        // from datetime-local)
+        // Assign start/end directly from request
         if (request.getStartDate() != null) {
             newAuction.setStartDate(request.getStartDate());
         }
