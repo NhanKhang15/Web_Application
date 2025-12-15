@@ -1,5 +1,6 @@
 package com.example.backend.notification.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,9 @@ import jakarta.mail.internet.MimeMessage;
 public class EmailService {
 
     private final JavaMailSender mailSender;
+
+    // Hardcode email đã verify trên Brevo để đảm bảo gửi được
+    private final String fromEmail = "khangnhanopi@gmail.com";
 
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
@@ -122,6 +126,7 @@ public class EmailService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
+            helper.setFrom(fromEmail); // QUAN TRỌNG: Email đã verify trên Brevo
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(content, false); // false for plain text, true for HTML
