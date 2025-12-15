@@ -15,6 +15,7 @@ import com.example.backend.auction.domain.auction.dto.AuctionDetailProjection;
 import com.example.backend.auction.domain.auction.dto.AuctionDto;
 import com.example.backend.auction.domain.auction.dto.EndedAuctionDto;
 import com.example.backend.auction.domain.auction.dto.ScheduledAuctionDto;
+import com.example.backend.auction.domain.auction.dto.SimilarItemDto;
 import com.example.backend.auction.domain.item.AuctionImgRepository;
 
 import com.example.backend.category.CategoryRepository;
@@ -150,5 +151,17 @@ public class ActiveItemsService {
         }
 
         return auctionRepo.searchAuctionsAdvanced(keyword.trim(), minPrice, maxPrice, ownerId, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public List<SimilarItemDto> getSimilarAuctions(Integer auctionId, int limit) {
+        // First, get the auction to find its category and item
+        var auction = auctionRepo.findById(auctionId)
+                .orElseThrow(() -> new RuntimeException("Auction not found: " + auctionId));
+
+        Integer categoryId = auction.getItem().getCategoryId();
+        Integer itemId = auction.getItem().getItemId();
+
+        return auctionRepo.findSimilarAuctions(categoryId, itemId, limit);
     }
 }

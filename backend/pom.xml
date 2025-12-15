@@ -192,6 +192,13 @@
         <version>3.1.0</version>
     </dependency>
 
+    <!-- Datafaker for generating fake data -->
+    <dependency>
+        <groupId>net.datafaker</groupId>
+        <artifactId>datafaker</artifactId>
+        <version>2.4.2</version>
+    </dependency>
+
   </dependencies>
 
   <build>

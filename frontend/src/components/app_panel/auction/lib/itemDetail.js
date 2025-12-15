@@ -19,6 +19,10 @@ export class ItemsApi {
     return getJSON(`/api/items/${itemId}/images`);
   }
 
+  static getSimilarItems(auctionId, limit = 4) {
+    return getJSON(`/api/auctions/${auctionId}/similar?limit=${limit}`);
+  }
+
 }
 
 export default ItemsApi;

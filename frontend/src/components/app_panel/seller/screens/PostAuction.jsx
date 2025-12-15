@@ -1,5 +1,5 @@
 // src/pages/PostAuction.jsx
-import React from "react";
+import React, { useRef } from "react";
 import { Upload, Calendar, DollarSign, FileText, Image as ImageIcon, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import PostAuctionApi from "../lib/PostAuctionApi.js";
 import { useTranslation } from "react-i18next";
@@ -61,6 +61,9 @@ export default function PostAuction() {
     const [toastType, setToastType] = React.useState("success"); // "success" | "error"
 
     const [imagePreviews, setImagePreviews] = React.useState([]);
+
+    // Ref to reset file input
+    const fileInputRef = useRef(null);
 
     // Helper to show toast
     const showToast = (message, type = "success") => {
@@ -147,6 +150,11 @@ export default function PostAuction() {
             ...prev,
             images: [...prev.images, ...files]
         }));
+
+        // Reset file input to allow re-selecting same files
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
     };
 
     const removeImage = (index) => {
@@ -416,6 +424,7 @@ export default function PostAuction() {
                                 onChange={handleImageUpload}
                                 className="hidden"
                                 id="image-upload"
+                                ref={fileInputRef}
                                 disabled={formData.images.length >= 10}
                             />
                             <label

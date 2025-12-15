@@ -15,6 +15,7 @@ import com.example.backend.auction.domain.auction.dto.AuctionDetailProjection;
 import com.example.backend.auction.domain.auction.dto.AuctionDto;
 import com.example.backend.auction.domain.auction.dto.EndedAuctionDto;
 import com.example.backend.auction.domain.auction.dto.ScheduledAuctionDto;
+import com.example.backend.auction.domain.auction.dto.SimilarItemDto;
 
 import jakarta.persistence.LockModeType;
 
@@ -397,4 +398,29 @@ public interface AuctionRepository extends JpaRepository<Auction, Integer> {
                 WHERE ai.SellerID = :sellerId
             """, nativeQuery = true)
     List<AuctionDto> findAllAuctionsBySellerId(@Param("sellerId") Integer sellerId);
+
+    // ========== SIMILAR ITEMS ==========
+    // Find similar auctions in the same category, excluding the current item
+    @Query(value = """
+                        SELECT
+                            ai.ItemID AS itemId,
+            ai.Title AS title,
+            ai.Slug AS slug,
+
+            COALESCE(img.ImgUrl, ai.Thumbnail) AS thumbnail,
+                            a.CreatedAt AS createdAt
+                        FROM Auctions a
+                        JOIN AuctionItems ai ON a.ItemID = ai.ItemID
+                        LEFT JOIN ItemImages img ON ai.ItemID = img.ItemID AND img.IsMain = 1
+                        WHERE a.Status = 'Open'
+                            AND ai.CategoryID = :categoryId
+                            AND ai.ItemID != :excludeItemId
+                        ORDER BY a.CreatedAt DESC
+                        LIMIT :limit
+                    """, nativeQuery = true)
+
+    List<SimilarItemDto> findSimilarAuctions(
+            @Param("categoryId") Integer categoryId,
+            @Param("excludeItemId") Integer excludeItemId,
+            @Param("limit") int limit);
 }

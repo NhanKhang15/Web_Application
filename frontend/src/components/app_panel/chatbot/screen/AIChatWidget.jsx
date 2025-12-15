@@ -90,8 +90,8 @@ export default function AIChatWidget({ externalOpen, onClose, currentUserId }) {
                         initial={{ opacity: 0, y: 20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                        className="w-full h-full md:mb-4 md:w-[350px] lg:w-[380px] md:h-auto bg-white dark:bg-neutral-900 md:rounded-2xl shadow-2xl border-0 md:border border-neutral-200 dark:border-neutral-800 overflow-hidden flex flex-col"
-                        style={{ maxHeight: "100vh" }}
+                        className="w-full h-full md:mb-4 md:w-[350px] lg:w-[380px] md:h-[450px] bg-white dark:bg-neutral-900 md:rounded-2xl shadow-2xl border-0 md:border border-neutral-200 dark:border-neutral-800 overflow-hidden flex flex-col"
+                        style={{ maxHeight: "calc(100vh - 120px)" }}
                     >
                         <div className="bg-blue-600 dark:bg-neutral-800 p-4 flex items-center justify-between text-white">
                             <span className="font-semibold flex items-center gap-2">

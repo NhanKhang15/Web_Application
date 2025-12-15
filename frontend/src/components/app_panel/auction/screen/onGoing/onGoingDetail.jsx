@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ItemsApi from "../../lib/itemDetail.js";
 import { PostAuctionApi } from "../../../seller/lib/PostAuctionApi.js";
-import { fetchAuctionItems } from "../../lib/auctionItems.js";
 import AuctionBidPanel from "../../wid/componentDetail/AuctionBidPanel.jsx";
 import AuctionImageGallery from "../../wid/componentDetail/AuctionImageGallery.jsx";
 import ImageGalleryModal from "../../wid/componentDetail/ImageGalleryModal.jsx";
@@ -146,30 +145,20 @@ export default function AuctionDetail() {
             .catch(console.error);
     }, []);
 
-    // ====== Fetch Similar Items (Sản phẩm cùng loại) ======
+    // ====== Fetch Similar Items (Backend API) ======
     useEffect(() => {
-        if (!raw || !raw.categoryId) return;
+        if (!raw?.auctionId && !raw?.itemId) return;
 
-        // ✅ CÁCH MỚI: Truyền thẳng categoryId vào API để Backend lọc giúp
-        fetchAuctionItems({
-            page: 0,
-            size: 5, // Chỉ cần lấy 5 cái
-            sort: "createdAt,desc",
-            categoryId: raw.categoryId // 👈 QUAN TRỌNG: Lọc theo danh mục ngay từ API
-        })
-            .then((res) => {
-                const allItems = res.content || [];
+        const auctionId = raw.auctionId ?? raw.itemId;
 
-                // Vẫn cần lọc Client-side một lần nữa để loại bỏ chính sản phẩm đang xem
-                const filtered = allItems.filter(item => item.itemId !== raw.itemId);
-
-                // Lấy tối đa 4 item để hiển thị
-                setSimilarItems(filtered.slice(0, 4));
+        ItemsApi.getSimilarItems(auctionId, 4)
+            .then((items) => {
+                // Backend already filters by category and excludes current item
+                setSimilarItems(Array.isArray(items) ? items : []);
             })
             .catch(err => {
-                // Nếu API chưa hỗ trợ lọc categoryId, nó sẽ trả về tất cả (fallback về logic cũ)
-                // Ta vẫn lọc lại ở client để đảm bảo an toàn
-                console.warn("API might not support category filtering yet", err);
+                console.error("Failed to fetch similar items:", err);
+                setSimilarItems([]);
             });
 
     }, [raw]);

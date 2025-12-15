@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.backend.auction.domain.auction.dto.AuctionDto;
 import com.example.backend.auction.domain.auction.dto.EndedAuctionDto;
 import com.example.backend.auction.domain.auction.dto.ScheduledAuctionDto;
+import com.example.backend.auction.domain.auction.dto.SimilarItemDto;
 
 import java.util.List;
 
@@ -78,5 +79,13 @@ public class AuctionsController {
     @GetMapping("/filters")
     public ResponseEntity<FilterOptionsDto> getFilters() {
         return ResponseEntity.ok(service.getFilterOptions());
+    }
+
+    // API 6: Get similar items (same category)
+    @GetMapping("/{auctionId}/similar")
+    public ResponseEntity<List<SimilarItemDto>> getSimilarItems(
+            @PathVariable Integer auctionId,
+            @RequestParam(defaultValue = "4") int limit) {
+        return ResponseEntity.ok(service.getSimilarAuctions(auctionId, limit));
     }
 }
