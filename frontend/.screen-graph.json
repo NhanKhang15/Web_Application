@@ -30,13 +30,6 @@
       "routes": [
         "/auth/callback"
       ]
-    },
-    {
-      "id": "src/components/verify_mail/screens/VerificationPage.jsx",
-      "label": "VerificationPage",
-      "routes": [
-        "/verify-email"
-      ]
     }
   ],
   "edges": [
