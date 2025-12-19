@@ -156,10 +156,8 @@ CREATE TABLE IF NOT EXISTS EmailVerificationTokens (
     TokenID     INT AUTO_INCREMENT PRIMARY KEY,
     UserID      INT NOT NULL,
     Token       VARCHAR(100) NOT NULL UNIQUE, -- Mã xác thực (OTP hoặc UUID)
-    ExpiresAt   DATETIME NOT NULL,            -- Thời gian hết hạn
-    UsedAt      DATETIME NULL,                -- Thời gian đã sử dụng
-    CreatedAt   DATETIME DEFAULT CURRENT_TIMESTAMP,
-
+    ExpiresDate   DATETIME NOT NULL,            -- Thời gian hết hạn
+    
     CONSTRAINT fk_evt_user
         FOREIGN KEY (UserID) REFERENCES Users(UserID)
         ON DELETE CASCADE

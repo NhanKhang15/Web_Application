@@ -33,12 +33,14 @@ public class BidService {
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final org.springframework.context.ApplicationEventPublisher eventPublisher;
+    private final AuctionEndService auctionEndService;
 
     public BidService(AuctionRepository auctionRepository, BidRepository bidRepository, UserRepository userRepository,
             SimpMessagingTemplate messagingTemplate,
             org.springframework.context.ApplicationEventPublisher eventPublisher,
             WalletRepository walletRepository,
-            WalletTransactionRepository walletTransactionRepository) {
+            WalletTransactionRepository walletTransactionRepository,
+            AuctionEndService auctionEndService) {
         this.auctionRepository = auctionRepository;
         this.bidRepository = bidRepository;
         this.userRepository = userRepository;
@@ -46,6 +48,7 @@ public class BidService {
         this.eventPublisher = eventPublisher;
         this.walletRepository = walletRepository;
         this.walletTransactionRepository = walletTransactionRepository;
+        this.auctionEndService = auctionEndService;
     }
 
     @Transactional
@@ -144,6 +147,113 @@ public class BidService {
 
         // 5. Publish BidPlacedEvent (Async email)
         eventPublisher.publishEvent(new com.example.backend.event.BidPlacedEvent(this, bid.getBidID()));
+
+        return BidResult.success(bid);
+    }
+
+    @Transactional
+    public BidResult buyNow(Integer auctionId, Integer userId) {
+        // 1. Lock Auction
+        Auction auction = auctionRepository.findByIdForUpdate(auctionId)
+                .orElseThrow(() -> new RuntimeException("Auction not found"));
+
+        // Validate Status
+        if (auction.getStatus() != AuctionStatus.Open) {
+            return BidResult.failed("Auction is not open");
+        }
+
+        // Validate Buy Now Price
+        if (auction.getBuyNowPrice() == null) {
+            return BidResult.failed("This auction does not have a Buy Now price");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isAfter(auction.getEndDate())) {
+            return BidResult.failed("Auction has ended");
+        }
+
+        User buyer = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        BigDecimal buyNowPrice = auction.getBuyNowPrice();
+
+        // --- Wallet Logic ---
+        Wallet wallet = walletRepository.findByUser_UserId(userId)
+                .orElseGet(() -> {
+                    User user = userRepository.findById(userId)
+                            .orElseThrow(() -> new RuntimeException("User not found"));
+                    Wallet w = new Wallet();
+                    w.setUser(user);
+                    w.setBalance(BigDecimal.ZERO);
+                    return walletRepository.save(w);
+                });
+
+        // Calculate deduction: Price - (Previous Max Bid if exists)
+        BigDecimal amountToDeduct = buyNowPrice;
+        java.util.Optional<Bid> previousBidOpt = bidRepository
+                .findTopByAuction_AuctionIDAndBidder_UserIdOrderByBidAmountDesc(auctionId, userId);
+
+        if (previousBidOpt.isPresent()) {
+            BigDecimal previousMaxBid = previousBidOpt.get().getBidAmount();
+            if (buyNowPrice.compareTo(previousMaxBid) > 0) {
+                amountToDeduct = buyNowPrice.subtract(previousMaxBid);
+            } else {
+                // Should not happen if BuyNow > Starting/Current Price logic is enforced
+                amountToDeduct = BigDecimal.ZERO;
+            }
+        }
+
+        if (amountToDeduct.compareTo(BigDecimal.ZERO) > 0) {
+            if (wallet.getBalance().compareTo(amountToDeduct) < 0) {
+                return BidResult.failed("Insufficient wallet balance for Buy Now");
+            }
+
+            // Deduct
+            wallet.setBalance(wallet.getBalance().subtract(amountToDeduct));
+            walletRepository.save(wallet);
+
+            // Transaction Log
+            WalletTransaction transaction = new WalletTransaction();
+            transaction.setUser(buyer);
+            transaction.setAmount(amountToDeduct);
+            transaction.setType(TransactionType.BID_FREEZE); // Treating as frozen funds until transfer
+            transaction.setDirection(Direction.OUT);
+            transaction.setRelatedAuction(auction);
+            transaction.setNote("Buy Now payment for auction " + auctionId);
+            walletTransactionRepository.save(transaction);
+        }
+        // --- End Wallet Logic ---
+
+        // 2. Place "Buy Now" Bid
+        Bid bid = new Bid();
+        bid.setAuction(auction);
+        bid.setBidder(buyer);
+        bid.setBidAmount(buyNowPrice);
+        bid.setBidTime(now);
+        bidRepository.save(bid);
+
+        // 3. Update Auction Price/Winner
+        auction.setCurrentPrice(buyNowPrice);
+        auction.setCurrentHighestBidId(bid.getBidID());
+        auctionRepository.save(auction);
+
+        // 4. End Auction Immediately
+        // Because we just placed the highest bid (Buy Now Price), this user is the
+        // winner.
+        // processAuctionEnd handling the transfer from "Frozen" state to Seller is
+        // handled by
+        // AuctionEndService (it sees the winner and transfers funds).
+        // Wait! In placeBid we freeze funds. In processAuctionEnd we transfer.
+        // Yes, processAuctionEnd takes 'finalPrice' (which is winnerBid.amount) and
+        // transfers it.
+        // But wait, processAuctionEnd *assumes* the money is already in the system
+        // (deducted/frozen).
+        // In placeBid we deducted 'amountToDeduct' (difference).
+        // If user had previous bid 100, and BuyNow is 500. We deduct 400. Total frozen
+        // = 500.
+        // processAuctionEnd transfers 500 to seller. Correct.
+
+        auctionEndService.processAuctionEnd(auctionId);
 
         return BidResult.success(bid);
     }

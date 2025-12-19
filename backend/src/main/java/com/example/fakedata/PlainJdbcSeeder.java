@@ -15,121 +15,150 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Random;
+
+import net.datafaker.Faker;
 
 public class PlainJdbcSeeder {
 
+    // Faker instance với locale tiếng Việt
+    private static final Faker faker = new Faker(new Locale("vi"));
+    private static final Faker fakerEn = new Faker(Locale.ENGLISH);
+    private static final Random random = new Random();
+
     // =====================================================================
-    // SẢN PHẨM ĐẤU GIÁ THEO 5 CATEGORY TRONG DATABASE
-    // Format: [title, keyword cho ảnh Unsplash]
+    // CÁC TEMPLATE SẢN PHẨM THEO CATEGORY (dùng Faker để sinh chi tiết)
     // =====================================================================
-    private static final Map<String, String[][]> PRODUCTS_BY_CATEGORY = new HashMap<>();
+    private static final Map<String, ProductGenerator> PRODUCT_GENERATORS = new HashMap<>();
 
     static {
-        // 1. ELECTRONICS - Đồ điện tử cao cấp đấu giá
-        PRODUCTS_BY_CATEGORY.put("Electronics", new String[][] {
-                { "iPhone 15 Pro Max 256GB Titanium Chính Hãng", "iphone,smartphone" },
-                { "MacBook Pro M3 Max 16 inch 1TB", "macbook,laptop" },
-                { "Samsung Galaxy S24 Ultra 512GB", "samsung,phone" },
-                { "Sony PlayStation 5 Pro Console Bundle", "playstation,gaming" },
-                { "iPad Pro 12.9 inch M2 Chip 256GB", "ipad,tablet" },
-                { "Apple Watch Ultra 2 Titanium 49mm", "smartwatch,apple" },
-                { "Sony WH-1000XM5 Premium Headphones", "headphones,sony" },
-                { "DJI Mavic 3 Pro Drone 4K Combo", "drone,dji" },
-                { "Canon EOS R5 Mirrorless Camera Body", "canon,camera" },
-                { "Sony A7 IV Full Frame Camera Kit", "sony,mirrorless" },
-                { "Nintendo Switch OLED Model Limited", "nintendo,gaming" },
-                { "Bose QuietComfort Ultra Earbuds", "earbuds,bose" }
+        // 1. ELECTRONICS - Đồ điện tử
+        PRODUCT_GENERATORS.put("Electronics", () -> {
+            String[] brands = { "Apple", "Samsung", "Sony", "LG", "Xiaomi", "Asus", "Dell", "HP", "Lenovo", "Canon",
+                    "Nikon", "DJI" };
+            String[] products = { "Smartphone", "Laptop", "Tablet", "Smartwatch", "Headphones", "Camera", "Drone",
+                    "Gaming Console", "TV", "Monitor", "Earbuds", "Speaker" };
+            String[] specs = { "Pro Max", "Ultra", "Pro", "Plus", "Lite", "Premium", "Limited Edition", "Special",
+                    "OLED", "4K" };
+            String[] storage = { "128GB", "256GB", "512GB", "1TB", "64GB" };
+
+            String brand = brands[random.nextInt(brands.length)];
+            String product = products[random.nextInt(products.length)];
+            String spec = specs[random.nextInt(specs.length)];
+            String size = storage[random.nextInt(storage.length)];
+
+            return new ProductInfo(
+                    String.format("%s %s %s %s %s", brand, product, fakerEn.numerify("##"), spec, size),
+                    product.toLowerCase().replace(" ", ",") + "," + brand.toLowerCase());
         });
 
-        // 2. CLOTHING - Quần áo thời trang cao cấp đấu giá
-        PRODUCTS_BY_CATEGORY.put("Clothing", new String[][] {
-                { "Louis Vuitton Monogram Jacket Limited", "luxury,fashion" },
-                { "Gucci GG Marmont Leather Jacket", "gucci,jacket" },
-                { "Nike Air Jordan 1 Retro High OG Chicago", "jordan,sneakers" },
-                { "Adidas Yeezy Boost 350 V2 Zebra", "yeezy,sneakers" },
-                { "Chanel Tweed Jacket Classic Collection", "chanel,fashion" },
-                { "Hermès Birkin 25 Togo Leather Bag", "hermes,luxury" },
-                { "Rolex Submariner Date 41mm Black", "rolex,watch" },
-                { "Omega Speedmaster Moonwatch Professional", "omega,watch" },
-                { "Burberry Trench Coat Heritage Classic", "burberry,coat" },
-                { "Dior Saddle Bag Oblique Canvas", "dior,bag" },
-                { "Prada Re-Nylon Jacket Black", "prada,fashion" },
-                { "Balenciaga Triple S Sneakers", "balenciaga,sneakers" }
+        // 2. CLOTHING - Quần áo thời trang
+        PRODUCT_GENERATORS.put("Clothing", () -> {
+            String[] brands = { "Louis Vuitton", "Gucci", "Chanel", "Hermès", "Prada", "Dior", "Burberry", "Nike",
+                    "Adidas", "Balenciaga", "Rolex", "Omega" };
+            String[] items = { "Jacket", "Coat", "Sneakers", "Bag", "Watch", "Dress", "Suit", "Hoodie", "Boots",
+                    "Belt" };
+            String[] materials = { "Leather", "Tweed", "Canvas", "Wool", "Cashmere", "Silk", "Denim" };
+            String[] editions = { "Classic", "Limited Edition", "Vintage", "Heritage", "Signature", "Premium" };
+
+            String brand = brands[random.nextInt(brands.length)];
+            String item = items[random.nextInt(items.length)];
+            String material = materials[random.nextInt(materials.length)];
+            String edition = editions[random.nextInt(editions.length)];
+
+            return new ProductInfo(
+                    String.format("%s %s %s %s", brand, material, item, edition),
+                    item.toLowerCase() + "," + brand.toLowerCase().replace(" ", ""));
         });
 
-        // 3. HOME & GARDEN - Đồ gia dụng & Vườn cao cấp đấu giá
-        PRODUCTS_BY_CATEGORY.put("Home & Garden", new String[][] {
-                { "Dyson V15 Detect Complete Vacuum", "dyson,vacuum" },
-                { "Herman Miller Aeron Chair Remastered", "ergonomic,chair" },
-                { "iRobot Roomba j9+ Self-Emptying Robot", "roomba,robot" },
-                { "Vitamix A3500 Blender Ascent Series", "vitamix,kitchen" },
-                { "KitchenAid Artisan Stand Mixer 5Qt", "kitchenaid,mixer" },
-                { "Breville Oracle Touch Espresso Machine", "espresso,coffee" },
-                { "Weber Genesis EPX-470 Gas Grill", "grill,outdoor" },
-                { "Le Creuset Signature Dutch Oven 7.25Qt", "lecreuset,cookware" },
-                { "Sonos Arc Premium Smart Soundbar", "sonos,speaker" },
-                { "Miele Complete C3 Vacuum Cleaner", "miele,vacuum" },
-                { "Nespresso Vertuo Next Premium Bundle", "nespresso,coffee" },
-                { "Philips Hue Smart Light Starter Kit", "philips,lighting" }
+        // 3. HOME & GARDEN - Đồ gia dụng
+        PRODUCT_GENERATORS.put("Home & Garden", () -> {
+            String[] brands = { "Dyson", "iRobot", "Vitamix", "KitchenAid", "Breville", "Weber", "Le Creuset", "Sonos",
+                    "Miele", "Philips", "Nespresso", "Herman Miller" };
+            String[] items = { "Vacuum Cleaner", "Robot Vacuum", "Blender", "Stand Mixer", "Coffee Machine", "Grill",
+                    "Dutch Oven", "Soundbar", "Air Purifier", "Smart Light" };
+            String[] series = { "Pro", "Elite", "Premium", "Signature", "Deluxe", "Complete", "Ultra", "Smart" };
+
+            String brand = brands[random.nextInt(brands.length)];
+            String item = items[random.nextInt(items.length)];
+            String serie = series[random.nextInt(series.length)];
+            String model = fakerEn.letterify("??").toUpperCase() + "-" + fakerEn.numerify("####");
+
+            return new ProductInfo(
+                    String.format("%s %s %s %s", brand, item, serie, model),
+                    item.toLowerCase().replace(" ", ",") + "," + brand.toLowerCase());
         });
 
-        // 4. BOOKS - Sách quý hiếm đấu giá
-        PRODUCTS_BY_CATEGORY.put("Books", new String[][] {
-                { "Harry Potter First Edition Boxed Set Signed", "harrypotter,books" },
-                { "The Lord of the Rings 1st Edition 1954", "lotr,vintage" },
-                { "Sách Cổ Việt Nam Thế Kỷ 19 Quý Hiếm", "antique,book" },
-                { "Encyclopedia Britannica Complete Set Leather", "encyclopedia,library" },
-                { "Manga One Piece Box Set Volume 1-90", "manga,onepiece" },
-                { "The Great Gatsby First Edition 1925", "gatsby,classic" },
-                { "Art of War Sun Tzu Ancient Manuscript Copy", "sunzu,ancient" },
-                { "Shakespeare Complete Works Leather Bound", "shakespeare,classic" },
-                { "Batman Detective Comics #27 Reprint Limited", "batman,comics" },
-                { "Marvel Comics Spider-Man #1 Signed Stan Lee", "spiderman,marvel" },
-                { "Từ Điển Bách Khoa Việt Nam Bản Gốc", "dictionary,vietnamese" },
-                { "National Geographic Collection 1960-2000", "natgeo,magazine" }
+        // 4. BOOKS - Sách
+        PRODUCT_GENERATORS.put("Books", () -> {
+            String[] types = { "First Edition", "Signed Copy", "Limited Edition", "Collector's Edition",
+                    "Leather Bound", "Boxed Set", "Original Manuscript", "Rare Print" };
+            String[] genres = { "Classic Literature", "Fantasy", "Science Fiction", "History", "Art", "Philosophy",
+                    "Biography", "Comics" };
+
+            String bookTitle = fakerEn.book().title();
+            String author = fakerEn.book().author();
+            String type = types[random.nextInt(types.length)];
+            String year = String.valueOf(1900 + random.nextInt(124));
+
+            return new ProductInfo(
+                    String.format("%s by %s - %s %s", bookTitle, author, type, year),
+                    "book,literature," + genres[random.nextInt(genres.length)].toLowerCase().replace(" ", ""));
         });
 
-        // 5. COLLECTIBLES - Đồ sưu tầm quý hiếm đấu giá
-        PRODUCTS_BY_CATEGORY.put("Collectibles", new String[][] {
-                { "Rolex Daytona Vintage 1969 Paul Newman", "rolex,vintage" },
-                { "Pokemon Charizard PSA 10 1st Edition Holo", "pokemon,card" },
-                { "LEGO Star Wars Millennium Falcon 75192", "lego,starwars" },
-                { "Vintage Coca-Cola Sign 1950s Original", "cocacola,vintage" },
-                { "Michael Jordan Rookie Card PSA 9 Fleer", "jordan,basketball" },
-                { "Antique Chinese Porcelain Vase Dynasty", "chinese,antique" },
-                { "Star Wars Original Movie Poster 1977", "starwars,poster" },
-                { "Tượng Phật Cổ Việt Nam Thế Kỷ 18", "buddha,antique" },
-                { "Beatles Abbey Road Signed Vinyl LP", "beatles,vinyl" },
-                { "Đồng Tiền Cổ Việt Nam Triều Nguyễn", "coin,vietnamese" },
-                { "Hot Wheels Redline Collection 1968 Set", "hotwheels,vintage" },
-                { "Vintage Leica M3 Camera 1954 Mint", "leica,camera" }
+        // 5. COLLECTIBLES - Đồ sưu tầm
+        PRODUCT_GENERATORS.put("Collectibles", () -> {
+            String[] types = { "Vintage Watch", "Trading Card", "LEGO Set", "Antique Sign", "Sports Memorabilia",
+                    "Porcelain Vase", "Movie Poster", "Vinyl Record", "Rare Coin", "Action Figure" };
+            String[] conditions = { "Mint Condition", "Near Mint", "Excellent", "Very Good", "PSA 10", "PSA 9",
+                    "Graded", "Authenticated" };
+            String[] eras = { "1950s", "1960s", "1970s", "1980s", "1990s", "Vintage", "Antique", "Classic" };
+
+            String type = types[random.nextInt(types.length)];
+            String condition = conditions[random.nextInt(conditions.length)];
+            String era = eras[random.nextInt(eras.length)];
+            String detail = fakerEn.commerce().productName();
+
+            return new ProductInfo(
+                    String.format("%s %s %s - %s", era, type, condition, detail),
+                    type.toLowerCase().replace(" ", ",") + ",collectible,vintage");
         });
     }
 
-    // Danh sách mô tả sản phẩm đấu giá
-    private static final String[] DESCRIPTIONS = {
-            "🔥 SẢN PHẨM CHÍNH HÃNG 100%% - Còn nguyên seal, đầy đủ phụ kiện, bảo hành 12 tháng. Cam kết hoàn tiền 200%% nếu phát hiện hàng giả.",
-            "⭐ LIKE NEW 99%% - Sử dụng cực kỳ cẩn thận, không trầy xước, đầy đủ hộp và phụ kiện gốc. Lý do bán: nâng cấp lên phiên bản mới hơn.",
-            "🏆 PHIÊN BẢN GIỚI HẠN LIMITED EDITION - Rất hiếm trên thị trường, chỉ sản xuất số lượng giới hạn. Cơ hội sở hữu không thể bỏ lỡ!",
-            "🎨 SẢN PHẨM VINTAGE CỔ ĐIỂN - Được bảo quản tốt qua nhiều thập kỷ, có giá trị sưu tầm và đầu tư rất cao.",
-            "📦 HÀNG NHẬP KHẨU CHÍNH NGẠCH - Có đầy đủ giấy tờ, hóa đơn và chứng nhận nguồn gốc xuất xứ rõ ràng.",
-            "💎 SẢN PHẨM CAO CẤP PREMIUM - Chất lượng tuyệt đỉnh, không có bất kỳ lỗi nào. Đã được kiểm tra kỹ lưỡng bởi chuyên gia.",
-            "✨ TÌNH TRẠNG NHƯ MỚI 98%% - Được sử dụng nhẹ nhàng, còn trong thời hạn bảo hành hãng. Tiết kiệm đáng kể so với mua mới.",
-            "🎖️ COLLECTOR'S EDITION - Có số seri riêng biệt và chứng nhận xác thực từ nhà sản xuất. Dành cho người sưu tầm thực thụ.",
-            "🇻🇳 PHIÊN BẢN ĐẶC BIỆT VIỆT NAM - Hàng độc quyền, số lượng cực kỳ giới hạn. Không bán tại bất kỳ đâu khác.",
-            "🌟 BEST SELLER TOP RATED - Sản phẩm nhận được hàng nghìn đánh giá 5 sao từ người dùng. Chất lượng đã được kiểm chứng."
-    };
+    // Danh sách mô tả sản phẩm đấu giá - sử dụng Faker
+    private static String generateDescription() {
+        String[] templates = {
+                "🔥 SẢN PHẨM CHÍNH HÃNG 100%% - %s. Cam kết hoàn tiền 200%% nếu phát hiện hàng giả.",
+                "⭐ LIKE NEW 99%% - %s. Lý do bán: nâng cấp lên phiên bản mới hơn.",
+                "🏆 PHIÊN BẢN GIỚI HẠN LIMITED EDITION - %s. Cơ hội sở hữu không thể bỏ lỡ!",
+                "🎨 SẢN PHẨM VINTAGE CỔ ĐIỂN - %s. Có giá trị sưu tầm và đầu tư rất cao.",
+                "📦 HÀNG NHẬP KHẨU CHÍNH NGẠCH - %s. Đầy đủ giấy tờ và chứng nhận nguồn gốc.",
+                "💎 SẢN PHẨM CAO CẤP PREMIUM - %s. Đã được kiểm tra kỹ lưỡng bởi chuyên gia.",
+                "✨ TÌNH TRẠNG NHƯ MỚI 98%% - %s. Tiết kiệm đáng kể so với mua mới.",
+                "🎖️ COLLECTOR'S EDITION - %s. Dành cho người sưu tầm thực thụ.",
+                "🇻🇳 PHIÊN BẢN ĐẶC BIỆT - %s. Số lượng cực kỳ giới hạn.",
+                "🌟 BEST SELLER TOP RATED - %s. Chất lượng đã được kiểm chứng."
+        };
 
-    // Danh sách địa điểm
-    private static final String[] LOCATIONS = {
-            "Quận 1, TP. Hồ Chí Minh", "Quận 7, TP. Hồ Chí Minh", "Quận Bình Thạnh, TP. Hồ Chí Minh",
-            "Quận Hoàn Kiếm, Hà Nội", "Quận Cầu Giấy, Hà Nội", "Quận Đống Đa, Hà Nội",
-            "Quận Hải Châu, Đà Nẵng", "Quận Ninh Kiều, Cần Thơ",
-            "TP. Nha Trang, Khánh Hòa", "TP. Đà Lạt, Lâm Đồng"
-    };
+        String detail = faker.lorem().sentence(8);
+        return String.format(templates[random.nextInt(templates.length)], detail);
+    }
+
+    // Danh sách địa điểm - sử dụng Faker
+    private static String generateLocation() {
+        String[] districts = {
+                "Quận 1", "Quận 2", "Quận 3", "Quận 7", "Quận Bình Thạnh", "Quận Phú Nhuận",
+                "Quận Hoàn Kiếm", "Quận Cầu Giấy", "Quận Đống Đa", "Quận Ba Đình",
+                "Quận Hải Châu", "Quận Ninh Kiều", "Quận Liên Chiểu"
+        };
+        String[] cities = {
+                "TP. Hồ Chí Minh", "Hà Nội", "Đà Nẵng", "Cần Thơ", "Nha Trang", "Đà Lạt", "Hải Phòng"
+        };
+
+        return districts[random.nextInt(districts.length)] + ", " + cities[random.nextInt(cities.length)];
+    }
 
     // ===========================================
     // MAIN METHOD
@@ -143,17 +172,17 @@ public class PlainJdbcSeeder {
         String pass = env.getOrDefault("SPRING_DATASOURCE_PASSWORD", "");
 
         System.out.println("🔗 Kết nối database với user: " + user);
+        System.out.println("🎲 Sử dụng Datafaker để sinh dữ liệu ngẫu nhiên\n");
 
         // ⚙️ CẤU HÌNH: Số lượng auction cần tạo
         final int TOTAL_AUCTIONS = 30;
-
-        Random random = new Random();
 
         try (Connection con = DriverManager.getConnection(url, user, pass)) {
             con.setAutoCommit(false);
 
             System.out.println("╔══════════════════════════════════════════════════════════════╗");
             System.out.println("║           🎯 AUCTION SEEDER - TẠO DỮ LIỆU ĐẤU GIÁ            ║");
+            System.out.println("║                  (Powered by Datafaker)                      ║");
             System.out.println("╚══════════════════════════════════════════════════════════════╝\n");
 
             // --- BƯỚC 1: LẤY DANH SÁCH USER IDs ĐÃ XÁC THỰC ---
@@ -186,9 +215,9 @@ public class PlainJdbcSeeder {
             }
             System.out.println("✅ Danh mục trong hệ thống:");
             categories.forEach((id, name) -> {
-                String[][] products = PRODUCTS_BY_CATEGORY.get(name);
-                int count = products != null ? products.length : 0;
-                System.out.println(String.format("   [%d] %-15s → %d sản phẩm mẫu", id, name, count));
+                boolean hasGenerator = PRODUCT_GENERATORS.containsKey(name);
+                System.out.println(String.format("   [%d] %-15s → %s",
+                        id, name, hasGenerator ? "✓ Faker generator" : "⚠ Fallback generator"));
             });
             System.out.println();
 
@@ -202,7 +231,7 @@ public class PlainJdbcSeeder {
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """;
 
-            System.out.println("📦 Đang tạo " + TOTAL_AUCTIONS + " sản phẩm đấu giá...");
+            System.out.println("📦 Đang tạo " + TOTAL_AUCTIONS + " sản phẩm đấu giá (sử dụng Faker)...");
 
             try (PreparedStatement ins = con.prepareStatement(insertItemSql, Statement.RETURN_GENERATED_KEYS)) {
                 LocalDateTime now = LocalDateTime.now();
@@ -216,11 +245,11 @@ public class PlainJdbcSeeder {
                     Integer categoryId = catEntry.getKey();
                     String categoryName = catEntry.getValue();
 
-                    String[][] productsForCategory = PRODUCTS_BY_CATEGORY.get(categoryName);
-                    if (productsForCategory == null) {
-                        System.out.println("   ⚠️ Không tìm thấy sản phẩm cho category: " + categoryName);
-                        continue;
-                    }
+                    // Lấy generator cho category, hoặc dùng fallback
+                    ProductGenerator generator = PRODUCT_GENERATORS.getOrDefault(categoryName,
+                            () -> new ProductInfo(
+                                    fakerEn.commerce().productName() + " " + fakerEn.commerce().material(),
+                                    "product,item"));
 
                     // Số sản phẩm cho category này
                     int numProducts = productsPerCategory + (remainder-- > 0 ? 1 : 0);
@@ -230,13 +259,13 @@ public class PlainJdbcSeeder {
                         Integer sellerId = userIds.get(userIndex % userIds.size());
                         userIndex++;
 
-                        // Chọn sản phẩm (tránh trùng lặp nếu có thể)
-                        String[] product = productsForCategory[i % productsForCategory.length];
-                        String title = product[0];
-                        String keyword = product[1];
+                        // Sinh sản phẩm bằng Faker
+                        ProductInfo product = generator.generate();
+                        String title = product.title();
+                        String keyword = product.keyword();
 
-                        String description = DESCRIPTIONS[random.nextInt(DESCRIPTIONS.length)];
-                        String location = LOCATIONS[random.nextInt(LOCATIONS.length)];
+                        String description = generateDescription();
+                        String location = generateLocation();
 
                         // Tạo slug unique (chuẩn hóa tiếng Việt)
                         String slug = normalizeVietnamese(title.toLowerCase())
@@ -368,6 +397,7 @@ public class PlainJdbcSeeder {
             System.out.println(String.format("║  🟡 Scheduled (sắp diễn ra): %-30d ║", scheduledCount));
             System.out.println(String.format("║  👥 Users tham gia         : %-30d ║", userIds.size()));
             System.out.println(String.format("║  🖼️  Ảnh tạo mới            : %-30d ║", newItemIds.size() * 7));
+            System.out.println("║  🎲 Data source            : Datafaker Library              ║");
             System.out.println("╚══════════════════════════════════════════════════════════════╝");
 
         } catch (Exception e) {
@@ -453,5 +483,23 @@ public class PlainJdbcSeeder {
         }
 
         return envMap;
+    }
+
+    // =====================================================================
+    // HELPER CLASSES
+    // =====================================================================
+
+    /**
+     * Functional interface để sinh sản phẩm cho mỗi category
+     */
+    @FunctionalInterface
+    interface ProductGenerator {
+        ProductInfo generate();
+    }
+
+    /**
+     * Record chứa thông tin sản phẩm được sinh ra
+     */
+    record ProductInfo(String title, String keyword) {
     }
 }

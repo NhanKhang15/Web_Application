@@ -20,7 +20,7 @@ const hhmmss = (s) => {
     return [h, m, sec].map((x) => String(x).padStart(2, "0")).join(":");
 };
 
-export default function AuctionBidPanel({ product, bids = [], onPlaceBid, isOwner = false }) {
+export default function AuctionBidPanel({ product, bids = [], onPlaceBid, onBuyNow, isOwner = false }) {
     const { t } = useTranslation();
     const navigate = useNavigate();
 
@@ -128,11 +128,11 @@ export default function AuctionBidPanel({ product, bids = [], onPlaceBid, isOwne
                     <Timer className="w-4 h-4 mr-1" /> {t('Next_min_bid')} {formatVND(nextMinBid)}
                 </div>
 
-                {product.buyNowPrice && (
+                {product.buyNowPrice && !isOwner && !isEnded && (
                     <div className="mt-4">
                         <button
-                            className="w-full py-2 bg-red-600 hover:bg-red-700 text-white rounded-md font-bold text-sm uppercase tracking-wide"
-                            onClick={() => alert(t("buy_now_alert"))}
+                            className="w-full py-2 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white rounded-md font-bold text-sm uppercase tracking-wide transition-all shadow-md hover:shadow-lg"
+                            onClick={onBuyNow}
                         >
                             {t('Buy_Now')} - {formatVND(product.buyNowPrice)}
                         </button>

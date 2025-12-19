@@ -198,6 +198,43 @@ public class MessageController {
         private String itemTitle;
     }
 
+    // === USER SEARCH (for starting conversations) ===
+    @GetMapping("/search-users")
+    public ResponseEntity<?> searchUsers(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "20") int limit,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        if (userDetails == null)
+            return ResponseEntity.status(401).build();
+
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Keyword is required");
+        }
+
+        User currentUser = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Search users by username (exclude current user)
+        List<User> users = userRepository.searchByUsername(keyword.trim(), currentUser.getUserId());
+
+        // Limit results and map to DTO
+        List<UserSearchResultDto> response = users.stream()
+                .limit(limit)
+                .map(u -> new UserSearchResultDto(u.getUserId(), u.getUsername()))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    static class UserSearchResultDto {
+        private Integer userId;
+        private String username;
+    }
+
     // === MESSAGE SEARCH ===
     @GetMapping("/search")
     public ResponseEntity<?> searchMessages(

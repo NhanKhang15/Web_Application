@@ -64,13 +64,21 @@ export default function GlobalChatWidget({ currentUserId, externalOpen, onClose 
     const [sendStatus, setSendStatus] = useState('idle'); // 'idle' | 'sending' | 'sent' | 'failed'
     const [failedMessage, setFailedMessage] = useState(null); // lưu tin nhắn thất bại để retry
     const [isPartnerTyping, setIsPartnerTyping] = useState(false); // typing indicator
-    const [searchQuery, setSearchQuery] = useState(""); // message search
-    const [searchResults, setSearchResults] = useState([]); // kết quả tìm kiếm
-    const [isSearching, setIsSearching] = useState(false);
+    const [searchQuery, setSearchQuery] = useState(""); // user search
+    const [userSearchResults, setUserSearchResults] = useState([]); // kết quả tìm kiếm user
+    const [isSearchingUsers, setIsSearchingUsers] = useState(false);
+
+    // Message search states
+    const [showMessageSearch, setShowMessageSearch] = useState(false);
+    const [messageSearchQuery, setMessageSearchQuery] = useState("");
+    const [messageSearchResults, setMessageSearchResults] = useState([]);
+    const [isSearchingMessages, setIsSearchingMessages] = useState(false);
+
     const messagesEndRef = useRef(null);
     const typingTimeoutRef = useRef(null); // để debounce typing event
     const stompClientRef = useRef(null); // lưu reference để gửi typing
-    const searchTimeoutRef = useRef(null); // để debounce search
+    const userSearchTimeoutRef = useRef(null); // để debounce user search
+    const messageSearchTimeoutRef = useRef(null); // để debounce message search
     const activePartnerRef = useRef(null); // track activePartner cho WebSocket callbacks
 
     // --- 1. LOGIC WEBSOCKET ---
@@ -222,16 +230,79 @@ export default function GlobalChatWidget({ currentUserId, externalOpen, onClose 
         }, 2000);
     };
 
-    // Handle search change - lọc danh sách conversations theo tên
+    // Handle user search change - search from backend API
     const handleSearchChange = (e) => {
-        setSearchQuery(e.target.value);
+        const query = e.target.value;
+        setSearchQuery(query);
+
+        // Debounce API call
+        if (userSearchTimeoutRef.current) {
+            clearTimeout(userSearchTimeoutRef.current);
+        }
+
+        if (query.trim().length >= 2) {
+            setIsSearchingUsers(true);
+            userSearchTimeoutRef.current = setTimeout(async () => {
+                try {
+                    const results = await getJSON(`/api/messages/search-users?keyword=${encodeURIComponent(query.trim())}&limit=10`);
+                    setUserSearchResults(results || []);
+                } catch (err) {
+                    console.error('User search error:', err);
+                    setUserSearchResults([]);
+                } finally {
+                    setIsSearchingUsers(false);
+                }
+            }, 300);
+        } else {
+            setUserSearchResults([]);
+            setIsSearchingUsers(false);
+        }
     };
 
-    // Lọc conversations theo search query
-    const filteredConversations = searchQuery.trim()
-        ? conversations.filter(conv =>
-            conv.partnerName.toLowerCase().includes(searchQuery.toLowerCase())
-        )
+    // Handle message search in current conversation
+    const handleMessageSearchChange = (e) => {
+        const query = e.target.value;
+        setMessageSearchQuery(query);
+
+        if (messageSearchTimeoutRef.current) {
+            clearTimeout(messageSearchTimeoutRef.current);
+        }
+
+        if (query.trim().length >= 2) {
+            setIsSearchingMessages(true);
+            messageSearchTimeoutRef.current = setTimeout(async () => {
+                try {
+                    const results = await getJSON(`/api/messages/search?keyword=${encodeURIComponent(query.trim())}&limit=30`);
+                    // Filter to only show messages with current partner
+                    const filtered = activePartner
+                        ? results.filter(r => r.partnerId === activePartner.id)
+                        : results;
+                    setMessageSearchResults(filtered || []);
+                } catch (err) {
+                    console.error('Message search error:', err);
+                    setMessageSearchResults([]);
+                } finally {
+                    setIsSearchingMessages(false);
+                }
+            }, 300);
+        } else {
+            setMessageSearchResults([]);
+            setIsSearchingMessages(false);
+        }
+    };
+
+    // Close message search
+    const closeMessageSearch = () => {
+        setShowMessageSearch(false);
+        setMessageSearchQuery("");
+        setMessageSearchResults([]);
+    };
+
+    // Lọc conversations theo search query (fallback nếu không có kết quả từ API)
+    const filteredConversations = searchQuery.trim() && searchQuery.trim().length >= 2
+        ? (userSearchResults.length > 0
+            ? userSearchResults.map(u => ({ partnerId: u.userId, partnerName: u.username, lastMessage: t('chat_start_new', { defaultValue: 'Bắt đầu trò chuyện' }), timeAgo: '' }))
+            : conversations.filter(conv => conv.partnerName.toLowerCase().includes(searchQuery.toLowerCase())))
         : conversations;
 
     const handleSendMessage = async (e) => {
@@ -376,9 +447,69 @@ export default function GlobalChatWidget({ currentUserId, externalOpen, onClose 
                                     <h3 className="font-bold text-gray-900 dark:text-white">{activePartner ? activePartner.name : t('Select_conversation')}</h3>
                                 </div>
                                 <div className="flex gap-2 text-gray-500">
+                                    {activePartner && (
+                                        <button
+                                            onClick={() => setShowMessageSearch(!showMessageSearch)}
+                                            className={`p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 ${showMessageSearch ? 'text-[#e43137]' : ''}`}
+                                            title={t('chat_search_messages', { defaultValue: 'Tìm tin nhắn' })}
+                                        >
+                                            <Search className="w-5 h-5" />
+                                        </button>
+                                    )}
                                     <button onClick={handleClose}><X className="w-5 h-5 hover:text-red-500" /></button>
                                 </div>
                             </div>
+                            {/* Message Search Panel */}
+                            {showMessageSearch && activePartner && (
+                                <div className="border-b border-gray-200 dark:border-gray-700 p-3 bg-gray-50 dark:bg-[#14191F]">
+                                    <div className="relative">
+                                        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                                        <input
+                                            type="text"
+                                            placeholder={t('chat_search_messages_placeholder', { defaultValue: 'Tìm trong cuộc trò chuyện...' })}
+                                            value={messageSearchQuery}
+                                            onChange={handleMessageSearchChange}
+                                            autoFocus
+                                            className="w-full pl-9 pr-8 py-2 text-sm bg-white dark:bg-[#0B0F13] border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-[#e43137] text-gray-900 dark:text-white"
+                                        />
+                                        {messageSearchQuery && (
+                                            <button
+                                                onClick={() => { setMessageSearchQuery(""); setMessageSearchResults([]); }}
+                                                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        )}
+                                    </div>
+                                    {/* Search Results */}
+                                    {messageSearchQuery.trim().length >= 2 && (
+                                        <div className="mt-2 max-h-40 overflow-y-auto">
+                                            {isSearchingMessages ? (
+                                                <div className="flex items-center justify-center py-3">
+                                                    <Loader2 className="w-4 h-4 animate-spin text-gray-500" />
+                                                    <span className="ml-2 text-xs text-gray-500">{t('chat_searching', { defaultValue: 'Đang tìm...' })}</span>
+                                                </div>
+                                            ) : messageSearchResults.length === 0 ? (
+                                                <p className="text-xs text-gray-500 text-center py-2">{t('chat_no_results', { defaultValue: 'Không tìm thấy kết quả' })}</p>
+                                            ) : (
+                                                <div className="space-y-1">
+                                                    {messageSearchResults.map((result, idx) => (
+                                                        <div
+                                                            key={idx}
+                                                            className="p-2 bg-white dark:bg-[#1A1F25] rounded border border-gray-200 dark:border-gray-700 hover:border-[#e43137] cursor-pointer"
+                                                        >
+                                                            <p className="text-xs text-gray-500">{result.createdAt?.split('T')[0]}</p>
+                                                            <p className={`text-sm ${result.isMine ? 'text-[#e43137]' : 'text-gray-900 dark:text-white'}`}>
+                                                                {result.isMine ? t('chat_you', { defaultValue: 'Bạn' }) : activePartner.name}: {result.content}
+                                                            </p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                             <div className="flex-1 p-4 overflow-y-auto bg-[#F5F5F5] dark:bg-[#0B0F13] space-y-3">
                                 {currentProduct && (
                                     <div className="flex items-center gap-3 bg-white dark:bg-[#14191F] p-3 rounded-lg border border-gray-200 dark:border-gray-700 mb-4 shadow-sm">
