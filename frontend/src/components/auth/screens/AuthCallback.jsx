@@ -53,6 +53,8 @@ export default function AuthCallback() {
         }
 
         sessionStorage.setItem("user", JSON.stringify(userObj));
+        // Dispatch event to sync theme immediately
+        window.dispatchEvent(new CustomEvent('userLogin', { detail: userObj }));
         navigate(userObj.profileCompleted ? "/dashboard" : "/user/profile", { replace: true });
       } catch (e) {
         console.error("[/api/auth/me] fetch error:", e);

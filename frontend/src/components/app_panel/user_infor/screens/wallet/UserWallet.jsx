@@ -10,7 +10,7 @@ import Avatar from "../../../widget/screens/Avatar.jsx";
 import { motion } from "framer-motion";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import WalletCard from "../../../payment/WalletCard.jsx";
+import WalletCard from "./WalletCard.jsx";
 
 export default function UserWallet({ profile }) {
     const { t } = useTranslation();

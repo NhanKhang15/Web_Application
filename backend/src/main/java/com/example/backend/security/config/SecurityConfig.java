@@ -53,7 +53,7 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
 
             // nếu bạn còn dùng /api/auth/me để debug → mở tạm
-            .requestMatchers("/api/auth/me").permitAll()
+            .requestMatchers("/api/auth/me", "/api/auth/logout").permitAll()
 
             // các API khác: tạm thời mở để dev cho đỡ 401
             .anyRequest().permitAll())

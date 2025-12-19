@@ -14,6 +14,7 @@ import {
     TrendingUp
 } from "lucide-react";
 import { SellerAuctionApi } from "../lib/SellerAuctionApi";
+import { useCurrency } from "../../widget/screens/CurrencyContext";
 
 /**
  * Modal for editing auction details and performing seller actions
@@ -24,8 +25,9 @@ import { SellerAuctionApi } from "../lib/SellerAuctionApi";
  */
 export default function EditAuctionModal({ auction, isOpen, onClose, onSuccess }) {
     const { t } = useTranslation();
+    const { formatPrice, formatVND } = useCurrency();
 
-    // Form state
+    // Form state - raw numeric values
     const [formData, setFormData] = useState({
         title: "",
         startingPrice: "",
@@ -33,6 +35,25 @@ export default function EditAuctionModal({ auction, isOpen, onClose, onSuccess }
         reservePrice: "",
         buyNowPrice: ""
     });
+
+    // Display values with thousand separators
+    const [displayPrices, setDisplayPrices] = useState({
+        startingPrice: "",
+        minStep: "",
+        reservePrice: "",
+        buyNowPrice: ""
+    });
+
+    // Format number with thousand separators (Vietnamese style: dots)
+    const formatWithSeparator = (value) => {
+        if (!value && value !== 0) return "";
+        return value.toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ".");
+    };
+
+    // Remove formatting to get raw number
+    const parseFormattedNumber = (formattedValue) => {
+        return formattedValue.replace(/\./g, "");
+    };
 
     // Reopen form state
     const [reopenData, setReopenData] = useState({
@@ -50,10 +71,16 @@ export default function EditAuctionModal({ auction, isOpen, onClose, onSuccess }
         if (auction) {
             setFormData({
                 title: auction.title || "",
-                startingPrice: auction.startingPrice || "",
-                minStep: auction.minStep || "",
-                reservePrice: auction.reservePrice || "",
-                buyNowPrice: auction.buyNowPrice || ""
+                startingPrice: auction.startingPrice?.toString() || "",
+                minStep: auction.minStep?.toString() || "",
+                reservePrice: auction.reservePrice?.toString() || "",
+                buyNowPrice: auction.buyNowPrice?.toString() || ""
+            });
+            setDisplayPrices({
+                startingPrice: formatWithSeparator(auction.startingPrice),
+                minStep: formatWithSeparator(auction.minStep),
+                reservePrice: formatWithSeparator(auction.reservePrice),
+                buyNowPrice: formatWithSeparator(auction.buyNowPrice)
             });
             setError(null);
             setSuccess(null);
@@ -72,6 +99,16 @@ export default function EditAuctionModal({ auction, isOpen, onClose, onSuccess }
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    // Handle price input change with formatting
+    const handlePriceChange = (field, value) => {
+        const rawValue = parseFormattedNumber(value);
+        // Only allow digits
+        if (rawValue && !/^\d+$/.test(rawValue)) return;
+
+        setFormData(prev => ({ ...prev, [field]: rawValue }));
+        setDisplayPrices(prev => ({ ...prev, [field]: formatWithSeparator(rawValue) }));
     };
 
     const handleReopenInputChange = (e) => {
@@ -183,10 +220,6 @@ export default function EditAuctionModal({ auction, isOpen, onClose, onSuccess }
         }
     };
 
-    const formatCurrency = (amount) => {
-        return new Intl.NumberFormat("vi-VN").format(amount || 0);
-    };
-
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
             <div className="bg-white dark:bg-neutral-900 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden">
@@ -214,7 +247,10 @@ export default function EditAuctionModal({ auction, isOpen, onClose, onSuccess }
                             {auction.title}
                         </div>
                         <div className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
-                            Giá hiện tại: <span className="text-green-600 font-semibold">{formatCurrency(auction.currentPrice)} ₫</span>
+                            Giá hiện tại: <span className="text-green-600 font-semibold">{formatVND(auction.currentPrice)}</span>
+                            {formatPrice(auction.currentPrice).secondary && (
+                                <span className="text-[10px] text-neutral-400 ml-1">({formatPrice(auction.currentPrice).secondary})</span>
+                            )}
                         </div>
                     </div>
 
@@ -298,24 +334,34 @@ export default function EditAuctionModal({ auction, isOpen, onClose, onSuccess }
                                         Giá khởi điểm (₫)
                                     </label>
                                     <input
-                                        type="number"
-                                        name="startingPrice"
-                                        value={formData.startingPrice}
-                                        onChange={handleInputChange}
+                                        type="text"
+                                        inputMode="numeric"
+                                        value={displayPrices.startingPrice}
+                                        onChange={(e) => handlePriceChange('startingPrice', e.target.value)}
                                         className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:ring-2 focus:ring-[#e43137] focus:border-transparent"
                                     />
+                                    {formData.startingPrice && formatPrice(Number(formData.startingPrice)).secondary && (
+                                        <p className="text-xs text-neutral-500 mt-1">
+                                            {formatPrice(Number(formData.startingPrice)).secondary}
+                                        </p>
+                                    )}
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                                         Bước giá (₫)
                                     </label>
                                     <input
-                                        type="number"
-                                        name="minStep"
-                                        value={formData.minStep}
-                                        onChange={handleInputChange}
+                                        type="text"
+                                        inputMode="numeric"
+                                        value={displayPrices.minStep}
+                                        onChange={(e) => handlePriceChange('minStep', e.target.value)}
                                         className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:ring-2 focus:ring-[#e43137] focus:border-transparent"
                                     />
+                                    {formData.minStep && formatPrice(Number(formData.minStep)).secondary && (
+                                        <p className="text-xs text-neutral-500 mt-1">
+                                            {formatPrice(Number(formData.minStep)).secondary}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
 
@@ -325,26 +371,36 @@ export default function EditAuctionModal({ auction, isOpen, onClose, onSuccess }
                                         Giá sàn (₫)
                                     </label>
                                     <input
-                                        type="number"
-                                        name="reservePrice"
-                                        value={formData.reservePrice}
-                                        onChange={handleInputChange}
+                                        type="text"
+                                        inputMode="numeric"
+                                        value={displayPrices.reservePrice}
+                                        onChange={(e) => handlePriceChange('reservePrice', e.target.value)}
                                         placeholder="Để trống nếu không có"
                                         className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:ring-2 focus:ring-[#e43137] focus:border-transparent"
                                     />
+                                    {formData.reservePrice && formatPrice(Number(formData.reservePrice)).secondary && (
+                                        <p className="text-xs text-neutral-500 mt-1">
+                                            {formatPrice(Number(formData.reservePrice)).secondary}
+                                        </p>
+                                    )}
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                                         Giá mua ngay (₫)
                                     </label>
                                     <input
-                                        type="number"
-                                        name="buyNowPrice"
-                                        value={formData.buyNowPrice}
-                                        onChange={handleInputChange}
+                                        type="text"
+                                        inputMode="numeric"
+                                        value={displayPrices.buyNowPrice}
+                                        onChange={(e) => handlePriceChange('buyNowPrice', e.target.value)}
                                         placeholder="Để trống nếu không có"
                                         className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:ring-2 focus:ring-[#e43137] focus:border-transparent"
                                     />
+                                    {formData.buyNowPrice && formatPrice(Number(formData.buyNowPrice)).secondary && (
+                                        <p className="text-xs text-neutral-500 mt-1">
+                                            {formatPrice(Number(formData.buyNowPrice)).secondary}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
 

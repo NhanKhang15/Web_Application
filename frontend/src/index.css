@@ -25,12 +25,12 @@ body {
 /* ---------------- CUSTOM VARIABLES ---------------- */
 :root {
   --elevation-3: 0px 1px 8px 0px rgba(0, 0, 0, 0.12),
-  0px 3px 4px 0px rgba(0, 0, 0, 0.14),
-  0px 3px 3px -2px rgba(0, 0, 0, 0.2);
+    0px 3px 4px 0px rgba(0, 0, 0, 0.14),
+    0px 3px 3px -2px rgba(0, 0, 0, 0.2);
 
   --elevation-8: 0px 3px 14px 2px rgba(0, 0, 0, 0.12),
-  0px 8px 10px 1px rgba(0, 0, 0, 0.14),
-  0px 5px 5px -3px rgba(0, 0, 0, 0.2);
+    0px 8px 10px 1px rgba(0, 0, 0, 0.14),
+    0px 5px 5px -3px rgba(0, 0, 0, 0.2);
 
   --elevation-outlined-light: 0px 0px 0px 1px rgba(224, 224, 224, 1);
 
@@ -80,10 +80,12 @@ body {
     opacity: 0;
     animation-timing-function: cubic-bezier(0.74, 0.25, 0.76, 1);
   }
+
   10% {
     opacity: 0.7;
     animation-timing-function: cubic-bezier(0.12, 0.01, 0.08, 0.99);
   }
+
   to {
     opacity: 0.4;
   }
@@ -94,6 +96,7 @@ body {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: none;
@@ -105,6 +108,7 @@ body {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: none;
@@ -112,10 +116,15 @@ body {
 }
 
 @keyframes shimmer {
-  0%, 90%, to {
+
+  0%,
+  90%,
+  to {
     background-position: calc(-100% - var(--shimmer-width)) 0;
   }
-  30%, 60% {
+
+  30%,
+  60% {
     background-position: calc(100% + var(--shimmer-width)) 0;
   }
 }
@@ -124,6 +133,7 @@ body {
   0% {
     transform: translate(0);
   }
+
   to {
     transform: translateX(calc(-100% - var(--gap)));
   }
@@ -133,6 +143,7 @@ body {
   0% {
     transform: translateY(0);
   }
+
   to {
     transform: translateY(calc(-100% - var(--gap)));
   }
@@ -207,8 +218,10 @@ body {
   }
 }
 
+/* Removed scroll-behavior: smooth - causes jank with framer-motion animations */
 html {
-  scroll-behavior: smooth;
+  /* Enable GPU acceleration for smoother performance */
+  -webkit-overflow-scrolling: touch;
 }
 
 @layer base {
@@ -228,7 +241,8 @@ html {
 }
 
 .slick-dots li button:before {
-  font-size: 0; /* hide default tiny dot */
+  font-size: 0;
+  /* hide default tiny dot */
 }
 
 .slick-dots li button {
@@ -240,20 +254,25 @@ html {
 }
 
 /* === Slick Arrows === */
-.slick-prev, .slick-next {
+.slick-prev,
+.slick-next {
   z-index: 20;
   width: 40px;
   height: 40px;
 }
 
-.slick-prev:before, .slick-next:before {
+.slick-prev:before,
+.slick-next:before {
   font-size: 40px;
-  color: white;             /* arrow color */
+  color: white;
+  /* arrow color */
   opacity: 0.75;
   transition: all 0.2s ease;
 }
 
-.slick-prev:hover:before, .slick-next:hover:before {
-  color: #FF3B30;           /* hover turns red */
+.slick-prev:hover:before,
+.slick-next:hover:before {
+  color: #FF3B30;
+  /* hover turns red */
   opacity: 1;
 }

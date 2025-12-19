@@ -30,9 +30,28 @@ export default function Settings() {
         setForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
     };
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        try {
+            // Call backend logout API (if exists) to clear cookies/session
+            await fetch(`${window.location.origin.replace(':5174', ':8081')}/api/auth/logout`, {
+                method: 'POST',
+                credentials: 'include'
+            }).catch(() => { }); // Ignore errors if endpoint doesn't exist
+        } catch (e) {
+            // Ignore logout API errors
+        }
+
+        // Clear all session data
         sessionStorage.removeItem("user");
-        alert("🚪 " + t("logout_success") + " thành công!");
+        sessionStorage.removeItem("token");
+
+        // Dispatch logout event for theme/other providers
+        window.dispatchEvent(new CustomEvent('userLogout'));
+
+        // Show success message
+        alert("🚪 " + t("logout_success"));
+
+        // Redirect to home
         navigate("/", { replace: true });
     };
 

@@ -13,11 +13,13 @@ import AuctionInfo from "../../wid/componentDetail/AuctionInfo.jsx";
 import { useChat } from "../../../widget/screens/ChatContext.jsx";
 import { useUserProfile } from "../../../user_infor/lib/useUserProfile.js";
 import { Wallet } from "lucide-react";
+import { useCurrency } from "../../../widget/screens/CurrencyContext";
 
 export default function AuctionDetail() {
     const { openChat } = useChat();
 
     const { profile: currentUser } = useUserProfile();
+    const { formatPrice, formatVND } = useCurrency();
 
     const { category, slug, itemSlug } = useParams();
     const realProductSlug = itemSlug || slug;
@@ -35,9 +37,6 @@ export default function AuctionDetail() {
     const [categories, setCategories] = useState({});
     const [similarItems, setSimilarItems] = useState([]);
     const [walletBalance, setWalletBalance] = useState(null);
-
-    // Format VND helper
-    const formatVND = (n) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n ?? 0);
 
     const handleOpenChat = () => {
         if (!currentUser || !currentUser.userId) {
@@ -419,6 +418,11 @@ export default function AuctionDetail() {
                                             <p className="font-bold text-lg text-emerald-600 dark:text-emerald-400">
                                                 {formatVND(walletBalance)}
                                             </p>
+                                            {formatPrice(walletBalance).secondary && (
+                                                <span className="text-sm font-medium text-emerald-500/80 dark:text-emerald-400/70">
+                                                    {formatPrice(walletBalance).secondary}
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
                                 </div>

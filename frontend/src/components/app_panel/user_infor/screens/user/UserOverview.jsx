@@ -3,7 +3,7 @@ import React from "react";
 import { Button } from "../../ui/Button.jsx";
 import InfoCardBody from "./InfoCardBody.jsx";
 import EditUserDialog from "./EditUserDialog.jsx";
-import WalletCard from "../../../payment/WalletCard.jsx";
+import WalletCard from "../wallet/WalletCard.jsx";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 

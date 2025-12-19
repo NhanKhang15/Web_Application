@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { Button } from "../user_infor/ui/Button";
-import { getToken, API_BASE_URL } from "../../../lib/api_url";
+import { Button } from "../../ui/Button.jsx";
+import { getToken, API_BASE_URL } from "../../../../../lib/api_url.js";
 import { RefreshCw, CreditCard, History } from "lucide-react";
 import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
-import { useUserProfile } from "../user_infor/lib/useUserProfile";
+import { useUserProfile } from "../../lib/useUserProfile.js";
+import { useCurrency } from "../../../widget/screens/CurrencyContext";
 
 export default function WalletCard() {
     const { t } = useTranslation();
+    const { formatPrice, formatVND } = useCurrency();
     const [balance, setBalance] = useState(0);
     const [loading, setLoading] = useState(false);
     const [amount, setAmount] = useState(""); // Raw numeric value
@@ -276,8 +278,8 @@ export default function WalletCard() {
         }
     };
 
-    const formatCurrency = (val) =>
-        new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
+    const balanceDisplay = formatPrice(balance);
+    const amountPreview = amount ? formatPrice(Number(amount)) : null;
 
     return (
         <div className="space-y-4 md:space-y-6 mt-4 md:mt-6 w-full min-w-0 overflow-hidden">
@@ -299,9 +301,16 @@ export default function WalletCard() {
                     </button>
                 </div>
                 <p className="text-sm text-neutral-500 dark:text-neutral-400">{t("wallet_current_balance")}</p>
-                <p className="text-2xl md:text-4xl font-bold text-green-600 dark:text-green-400 mt-1 break-all">
-                    {formatCurrency(balance)}
-                </p>
+                <div className="flex flex-col">
+                    <p className="text-2xl md:text-4xl font-bold text-green-600 dark:text-green-400 mt-1 break-all">
+                        {balanceDisplay.primary}
+                    </p>
+                    {balanceDisplay.secondary && (
+                        <span className="text-base md:text-lg font-medium text-green-500/80 dark:text-green-400/70">
+                            {balanceDisplay.secondary}
+                        </span>
+                    )}
+                </div>
             </motion.div>
 
             {/* Block 2: Top Up Form */}
@@ -329,9 +338,16 @@ export default function WalletCard() {
                             className="w-full px-4 py-3 border rounded-lg dark:bg-neutral-800 dark:border-neutral-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
                         />
                         {amount && (
-                            <p className="mt-2 text-sm italic text-neutral-600 dark:text-neutral-400">
-                                {t("wallet_amount_in_words")} <span className="font-medium text-blue-600 dark:text-blue-400">{numberToWords(amount)}</span>
-                            </p>
+                            <>
+                                <p className="mt-2 text-sm italic text-neutral-600 dark:text-neutral-400">
+                                    {t("wallet_amount_in_words")} <span className="font-medium text-blue-600 dark:text-blue-400">{numberToWords(amount)}</span>
+                                </p>
+                                {amountPreview?.secondary && (
+                                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                                        {amountPreview.secondary}
+                                    </p>
+                                )}
+                            </>
                         )}
                     </div>
 
@@ -342,7 +358,7 @@ export default function WalletCard() {
                                 onClick={() => handleQuickAmount(val)}
                                 className="px-4 py-2 rounded-full border border-neutral-200 dark:border-neutral-700 text-sm font-medium hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
                             >
-                                {formatCurrency(val)}
+                                {formatVND(val)}
                             </button>
                         ))}
                     </div>
@@ -398,7 +414,12 @@ export default function WalletCard() {
                                         </td>
                                         <td className={`px-2 md:px-4 py-3 text-right font-semibold text-xs md:text-sm ${tx.direction === 'IN' ? 'text-green-600' : 'text-red-600'
                                             }`}>
-                                            {formatCurrency(tx.amount)}
+                                            <div className="flex flex-col items-end">
+                                                <span>{formatVND(tx.amount)}</span>
+                                                {formatPrice(tx.amount).secondary && (
+                                                    <span className="text-[10px] text-neutral-400">{formatPrice(tx.amount).secondary}</span>
+                                                )}
+                                            </div>
                                         </td>
                                         <td className="px-2 md:px-4 py-3 font-medium">
                                             <span className={`px-2 py-1 rounded text-xs ${tx.direction === 'IN' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :

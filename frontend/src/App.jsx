@@ -4,6 +4,7 @@ import { lazy, Suspense } from "react";
 import { ThemeProvider } from "./components/theme/ThemeProvider.jsx";
 import LoadingFallback from "./components/LoadingFallback.jsx";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
+import { CurrencyProvider } from "./components/app_panel/widget/screens/CurrencyContext.jsx";
 
 // Lazy load all route components for code splitting
 const Login = lazy(() => import("./components/auth/screens/Login"));
@@ -31,64 +32,66 @@ function RequireAuth({ children }) {
 export default function App() {
     return (
         <ThemeProvider>
-            <ErrorBoundary>
-                <BrowserRouter>
-                    <Suspense fallback={<LoadingFallback />}>
-                        <Routes>
-                            <Route path="/" element={<Homepage />} />
-                            <Route path="/Homepage" element={<Homepage />} />
-                            <Route path="/login" element={<Login />} />
-                            <Route path="/signup" element={<Signup />} />
+            <CurrencyProvider>
+                <ErrorBoundary>
+                    <BrowserRouter>
+                        <Suspense fallback={<LoadingFallback />}>
+                            <Routes>
+                                <Route path="/" element={<Homepage />} />
+                                <Route path="/Homepage" element={<Homepage />} />
+                                <Route path="/login" element={<Login />} />
+                                <Route path="/signup" element={<Signup />} />
 
-                            {/* OAuth callback */}
-                            <Route path="/auth/callback" element={<AuthCallback />} />
+                                {/* OAuth callback */}
+                                <Route path="/auth/callback" element={<AuthCallback />} />
 
-                            {/* Email Verification */}
-                            <Route path="/verify-email" element={<EmailVerificationPage />} />
+                                {/* Email Verification */}
+                                <Route path="/verify-email" element={<EmailVerificationPage />} />
 
-                            <Route
-                                path="/user/profile"
-                                element={
-                                    <RequireAuth>
-                                        <ProfileSetup />
-                                    </RequireAuth>
-                                }
-                            />
+                                <Route
+                                    path="/user/profile"
+                                    element={
+                                        <RequireAuth>
+                                            <ProfileSetup />
+                                        </RequireAuth>
+                                    }
+                                />
 
-                            {/* --- CẬP NHẬT DASHBOARD ROUTES --- */}
+                                {/* --- CẬP NHẬT DASHBOARD ROUTES --- */}
 
-                            {/* Level 1: /dashboard */}
-                            <Route
-                                path="/dashboard"
-                                element={<RequireAuth><MerchantProfile /></RequireAuth>}
-                            />
+                                {/* Level 1: /dashboard */}
+                                <Route
+                                    path="/dashboard"
+                                    element={<RequireAuth><MerchantProfile /></RequireAuth>}
+                                />
 
-                            {/* Level 2: /dashboard/auctions */}
-                            <Route
-                                path="/dashboard/:category"
-                                element={<RequireAuth><MerchantProfile /></RequireAuth>}
-                            />
+                                {/* Level 2: /dashboard/auctions */}
+                                <Route
+                                    path="/dashboard/:category"
+                                    element={<RequireAuth><MerchantProfile /></RequireAuth>}
+                                />
 
-                            {/* Level 3: Menu con (VD: /dashboard/auctions/main, /dashboard/auctions/ongoing) */}
-                            {/* Ở đây tham số thứ 2 ta gọi là :slug để khớp với logic MerchantProfile hiện tại */}
-                            <Route
-                                path="/dashboard/:category/:slug"
-                                element={<RequireAuth><MerchantProfile /></RequireAuth>}
-                            />
+                                {/* Level 3: Menu con (VD: /dashboard/auctions/main, /dashboard/auctions/ongoing) */}
+                                {/* Ở đây tham số thứ 2 ta gọi là :slug để khớp với logic MerchantProfile hiện tại */}
+                                <Route
+                                    path="/dashboard/:category/:slug"
+                                    element={<RequireAuth><MerchantProfile /></RequireAuth>}
+                                />
 
-                            {/* 👇 THÊM ROUTE NÀY: Level 4 cho Chi tiết sản phẩm */}
-                            {/* VD: /dashboard/auctions/main/iphone-15 */}
-                            {/* :slug là 'main', :itemSlug là 'iphone-15' */}
-                            <Route
-                                path="/dashboard/:category/:slug/:itemSlug"
-                                element={<RequireAuth><MerchantProfile /></RequireAuth>}
-                            />
+                                {/* 👇 THÊM ROUTE NÀY: Level 4 cho Chi tiết sản phẩm */}
+                                {/* VD: /dashboard/auctions/main/iphone-15 */}
+                                {/* :slug là 'main', :itemSlug là 'iphone-15' */}
+                                <Route
+                                    path="/dashboard/:category/:slug/:itemSlug"
+                                    element={<RequireAuth><MerchantProfile /></RequireAuth>}
+                                />
 
-                            <Route path="*" element={<Homepage />} />
-                        </Routes>
-                    </Suspense>
-                </BrowserRouter>
-            </ErrorBoundary>
+                                <Route path="*" element={<Homepage />} />
+                            </Routes>
+                        </Suspense>
+                    </BrowserRouter>
+                </ErrorBoundary>
+            </CurrencyProvider>
         </ThemeProvider>
     );
 }

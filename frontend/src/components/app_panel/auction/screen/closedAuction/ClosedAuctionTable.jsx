@@ -1,14 +1,10 @@
 import React from "react";
 import { CheckCircle2, XCircle, Eye, User } from "lucide-react";
 import { useTranslation } from "react-i18next";
-
-// Helper format tiền
-const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
-};
+import { useCurrency } from "../../../widget/screens/CurrencyContext";
 
 // Component con: Dòng dữ liệu (Row)
-const ClosedAuctionRow = ({ item, t, onViewResult }) => {
+const ClosedAuctionRow = ({ item, t, onViewResult, formatPrice, formatVND }) => {
     return (
         <tr className="border-b dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors group">
             {/* ID */}
@@ -30,7 +26,10 @@ const ClosedAuctionRow = ({ item, t, onViewResult }) => {
 
             {/* Final Price - Always Visible */}
             <td className="px-2 md:px-4 py-3 md:py-4 font-bold text-neutral-900 dark:text-white text-xs md:text-sm">
-                {formatCurrency(item.finalPrice)}
+                <div>{formatVND(item.finalPrice)}</div>
+                {formatPrice(item.finalPrice).secondary && (
+                    <div className="text-[10px] font-normal text-neutral-400">{formatPrice(item.finalPrice).secondary}</div>
+                )}
             </td>
 
             {/* Status - Hidden on Small Mobile */}
@@ -71,6 +70,7 @@ const ClosedAuctionRow = ({ item, t, onViewResult }) => {
 // Component chính: Table Container
 export default function ClosedAuctionTable({ data, onViewResult }) {
     const { t } = useTranslation();
+    const { formatPrice, formatVND } = useCurrency();
 
     return (
         <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm overflow-hidden border border-neutral-200 dark:border-neutral-800">
@@ -88,7 +88,7 @@ export default function ClosedAuctionTable({ data, onViewResult }) {
                     </thead>
                     <tbody>
                         {data.map((item) => (
-                            <ClosedAuctionRow key={item.id} item={item} t={t} onViewResult={onViewResult} />
+                            <ClosedAuctionRow key={item.id} item={item} t={t} onViewResult={onViewResult} formatPrice={formatPrice} formatVND={formatVND} />
                         ))}
                     </tbody>
                 </table>
