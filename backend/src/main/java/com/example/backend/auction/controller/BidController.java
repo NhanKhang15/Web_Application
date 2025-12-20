@@ -95,6 +95,36 @@ public class BidController {
         }
     }
 
+    @PostMapping("/{auctionId}/buy-now")
+    public ResponseEntity<?> buyNow(@PathVariable Integer auctionId,
+            Authentication authentication,
+            @AuthenticationPrincipal Object principal) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(401).body("User must be logged in");
+        }
+
+        Integer userId = null;
+        if (principal instanceof UserDetails userDetails) {
+            String username = userDetails.getUsername();
+            userId = userRepository.findByUsername(username).map(User::getUserId).orElse(null);
+        } else if (principal instanceof OAuth2User oauth2User) {
+            String email = oauth2User.getAttribute("email");
+            userId = userRepository.findByEmail(email).map(User::getUserId).orElse(null);
+        }
+
+        if (userId == null) {
+            return ResponseEntity.status(404).body("User not found");
+        }
+
+        BidResult result = bidService.buyNow(auctionId, userId);
+
+        if (result.isSuccess()) {
+            return ResponseEntity.ok(java.util.Map.of("message", "Buy Now successful", "success", true));
+        } else {
+            return ResponseEntity.badRequest().body(java.util.Map.of("message", result.getMessage(), "success", false));
+        }
+    }
+
     @GetMapping("/auction/{auctionId}")
     public ResponseEntity<List<Bid>> getBids(@PathVariable Integer auctionId) {
         return ResponseEntity.ok(bidService.getBidsForAuction(auctionId));

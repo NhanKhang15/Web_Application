@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ItemsApi from "../../lib/itemDetail.js";
 import { PostAuctionApi } from "../../../seller/lib/PostAuctionApi.js";
+import { BidApi } from "../../lib/BidApi.js";
 import AuctionBidPanel from "../../wid/componentDetail/AuctionBidPanel.jsx";
 import AuctionImageGallery from "../../wid/componentDetail/AuctionImageGallery.jsx";
 import ImageGalleryModal from "../../wid/componentDetail/ImageGalleryModal.jsx";
@@ -356,6 +357,28 @@ export default function AuctionDetail() {
         }
     };
 
+    // ====== Buy Now ======
+    const handleBuyNow = async () => {
+        if (currentUser && !currentUser.emailVerified) {
+            alert(t("please_verify_email_to_bid") || "Vui lòng xác thực email để mua ngay!");
+            navigate("/dashboard/user");
+            return;
+        }
+
+        if (!window.confirm(`Bạn có chắc chắn muốn mua ngay với giá ${formatVND(product.buyNowPrice)}?`)) {
+            return;
+        }
+
+        try {
+            await BidApi.buyNow(product.auctionId ?? product.id);
+            alert("Mua ngay thành công! Vui lòng kiểm tra email.");
+            window.location.reload();
+        } catch (error) {
+            console.error("Buy Now failed:", error);
+            alert(error.message || "Lỗi khi mua ngay");
+        }
+    };
+
     // ====== Render ======
     if (state.loading) return <div className="p-10 text-center text-gray-500">{t('Loading_product_data')}...</div>;
     if (state.notFound) return <div className="p-10 text-center text-red-500">{t('Product_not_found')}</div>;
@@ -434,6 +457,7 @@ export default function AuctionDetail() {
                             product={product}
                             bids={bids}
                             onPlaceBid={handlePlaceBid}
+                            onBuyNow={handleBuyNow}
                             isOwner={isOwner}
                         />
                     </div>

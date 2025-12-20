@@ -6,30 +6,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/files")
 public class FileController {
 
-  private final FileStorageService storage;
+  private final CloudinaryService cloudinaryService;
 
-  public FileController(FileStorageService storage) {
-    this.storage = storage;
+  public FileController(CloudinaryService cloudinaryService) {
+    this.cloudinaryService = cloudinaryService;
   }
 
   @PostMapping("/upload")
   public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file) {
     try {
-      String savedName = storage.storeImage(file);
+      // Upload directly to Cloudinary - returns full Cloudinary URL
+      String cloudinaryUrl = cloudinaryService.uploadImage(file, "avatars");
 
-      String url = ServletUriComponentsBuilder
-              .fromCurrentContextPath()
-              .path("/uploads/")
-              .path(savedName)
-              .toUriString();
-
-      return ResponseEntity.ok(new UploadResponse(true, url, savedName));
+      return ResponseEntity.ok(new UploadResponse(true, cloudinaryUrl, "Upload thành công"));
 
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(new UploadResponse(false, null, e.getMessage()));
@@ -37,5 +31,6 @@ public class FileController {
   }
 
   // DTO phản hồi
-  record UploadResponse(boolean success, String url, String message) {}
+  record UploadResponse(boolean success, String url, String message) {
+  }
 }

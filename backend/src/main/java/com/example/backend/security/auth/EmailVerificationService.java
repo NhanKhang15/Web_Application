@@ -36,6 +36,7 @@ public class EmailVerificationService {
         String message = "Your verification code is: " + otp;
 
         SimpleMailMessage email = new SimpleMailMessage();
+        email.setFrom("khangnhanopi@gmail.com"); // Hardcode theo yêu cầu để fix lỗi Brevo
         email.setTo(user.getEmail());
         email.setSubject(subject);
         email.setText(message);

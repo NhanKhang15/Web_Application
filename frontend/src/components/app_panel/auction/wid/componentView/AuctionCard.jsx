@@ -2,6 +2,7 @@
 import React from "react";
 import { ArrowUpRight, MapPin, ImageOff, ShoppingCart } from "lucide-react";
 import { PostAuctionApi } from "../../../seller/lib/PostAuctionApi.js";
+import { BidApi } from "../../lib/BidApi.js";
 import { useTranslation } from "react-i18next";
 import { useCurrency } from "../../../widget/screens/CurrencyContext";
 
@@ -117,8 +118,31 @@ export default function AuctionCard({ item, onClick, aosDelay }) {
                     </div>
 
                     {/* Bid Button */}
-                    <div className="w-7 h-7 rounded-full bg-red-500/10 flex items-center justify-center group-hover:bg-red-500 transition-all duration-300">
-                        <ArrowUpRight className="w-3.5 h-3.5 text-red-500 dark:text-red-400 group-hover:text-white transition-colors" />
+                    <div className="flex items-center gap-1">
+                        {price > 0 && item.status === 'Open' && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (window.confirm(`Bạn có chắc muốn mua ngay với giá ${formatCurrency(price)}?`)) {
+                                        BidApi.buyNow(item.auctionId)
+                                            .then(res => {
+                                                alert("Mua thành công! Vui lòng kiểm tra email.");
+                                                // Reload or callback to update UI
+                                                window.location.reload();
+                                            })
+                                            .catch(err => {
+                                                alert(err.message || "Lỗi khi mua ngay");
+                                            });
+                                    }
+                                }}
+                                className="px-2 py-1 h-7 text-xs font-bold text-white bg-gradient-to-r from-orange-500 to-red-500 rounded-lg hover:shadow-lg hover:from-orange-600 hover:to-red-600 transition-all duration-300 transform hover:scale-105 active:scale-95"
+                            >
+                                {t('buy_now')}
+                            </button>
+                        )}
+                        <div className="w-7 h-7 rounded-full bg-red-500/10 flex items-center justify-center group-hover:bg-red-500 transition-all duration-300">
+                            <ArrowUpRight className="w-3.5 h-3.5 text-red-500 dark:text-red-400 group-hover:text-white transition-colors" />
+                        </div>
                     </div>
                 </div>
             </div>

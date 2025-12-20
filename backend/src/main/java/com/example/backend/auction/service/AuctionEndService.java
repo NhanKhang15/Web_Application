@@ -134,9 +134,14 @@ public class AuctionEndService {
      * So we only need to add to seller's wallet.
      */
     private void transferPayment(User buyer, User seller, BigDecimal amount, Auction auction) {
-        // Get seller wallet
+        // Get seller wallet (or create if not exists)
         Wallet sellerWallet = walletRepo.findByUser_UserId(seller.getUserId())
-                .orElseThrow(() -> new RuntimeException("Seller wallet not found"));
+                .orElseGet(() -> {
+                    Wallet w = new Wallet();
+                    w.setUser(seller);
+                    w.setBalance(java.math.BigDecimal.ZERO);
+                    return walletRepo.save(w);
+                });
 
         // Add to seller wallet
         sellerWallet.setBalance(sellerWallet.getBalance().add(amount));
