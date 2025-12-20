@@ -21,7 +21,6 @@ import UserAttachment from "../user_infor/screens/attachment/UserAttachment.jsx"
 import AuctionView from "../auction/screen/onGoing/onGoingView.jsx";
 import PlatformUsers from "../trader/screens/PlatformUsers.jsx";
 import UserWallet from "../user_infor/screens/wallet/UserWallet.jsx";
-import UserChart from "../user_infor/screens/performance/UserChart.jsx";
 import Settings from "../settings/Settings.jsx";
 import Utilities from "../utils/Utilities.jsx";
 import AboutUs from "../about/AboutUs.jsx";
@@ -252,15 +251,16 @@ export default function MerchantProfile() {
         if (loading) return <p className="text-neutral-500 dark:text-neutral-400">{t('loading_profile')}</p>;
         if (!profile) return <p className="text-red-500">{t('loading_profile')}</p>;
 
+        // Use slug in key to force remount when navigating between pages
+        const pageKey = `${activeSub}-${slug || 'default'}`;
+
         switch (activeSub) {
             case "user":
-                return <UserOverview profile={profile} email={email} isEditing={isEditing} setIsEditing={setIsEditing} updateProfile={updateProfile} />;
+                return <UserOverview key={pageKey} profile={profile} email={email} isEditing={isEditing} setIsEditing={setIsEditing} updateProfile={updateProfile} />;
             case "file":
-                return <UserAttachment profile={profile} />;
+                return <UserAttachment key={pageKey} profile={profile} />;
             case "wallet":
-                return <UserWallet profile={profile} />;
-            case "chart":
-                return <UserChart profile={profile} />;
+                return <UserWallet key={pageKey} profile={profile} />;
             default:
                 return <p className="text-sm text-neutral-500 dark:text-neutral-400">{t('select_sidebar_item')}</p>;
         }

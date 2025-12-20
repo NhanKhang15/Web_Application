@@ -310,7 +310,6 @@ const resources = {
             loading_profile: "Loading profile...",
             failed_load_user_data: "Failed to load user data",
             wallet_title: "Wallet",
-            analytics_title: "Analytics",
             empty_note: "Empty note…",
             chart_demo: "Chart (demo).",
             select_sub_sidebar: "Select an item from the sub sidebar.",
@@ -329,7 +328,6 @@ const resources = {
             sub_user: "User",
             sub_attachments: "Attachments",
             sub_wallet: "Wallet",
-            sub_analytics: "Analytics",
 
             // --- Dashboard Stats ---
             total_revenue: "TOTAL REVENUE",
@@ -510,6 +508,10 @@ const resources = {
             wallet_min_error: "Minimum top-up amount is 10,000 VND",
             wallet_error_prefix: "Error:",
             wallet_error_generic: "An error occurred, please try again.",
+            wallet_balance_chart: "Balance Chart",
+            wallet_no_chart_data: "No transaction data yet",
+            wallet_income: "Income",
+            wallet_expense: "Expense",
 
             // --- Chat Widget ---
             chat_select_conversation: "Select a conversation to start",
@@ -882,7 +884,6 @@ const resources = {
             sub_user: "Người dùng",
             sub_attachments: "Tệp đính kèm",
             sub_wallet: "Ví",
-            sub_analytics: "Phân tích",
 
             // --- Dashboard Stats ---
             total_revenue: "TỔNG DOANH THU",
@@ -1063,6 +1064,10 @@ const resources = {
             wallet_min_error: "Số tiền nạp tối thiểu 10.000 VND",
             wallet_error_prefix: "Lỗi:",
             wallet_error_generic: "Có lỗi xảy ra, vui lòng thử lại.",
+            wallet_balance_chart: "Biểu đồ số dư",
+            wallet_no_chart_data: "Chưa có dữ liệu giao dịch",
+            wallet_income: "Tiền vào",
+            wallet_expense: "Tiền ra",
 
             // --- Chat Widget ---
             chat_select_conversation: "Để bắt đầu, hãy chọn một cuộc hội thoại",

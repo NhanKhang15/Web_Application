@@ -53,4 +53,37 @@ public class WalletController {
                 .toList();
         return ResponseEntity.ok(transactions);
     }
+
+    @GetMapping("/balance-history")
+    public ResponseEntity<?> getBalanceHistory(@AuthenticationPrincipal CustomUserDetails user) {
+        if (user == null) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
+
+        // Get all transactions ordered by time ASC to compute cumulative balance
+        var transactions = wtRepo.findByUser_UserIdOrderByCreatedAtAsc(user.getUserId());
+
+        java.util.List<com.example.backend.payment.dto.BalanceHistoryDTO> history = new java.util.ArrayList<>();
+        BigDecimal cumulativeBalance = BigDecimal.ZERO;
+
+        for (var tx : transactions) {
+            BigDecimal change;
+            if (tx.getDirection() == com.example.backend.payment.entity.Direction.IN) {
+                change = tx.getAmount();
+                cumulativeBalance = cumulativeBalance.add(tx.getAmount());
+            } else {
+                change = tx.getAmount().negate();
+                cumulativeBalance = cumulativeBalance.subtract(tx.getAmount());
+            }
+
+            history.add(new com.example.backend.payment.dto.BalanceHistoryDTO(
+                    tx.getCreatedAt(),
+                    cumulativeBalance,
+                    change,
+                    tx.getNote(),
+                    tx.getDirection().name()));
+        }
+
+        return ResponseEntity.ok(history);
+    }
 }

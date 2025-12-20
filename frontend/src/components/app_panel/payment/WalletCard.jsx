@@ -7,6 +7,7 @@ import { RefreshCw, CreditCard, History } from "lucide-react";
 import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
 import { useUserProfile } from "../user_infor/lib/useUserProfile";
+import BalanceChart from "./BalanceChart";
 
 export default function WalletCard() {
     const { t } = useTranslation();
@@ -16,6 +17,7 @@ export default function WalletCard() {
     const [displayAmount, setDisplayAmount] = useState(""); // Formatted for display
     const [transactions, setTransactions] = useState([]);
     const [refreshing, setRefreshing] = useState(false);
+    const [chartRefreshTrigger, setChartRefreshTrigger] = useState(0); // Trigger chart refresh
     const { profile } = useUserProfile();
 
     // Format number with thousand separators (Vietnamese style: dots)
@@ -191,6 +193,7 @@ export default function WalletCard() {
             stompClient.subscribe(`/topic/wallet/${profile.userId}`, (msg) => {
                 if (msg.body === "PAYMENT_SUCCESS") {
                     fetchData();
+                    setChartRefreshTrigger(prev => prev + 1); // Trigger chart refresh
                 }
             });
         });
@@ -360,7 +363,10 @@ export default function WalletCard() {
                 </div>
             </motion.div>
 
-            {/* Block 3: Transaction History */}
+            {/* Block 3: Balance Chart */}
+            <BalanceChart refreshTrigger={chartRefreshTrigger} />
+
+            {/* Block 4: Transaction History */}
             <motion.div
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
