@@ -132,6 +132,9 @@ public class AuctionEndService {
      * Transfer payment from buyer to seller.
      * The bid amount was already frozen (deducted) when placing the bid.
      * So we only need to add to seller's wallet.
+     * NOTE: We don't create a buyer transaction here because:
+     * - For regular bids: BID_FREEZE transaction was already created in placeBid()
+     * - For Buy Now: BID_FREEZE transaction was already created in buyNow()
      */
     private void transferPayment(User buyer, User seller, BigDecimal amount, Auction auction) {
         // Get seller wallet (or create if not exists)
@@ -147,17 +150,9 @@ public class AuctionEndService {
         sellerWallet.setBalance(sellerWallet.getBalance().add(amount));
         walletRepo.save(sellerWallet);
 
-        // Record transaction for buyer (PAYMENT - OUT)
-        WalletTransaction buyerTx = new WalletTransaction();
-        buyerTx.setUser(buyer);
-        buyerTx.setAmount(amount);
-        buyerTx.setType(TransactionType.PAYMENT);
-        buyerTx.setDirection(Direction.OUT);
-        buyerTx.setRelatedAuction(auction);
-        buyerTx.setNote("Payment for winning auction #" + auction.getAuctionID());
-        transactionRepo.save(buyerTx);
-
         // Record transaction for seller (SALE_INCOME - IN)
+        // NOTE: Buyer transaction is NOT created here because it was already
+        // recorded as BID_FREEZE in placeBid() or buyNow()
         WalletTransaction sellerTx = new WalletTransaction();
         sellerTx.setUser(seller);
         sellerTx.setAmount(amount);
