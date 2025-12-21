@@ -11,7 +11,7 @@ import {
     ResponsiveContainer,
     ReferenceLine,
 } from "recharts";
-import { getToken, API_BASE_URL } from "../../../lib/api_url";
+import { getToken, API_BASE_URL } from "../../../../../lib/api_url.js";
 import { TrendingUp } from "lucide-react";
 
 // Custom tooltip component for the chart

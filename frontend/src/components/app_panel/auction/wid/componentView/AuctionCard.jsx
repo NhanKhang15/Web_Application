@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { useCurrency } from "../../../widget/screens/CurrencyContext";
 
 // helper - kept for fallback
-const formatCurrencyVND = (amount) => {
+const formatCurrency = (amount) => {
     if (!amount) return "0 ₫";
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
 };
@@ -137,7 +137,7 @@ export default function AuctionCard({ item, onClick, aosDelay }) {
                                 }}
                                 className="px-2 py-1 h-7 text-xs font-bold text-white bg-gradient-to-r from-orange-500 to-red-500 rounded-lg hover:shadow-lg hover:from-orange-600 hover:to-red-600 transition-all duration-300 transform hover:scale-105 active:scale-95"
                             >
-                                {t('buy_now')}
+                                {t('Buy_Now')}
                             </button>
                         )}
                         <div className="w-7 h-7 rounded-full bg-red-500/10 flex items-center justify-center group-hover:bg-red-500 transition-all duration-300">
