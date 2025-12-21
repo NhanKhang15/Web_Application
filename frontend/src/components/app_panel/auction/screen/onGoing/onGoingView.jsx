@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import { getJSON } from "../../../../../lib/api_url.js";
 import ScheduledAuctions from "../scheduledAuction/ScheduledAuctions.jsx";
 import ClosedAuctions from "../closedAuction/ClosedAuctions.jsx";
+import Snowfall from "react-snowfall";
 
 export default function AuctionView() {
     const { t } = useTranslation();
@@ -301,6 +302,17 @@ export default function AuctionView() {
 
     return (
         <div className="w-full min-h-full flex flex-col relative overflow-x-hidden bg-gray-50 dark:bg-[#0B0F13] text-[#212121] dark:text-gray-200 transition-colors duration-300 rounded-xl pb-10">
+            {/* Snowfall Effect */}
+            <Snowfall
+                snowflakeCount={150}
+                style={{
+                    position: 'fixed',
+                    width: '100vw',
+                    height: '100vh',
+                    zIndex: 9999,
+                    pointerEvents: 'none',
+                }}
+            />
             <FilterSheet
                 open={openFilter}
                 onClose={() => setOpenFilter(false)}
