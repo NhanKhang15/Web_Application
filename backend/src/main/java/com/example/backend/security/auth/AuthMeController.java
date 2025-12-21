@@ -81,4 +81,19 @@ public class AuthMeController {
         "emailVerified", u.isEmailVerified(),
         "profileCompleted", completed));
   }
+
+  @PostMapping("/logout")
+  public ResponseEntity<?> logout(jakarta.servlet.http.HttpServletRequest request,
+      jakarta.servlet.http.HttpServletResponse response) {
+    // Invalidate session
+    var session = request.getSession(false);
+    if (session != null) {
+      session.invalidate();
+    }
+
+    // Clear security context
+    org.springframework.security.core.context.SecurityContextHolder.clearContext();
+
+    return ResponseEntity.ok(Map.of("success", true, "message", "Logged out successfully"));
+  }
 }

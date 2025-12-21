@@ -146,18 +146,26 @@ public class PlainJdbcSeeder {
         return String.format(templates[random.nextInt(templates.length)], detail);
     }
 
-    // Danh sách địa điểm - sử dụng Faker
+    // Danh sách địa điểm - khớp với dropdown frontend (63 tỉnh/thành Việt Nam)
     private static String generateLocation() {
-        String[] districts = {
-                "Quận 1", "Quận 2", "Quận 3", "Quận 7", "Quận Bình Thạnh", "Quận Phú Nhuận",
-                "Quận Hoàn Kiếm", "Quận Cầu Giấy", "Quận Đống Đa", "Quận Ba Đình",
-                "Quận Hải Châu", "Quận Ninh Kiều", "Quận Liên Chiểu"
-        };
-        String[] cities = {
-                "TP. Hồ Chí Minh", "Hà Nội", "Đà Nẵng", "Cần Thơ", "Nha Trang", "Đà Lạt", "Hải Phòng"
+        String[] provinces = {
+                "An Giang", "Bà Rịa - Vũng Tàu", "Bắc Giang", "Bắc Kạn", "Bạc Liêu",
+                "Bắc Ninh", "Bến Tre", "Bình Định", "Bình Dương", "Bình Phước",
+                "Bình Thuận", "Cà Mau", "Cần Thơ", "Cao Bằng", "Đà Nẵng",
+                "Đắk Lắk", "Đắk Nông", "Điện Biên", "Đồng Nai", "Đồng Tháp",
+                "Gia Lai", "Hà Giang", "Hà Nam", "Hà Nội", "Hà Tĩnh",
+                "Hải Dương", "Hải Phòng", "Hậu Giang", "Hòa Bình", "Hồ Chí Minh",
+                "Hưng Yên", "Khánh Hòa", "Kiên Giang", "Kon Tum", "Lai Châu",
+                "Lâm Đồng", "Lạng Sơn", "Lào Cai", "Long An", "Nam Định",
+                "Nghệ An", "Ninh Bình", "Ninh Thuận", "Phú Thọ", "Phú Yên",
+                "Quảng Bình", "Quảng Nam", "Quảng Ngãi", "Quảng Ninh", "Quảng Trị",
+                "Sóc Trăng", "Sơn La", "Tây Ninh", "Thái Bình", "Thái Nguyên",
+                "Thanh Hóa", "Thừa Thiên Huế", "Tiền Giang", "Trà Vinh", "Tuyên Quang",
+                "Vĩnh Long", "Vĩnh Phúc", "Yên Bái",
+                "International"
         };
 
-        return districts[random.nextInt(districts.length)] + ", " + cities[random.nextInt(cities.length)];
+        return provinces[random.nextInt(provinces.length)];
     }
 
     // ===========================================

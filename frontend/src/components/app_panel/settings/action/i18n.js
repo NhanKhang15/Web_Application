@@ -518,11 +518,6 @@ const resources = {
             chat_type_message: "Type a message...",
             chat_sending: "Sending...",
             chat_send_failed: "Failed to send. Tap to retry.",
-            chat_search_messages: "Search messages...",
-            chat_searching: "Searching...",
-            chat_search_results: "Search results",
-            chat_no_results: "No results found",
-            chat_you: "You",
 
             // --- Utility Menu ---
             utility_messages: "Messages",
@@ -559,6 +554,46 @@ const resources = {
 
             // --- PostAuction ---
             Email_not_verified_auction: "Please verify your email before posting auctions! Go to User profile to verify.",
+
+            // --- VerificationPage ---
+            verify_email_title: "Verify Email",
+            verify_email_enter_code: "Enter Verification Code",
+            verify_email_desc: "Enter your email to receive a verification code.",
+            verify_email_code_desc: "A verification code has been sent to {{email}}",
+            verify_email_invalid_email: "Please enter a valid email",
+            verify_email_invalid_code: "Please enter the verification code",
+            verify_email_code_sent: "Verification code has been sent to your email.",
+            verify_email_success: "Verification successful!",
+            verify_email_failed: "Verification failed. Please check your code.",
+            verify_email_label: "Email",
+            verify_email_code_label: "Verification Code",
+            verify_email_send_code: "Send Code",
+            verify_email_verify: "Verify",
+            verify_email_resend: "Resend Code",
+            verify_email_back: "Back",
+
+            // --- SellerChatWidget ---
+            Just_now: "Just now",
+            Now: "Now",
+            New_conversation: "Start a conversation",
+            chat_start_new: "Start a conversation",
+            chat_conversations: "Messages",
+            chat_search_users: "Search users...",
+            chat_no_user_found: "No users found",
+            chat_search_messages: "Search messages",
+            chat_search_messages_placeholder: "Search in conversation...",
+            chat_searching: "Searching...",
+            chat_no_results: "No results found",
+            chat_you: "You",
+
+            // --- DashboardStats ---
+            balance: "Balance",
+
+            // --- Search ---
+            search_history: "Recent Searches",
+
+            // --- EditAuctionModal ---
+            edit_auction: "Manage Auction",
         },
     },
     vi: {
@@ -1110,6 +1145,46 @@ const resources = {
 
             // --- PostAuction ---
             Email_not_verified_auction: "Vui lòng xác thực email trước khi đăng đấu giá! Vào mục Hồ sơ cá nhân (User) để xác thực.",
+
+            // --- VerificationPage ---
+            verify_email_title: "Xác thực Email",
+            verify_email_enter_code: "Nhập mã xác thực",
+            verify_email_desc: "Nhập email của bạn để nhận mã xác thực.",
+            verify_email_code_desc: "Mã xác thực đã được gửi tới {{email}}",
+            verify_email_invalid_email: "Vui lòng nhập email hợp lệ",
+            verify_email_invalid_code: "Vui lòng nhập mã xác thực",
+            verify_email_code_sent: "Mã xác thực đã được gửi tới email của bạn.",
+            verify_email_success: "Xác thực thành công!",
+            verify_email_failed: "Xác thực thất bại. Vui lòng kiểm tra lại mã.",
+            verify_email_label: "Email",
+            verify_email_code_label: "Mã xác thực",
+            verify_email_send_code: "Gửi mã",
+            verify_email_verify: "Xác thực",
+            verify_email_resend: "Gửi lại mã",
+            verify_email_back: "Quay lại",
+
+            // --- SellerChatWidget ---
+            Just_now: "Vừa xong",
+            Now: "Mới",
+            New_conversation: "Bắt đầu trò chuyện",
+            chat_start_new: "Bắt đầu trò chuyện",
+            chat_conversations: "Tin nhắn",
+            chat_search_users: "Tìm người dùng...",
+            chat_no_user_found: "Không tìm thấy người dùng",
+            chat_search_messages: "Tìm tin nhắn",
+            chat_search_messages_placeholder: "Tìm trong cuộc trò chuyện...",
+            chat_searching: "Đang tìm...",
+            chat_no_results: "Không tìm thấy kết quả",
+            chat_you: "Bạn",
+
+            // --- DashboardStats ---
+            balance: "Số dư",
+
+            // --- Search ---
+            search_history: "Lịch sử tìm kiếm",
+
+            // --- EditAuctionModal ---
+            edit_auction: "Quản lý đấu giá",
         },
     },
 };

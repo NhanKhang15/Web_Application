@@ -5,6 +5,7 @@ import { getJSON } from "../../../../lib/api_url";
 import { useUserProfile } from "../../user_infor/lib/useUserProfile";
 import { PostAuctionApi } from "../lib/PostAuctionApi";
 import EditAuctionModal from "./EditAuctionModal";
+import { useCurrency } from "../../widget/screens/CurrencyContext";
 import {
     Package,
     Clock,
@@ -26,6 +27,7 @@ export default function ManageAuction() {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const { profile } = useUserProfile();
+    const { formatPrice, formatVND } = useCurrency();
 
     const [auctions, setAuctions] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -113,15 +115,6 @@ export default function ManageAuction() {
                     </span>
                 );
         }
-    };
-
-    // Format currency
-    const formatCurrency = (amount) => {
-        return new Intl.NumberFormat("vi-VN", {
-            style: "currency",
-            currency: "VND",
-            minimumFractionDigits: 0,
-        }).format(amount || 0);
     };
 
     // Format date
@@ -289,16 +282,26 @@ export default function ManageAuction() {
                                                         {t("starting_price") || "Starting"}
                                                     </span>
                                                     <span className="font-semibold text-neutral-800 dark:text-neutral-200">
-                                                        {formatCurrency(auction.startingPrice)}
+                                                        {formatVND(auction.startingPrice)}
                                                     </span>
+                                                    {formatPrice(auction.startingPrice).secondary && (
+                                                        <span className="text-[10px] text-neutral-400 block">
+                                                            {formatPrice(auction.startingPrice).secondary}
+                                                        </span>
+                                                    )}
                                                 </div>
                                                 <div>
                                                     <span className="text-neutral-500 dark:text-neutral-400 block">
                                                         {t("current_bid") || "Current"}
                                                     </span>
                                                     <span className="font-semibold text-green-600 dark:text-green-400">
-                                                        {formatCurrency(auction.currentPrice)}
+                                                        {formatVND(auction.currentPrice)}
                                                     </span>
+                                                    {formatPrice(auction.currentPrice).secondary && (
+                                                        <span className="text-[10px] text-green-500/70 block">
+                                                            {formatPrice(auction.currentPrice).secondary}
+                                                        </span>
+                                                    )}
                                                 </div>
                                                 <div>
                                                     <span className="text-neutral-500 dark:text-neutral-400 block">

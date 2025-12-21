@@ -37,6 +37,7 @@ import { subSidebarItems } from "../slidebar/lib/subSidebarItems.js";
 import { useTranslation } from "react-i18next";
 import UtilityMenu from "../widget/screens/UtilityMenu.jsx";
 import MobileNav from "../slidebar/screens/MobileNav.jsx";
+import CurrencySelector from "../widget/screens/CurrencySelector.jsx";
 
 function EmptyPage({ title }) {
     const { t } = useTranslation();
@@ -271,7 +272,16 @@ export default function MerchantProfile() {
             <ChatProvider>
                 <div className="min-h-screen w-full flex flex-col bg-neutral-50 dark:bg-[#111] text-neutral-900 dark:text-neutral-100 pb-16 md:pb-0">
                     {/* HEADER */}
-                    <motion.div className="sticky top-0 w-full z-20 bg-neutral-900 dark:bg-white" style={{ height: headerH, willChange: "height", zIndex: scrolled ? 50 : 20 }}>
+                    <motion.div
+                        className="sticky top-0 w-full z-20 bg-neutral-900 dark:bg-white"
+                        style={{
+                            height: headerH,
+                            willChange: "height, transform",
+                            transform: "translateZ(0)",
+                            backfaceVisibility: "hidden",
+                            zIndex: scrolled ? 50 : 20
+                        }}
+                    >
                         <div className="h-full px-6 flex items-center justify-between">
                             {/* LEFT: Logo */}
                             <div className="flex items-center">
@@ -332,8 +342,12 @@ export default function MerchantProfile() {
                                 <Search className="w-4 h-4" />
                             </button>
 
-                            {/* RIGHT: User chip + Lang switch */}
-                            <div className="flex items-center gap-3 md:gap-4">
+                            {/* RIGHT: Currency + Lang switch + User chip */}
+                            <div className="flex items-center gap-2 md:gap-3">
+                                {/* Currency Selector */}
+                                <CurrencySelector className="hidden md:block" />
+
+                                {/* Language Selector */}
                                 <div className="relative" ref={langBtnRef}>
                                     <button
                                         onClick={() => setLangDropdownOpen(!langDropdownOpen)}
@@ -424,12 +438,27 @@ export default function MerchantProfile() {
 
                     {/* BODY */}
                     <div className="flex flex-1 min-h-0">
-                        <motion.div className="hidden md:block shrink-0 sticky" style={{ top: contentPadTop, willChange: "top", height: useTransform(scrollY, [0, 160], [`calc(100vh - ${EXPANDED_HEADER_PX}px)`, `calc(100vh - ${COLLAPSED_HEADER_PX}px)`]) }}>
+                        <motion.div
+                            className="hidden md:block shrink-0 sticky"
+                            style={{
+                                top: contentPadTop,
+                                willChange: "top",
+                                transform: "translateZ(0)",
+                                height: useTransform(scrollY, [0, 160], [`calc(100vh - ${EXPANDED_HEADER_PX}px)`, `calc(100vh - ${COLLAPSED_HEADER_PX}px)`])
+                            }}
+                        >
                             <LeftNav activeKey={leftKey} onChange={setLeftKey} />
                         </motion.div>
 
                         <main className="relative flex-1 min-h-0">
-                            <motion.div className="px-3 pb-4 min-w-0" style={{ marginTop: scrolled ? headerH : cardOverlap, zIndex: scrolled ? 5 : 30, willChange: "margin-top" }}>
+                            <motion.div
+                                className="px-3 pb-4 min-w-0"
+                                style={{
+                                    marginTop: scrolled ? headerH : cardOverlap,
+                                    zIndex: scrolled ? 5 : 30,
+                                    willChange: "margin-top"
+                                }}
+                            >
                                 {leftKey === "auction" ? (
                                     <CardShell variant="custom" customLeft={<AuctionSideBar active={auctionView} onSelect={handleAuctionMenuSelect} isOpen={auctionSidebarOpen} onToggle={() => setAuctionSidebarOpen(!auctionSidebarOpen)} />}>
                                         <AuctionView view={auctionView} />

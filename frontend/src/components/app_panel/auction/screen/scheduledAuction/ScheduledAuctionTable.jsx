@@ -2,11 +2,7 @@ import React from "react";
 import { Clock, MessageSquare } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useScheduledTimer } from "../../hook/useAuction.jsx";
-
-// Helper format tiền tệ
-const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
-};
+import { useCurrency } from "../../../widget/screens/CurrencyContext";
 
 // Helper format thời gian
 const formatTime = (totalSeconds) => {
@@ -19,7 +15,7 @@ const formatTime = (totalSeconds) => {
 };
 
 // --- Component con: Dòng dữ liệu (Row) ---
-const AuctionTableRow = ({ item, t }) => {
+const AuctionTableRow = ({ item, t, formatPrice, formatVND }) => {
     // Hook để tính thời gian còn lại đến khi bắt đầu
     const { secondsLeft, isStarted } = useScheduledTimer(item.startsAt);
 
@@ -45,7 +41,10 @@ const AuctionTableRow = ({ item, t }) => {
 
             {/* Min Increment - Hidden on Mobile */}
             <td className="hidden md:table-cell px-4 py-4 text-neutral-600 dark:text-neutral-400 text-sm">
-                {formatCurrency(item.increment)}
+                <div>{formatVND(item.increment)}</div>
+                {formatPrice(item.increment).secondary && (
+                    <div className="text-[10px] text-neutral-400">{formatPrice(item.increment).secondary}</div>
+                )}
             </td>
 
             {/* Trader - Hidden on Mobile */}
@@ -55,7 +54,10 @@ const AuctionTableRow = ({ item, t }) => {
 
             {/* Base Price - Hidden on Mobile */}
             <td className="hidden md:table-cell px-4 py-4 font-medium text-neutral-800 dark:text-neutral-200 text-sm">
-                {formatCurrency(item.base)}
+                <div>{formatVND(item.base)}</div>
+                {formatPrice(item.base).secondary && (
+                    <div className="text-[10px] text-neutral-400">{formatPrice(item.base).secondary}</div>
+                )}
             </td>
 
             {/* Timer - Always Visible */}
@@ -70,7 +72,10 @@ const AuctionTableRow = ({ item, t }) => {
 
             {/* Current Price - Always Visible */}
             <td className="px-2 md:px-4 py-3 md:py-4 font-bold text-neutral-900 dark:text-white text-xs md:text-sm">
-                {formatCurrency(item.base)}
+                <div>{formatVND(item.base)}</div>
+                {formatPrice(item.base).secondary && (
+                    <div className="text-[10px] font-normal text-neutral-400">{formatPrice(item.base).secondary}</div>
+                )}
             </td>
         </tr>
     );
@@ -79,6 +84,7 @@ const AuctionTableRow = ({ item, t }) => {
 // --- Component chính: Table Container ---
 export default function ScheduledAuctionTable({ data }) {
     const { t } = useTranslation();
+    const { formatPrice, formatVND } = useCurrency();
 
     return (
         <div className="bg-white dark:bg-neutral-900 rounded-xl shadow-sm overflow-hidden border border-neutral-200 dark:border-neutral-800 max-w-full">
@@ -97,7 +103,7 @@ export default function ScheduledAuctionTable({ data }) {
                     </thead>
                     <tbody>
                         {data.map((item) => (
-                            <AuctionTableRow key={item.id} item={item} t={t} />
+                            <AuctionTableRow key={item.id} item={item} t={t} formatPrice={formatPrice} formatVND={formatVND} />
                         ))}
                     </tbody>
                 </table>

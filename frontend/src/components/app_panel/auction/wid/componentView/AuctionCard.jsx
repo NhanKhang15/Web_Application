@@ -4,8 +4,9 @@ import { ArrowUpRight, MapPin, ImageOff, ShoppingCart } from "lucide-react";
 import { PostAuctionApi } from "../../../seller/lib/PostAuctionApi.js";
 import { BidApi } from "../../lib/BidApi.js";
 import { useTranslation } from "react-i18next";
+import { useCurrency } from "../../../widget/screens/CurrencyContext";
 
-// helper
+// helper - kept for fallback
 const formatCurrency = (amount) => {
     if (!amount) return "0 ₫";
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
@@ -20,6 +21,7 @@ const formatCurrency = (amount) => {
  */
 export default function AuctionCard({ item, onClick, aosDelay }) {
     const { t } = useTranslation();
+    const { formatPrice, currency } = useCurrency();
 
     // Extract data with fallbacks
     const currentBid = item.currentPrice || 0;
@@ -27,6 +29,10 @@ export default function AuctionCard({ item, onClick, aosDelay }) {
     const location = item.location || t('Unknown_location');
     const title = item.title || t('untitled');
     const price = item.buyNowPrice || 0;
+
+    // Get formatted prices with conversion
+    const bidPriceDisplay = formatPrice(currentBid);
+    const buyNowPriceDisplay = formatPrice(price);
 
     // API returns 'thumbnail' which is the image URL
     const rawImg = item.thumbnail || item.imgUrl;
@@ -58,9 +64,14 @@ export default function AuctionCard({ item, onClick, aosDelay }) {
                 )}
 
                 {/* Current Bid Badge - Floating on Image with blur effect */}
-                <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-black/40 backdrop-blur-md rounded-full px-3 py-1.5 border border-white/20 shadow-lg">
-                    <ArrowUpRight className="w-4 h-4 text-green-400" strokeWidth={2.5} />
-                    <span className="text-sm font-bold text-green-400">{formatCurrency(currentBid)}</span>
+                <div className="absolute top-3 left-3 flex flex-col items-start bg-black/40 backdrop-blur-md rounded-lg px-3 py-1.5 border border-white/20 shadow-lg">
+                    <div className="flex items-center gap-1.5">
+                        <ArrowUpRight className="w-4 h-4 text-green-400" strokeWidth={2.5} />
+                        <span className="text-sm font-bold text-green-400">{bidPriceDisplay.primary}</span>
+                    </div>
+                    {bidPriceDisplay.secondary && (
+                        <span className="text-[10px] text-green-300/80 ml-5">{bidPriceDisplay.secondary}</span>
+                    )}
                 </div>
             </div>
 
@@ -73,9 +84,14 @@ export default function AuctionCard({ item, onClick, aosDelay }) {
 
                 {/* Buy Now Price - Below title with cart icon */}
                 {price > 0 && (
-                    <div className="flex items-center gap-1.5 text-orange-500 dark:text-orange-400">
-                        <ShoppingCart className="w-3.5 h-3.5" />
-                        <span className="text-sm font-bold">{formatCurrency(price)}</span>
+                    <div className="flex flex-col">
+                        <div className="flex items-center gap-1.5 text-orange-500 dark:text-orange-400">
+                            <ShoppingCart className="w-3.5 h-3.5" />
+                            <span className="text-sm font-bold">{buyNowPriceDisplay.primary}</span>
+                        </div>
+                        {buyNowPriceDisplay.secondary && (
+                            <span className="text-[10px] text-orange-400/70 dark:text-orange-300/60 ml-5">{buyNowPriceDisplay.secondary}</span>
+                        )}
                     </div>
                 )}
 
@@ -121,7 +137,7 @@ export default function AuctionCard({ item, onClick, aosDelay }) {
                                 }}
                                 className="px-2 py-1 h-7 text-xs font-bold text-white bg-gradient-to-r from-orange-500 to-red-500 rounded-lg hover:shadow-lg hover:from-orange-600 hover:to-red-600 transition-all duration-300 transform hover:scale-105 active:scale-95"
                             >
-                                {t('buy_now')}
+                                {t('Buy_Now')}
                             </button>
                         )}
                         <div className="w-7 h-7 rounded-full bg-red-500/10 flex items-center justify-center group-hover:bg-red-500 transition-all duration-300">

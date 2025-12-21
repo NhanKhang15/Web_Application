@@ -9,10 +9,10 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { useCurrency } from "../../../widget/screens/CurrencyContext";
 
 // --- Helper functions ---
 const fmt = (n) => Number(n ?? 0).toLocaleString('vi-VN');
-const formatVND = (n) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n ?? 0);
 const hhmmss = (s) => {
     const h = Math.floor(s / 3600);
     const m = Math.floor((s % 3600) / 60);
@@ -23,6 +23,7 @@ const hhmmss = (s) => {
 export default function AuctionBidPanel({ product, bids = [], onPlaceBid, onBuyNow, isOwner = false }) {
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const { formatPrice, formatVND } = useCurrency();
 
     // Calculate time left (simple version, ideally use a hook or interval)
     const [now, setNow] = useState(Date.now());
@@ -48,8 +49,30 @@ export default function AuctionBidPanel({ product, bids = [], onPlaceBid, onBuyN
     }, [secondsLeft, t]);
 
     const [amount, setAmount] = useState("");
+    const [displayAmount, setDisplayAmount] = useState(""); // Formatted for display
     const [msg, setMsg] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Format number with thousand separators (Vietnamese style: dots)
+    const formatWithSeparator = (value) => {
+        if (!value && value !== 0) return "";
+        return value.toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ".");
+    };
+
+    // Remove formatting to get raw number
+    const parseFormattedNumber = (formattedValue) => {
+        return formattedValue.replace(/\./g, "");
+    };
+
+    // Handle bid amount input change
+    const handleAmountChange = (value) => {
+        const rawValue = parseFormattedNumber(value);
+        // Only allow digits
+        if (rawValue && !/^\d+$/.test(rawValue)) return;
+
+        setAmount(rawValue);
+        setDisplayAmount(formatWithSeparator(rawValue));
+    };
 
     const currentPrice = product.price;
     const nextMinBid = currentPrice + product.minStep;
@@ -67,8 +90,9 @@ export default function AuctionBidPanel({ product, bids = [], onPlaceBid, onBuyN
         setIsSubmitting(true);
         try {
             await onPlaceBid(val);
-            setMsg({ ok: true, text: t('Bid_placed_success', { amount: fmt(val) }) });
+            setMsg({ ok: true, text: t('Bid_placed_success', { amount: formatWithSeparator(val) }) });
             setAmount("");
+            setDisplayAmount("");
         } catch (e) {
             setMsg({ ok: false, text: e.message || t('ERR_BID_FAILED') });
         } finally {
@@ -104,28 +128,50 @@ export default function AuctionBidPanel({ product, bids = [], onPlaceBid, onBuyN
             {/* Bid section */}
             <div className="p-5 border-t border-gray-200 dark:border-gray-700 pt-4">
                 <p className="text-sm text-gray-600 dark:text-gray-500 mb-1">{t('CURRENT_BID')}</p>
-                <h2 className="text-3xl font-extrabold text-green-600">
-                    {formatVND(currentPrice)}
-                </h2>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{bids.length} {t('bids')}</p>
-
-                <div className="grid grid-cols-2 gap-2 mt-4 text-xs text-gray-600 dark:text-gray-500">
-                    <div>
-                        <span className="font-semibold">{t('Starting_Price')}:</span> {formatVND(product.startingPrice)}
-                    </div>
-                    <div>
-                        <span className="font-semibold">{t('Min_Step')}:</span> {formatVND(product.minStep)}
-                    </div>
-                    <div>
-                        <span className="font-semibold">{t('Reserve_Price')}:</span> {formatVND(product.reservePrice)}
-                    </div>
-                    <div>
-                        <span className="font-semibold">{t('Current_Price')}:</span> {formatVND(currentPrice)}
-                    </div>
+                <div className="flex flex-col">
+                    <h2 className="text-3xl font-extrabold text-green-600">
+                        {formatPrice(currentPrice).primary}
+                    </h2>
+                    {formatPrice(currentPrice).secondary && (
+                        <span className="text-sm text-green-500/70">{formatPrice(currentPrice).secondary}</span>
+                    )}
                 </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{bids.length} {t('bids')}</p>
 
-                <div className="flex items-center text-xs text-gray-600 dark:text-gray-500 mt-3">
-                    <Timer className="w-4 h-4 mr-1" /> {t('Next_min_bid')} {formatVND(nextMinBid)}
+                <div className="mt-4 text-sm text-gray-600 dark:text-gray-500 space-y-2">
+                    {/* Starting Price */}
+                    <div className="flex justify-between items-start">
+                        <span className="font-medium text-gray-700 dark:text-gray-400">{t('Starting_Price')}:</span>
+                        <div className="text-right">
+                            <span className="font-semibold">{formatVND(product.startingPrice)}</span>
+                            {formatPrice(product.startingPrice).secondary && (
+                                <p className="text-xs text-gray-400">{formatPrice(product.startingPrice).secondary}</p>
+                            )}
+                        </div>
+                    </div>
+                    {/* Min Step */}
+                    <div className="flex justify-between items-start">
+                        <span className="font-medium text-gray-700 dark:text-gray-400">{t('Min_Step')}:</span>
+                        <div className="text-right">
+                            <span className="font-semibold">{formatVND(product.minStep)}</span>
+                            {formatPrice(product.minStep).secondary && (
+                                <p className="text-xs text-gray-400">{formatPrice(product.minStep).secondary}</p>
+                            )}
+                        </div>
+                    </div>
+                    {/* Next min bid */}
+                    <div className="flex justify-between items-start pt-2 border-t border-gray-100 dark:border-gray-700">
+                        <div className="flex items-center gap-1 text-gray-700 dark:text-gray-400">
+                            <Timer className="w-4 h-4" />
+                            <span className="font-medium">{t('Next_min_bid')}:</span>
+                        </div>
+                        <div className="text-right">
+                            <span className="font-bold text-purple-600 dark:text-purple-400">{formatVND(nextMinBid)}</span>
+                            {formatPrice(nextMinBid).secondary && (
+                                <p className="text-xs text-gray-400">{formatPrice(nextMinBid).secondary}</p>
+                            )}
+                        </div>
+                    </div>
                 </div>
 
                 {product.buyNowPrice && !isOwner && !isEnded && (
@@ -134,8 +180,11 @@ export default function AuctionBidPanel({ product, bids = [], onPlaceBid, onBuyN
                             className="w-full py-2 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white rounded-md font-bold text-sm uppercase tracking-wide transition-all shadow-md hover:shadow-lg"
                             onClick={onBuyNow}
                         >
-                            {t('Buy_Now')} - {formatVND(product.buyNowPrice)}
+                            {t('Buy_Now')} - {formatPrice(product.buyNowPrice).primary}
                         </button>
+                        {formatPrice(product.buyNowPrice).secondary && (
+                            <p className="text-xs text-center text-red-400/70 mt-1">{formatPrice(product.buyNowPrice).secondary}</p>
+                        )}
                     </div>
                 )}
 
@@ -158,11 +207,12 @@ export default function AuctionBidPanel({ product, bids = [], onPlaceBid, onBuyN
 
                 <div className="flex gap-2 mt-4">
                     <input
-                        type="number"
-                        value={amount}
-                        onChange={(e) => setAmount(e.target.value)}
+                        type="text"
+                        inputMode="numeric"
+                        value={displayAmount}
+                        onChange={(e) => handleAmountChange(e.target.value)}
                         disabled={isEnded || isSubmitting || isOwner}
-                        placeholder={isOwner ? t('Your_item', { defaultValue: 'Sản phẩm của bạn' }) : `≥ ${nextMinBid}`}
+                        placeholder={isOwner ? t('Your_item', { defaultValue: 'Sản phẩm của bạn' }) : `≥ ${formatWithSeparator(nextMinBid)}`}
                         className="flex-1 border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 text-sm bg-gray-50 dark:bg-[#0B0F13]"
                     />
                     <button
@@ -174,12 +224,23 @@ export default function AuctionBidPanel({ product, bids = [], onPlaceBid, onBuyN
                     </button>
                 </div>
 
+                {/* Currency conversion for bid amount */}
+                {amount && formatPrice(Number(amount)).secondary && (
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                        {formatPrice(Number(amount)).secondary}
+                    </p>
+                )}
+
                 <div className="mt-2 flex gap-2 text-xs">
                     {[50, 100, 250].map((s) => (
                         <button
                             key={s}
                             disabled={isOwner}
-                            onClick={() => setAmount(String(nextMinBid + s))}
+                            onClick={() => {
+                                const newVal = nextMinBid + s;
+                                setAmount(String(newVal));
+                                setDisplayAmount(formatWithSeparator(newVal));
+                            }}
                             className="px-2 py-1 rounded border border-gray-300 dark:border-gray-700 disabled:opacity-50"
                         >
                             +{s}
@@ -206,7 +267,12 @@ export default function AuctionBidPanel({ product, bids = [], onPlaceBid, onBuyN
                             className="flex items-center justify-between text-sm bg-gray-50 dark:bg-[#1A1F25] rounded-md px-3 py-2"
                         >
                             <span>{b.bidderName || b.bidder}</span>
-                            <span>{formatVND(b.bidAmount || b.amount)}</span>
+                            <div className="flex flex-col items-end">
+                                <span>{formatVND(b.bidAmount || b.amount)}</span>
+                                {formatPrice(b.bidAmount || b.amount).secondary && (
+                                    <span className="text-[10px] text-gray-400">{formatPrice(b.bidAmount || b.amount).secondary}</span>
+                                )}
+                            </div>
                             <span className="text-xs text-gray-500">
                                 {new Date(b.bidTime || b.time).toLocaleTimeString()}
                             </span>

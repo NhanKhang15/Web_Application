@@ -5,7 +5,7 @@ import { Card, CardContent } from "../ui/Card";
 import { Input } from "../ui/Input";
 import { loginLocal, startGoogleLogin } from "../services/login_api";
 import { useTranslation } from "react-i18next"; // ✅ thêm i18n
-import {API_BASE_URL} from "../../../lib/api_url.js";
+import { API_BASE_URL } from "../../../lib/api_url.js";
 import { PasswordInput } from "../ui/PasswordInput";
 
 export default function Login() {
@@ -76,6 +76,8 @@ export default function Login() {
                 }
 
                 sessionStorage.setItem("user", JSON.stringify(userObj));
+                // Dispatch event to sync theme immediately
+                window.dispatchEvent(new CustomEvent('userLogin', { detail: userObj }));
                 setMsg(res?.message || t("login_success"));
 
                 navigate(userObj.profileCompleted ? "/dashboard" : "/user/profile", { replace: true });
@@ -95,21 +97,19 @@ export default function Login() {
             <div className="absolute top-4 right-4 z-20 flex gap-2">
                 <button
                     onClick={() => changeLang("en")}
-                    className={`px-2 py-1 rounded-md text-xs font-semibold ${
-                        i18n.language === "en"
+                    className={`px-2 py-1 rounded-md text-xs font-semibold ${i18n.language === "en"
                             ? "bg-white text-black"
                             : "bg-transparent text-gray-300 hover:text-white"
-                    }`}
+                        }`}
                 >
                     🇺🇸 EN
                 </button>
                 <button
                     onClick={() => changeLang("vi")}
-                    className={`px-2 py-1 rounded-md text-xs font-semibold ${
-                        i18n.language === "vi"
+                    className={`px-2 py-1 rounded-md text-xs font-semibold ${i18n.language === "vi"
                             ? "bg-white text-black"
                             : "bg-transparent text-gray-300 hover:text-white"
-                    }`}
+                        }`}
                 >
                     🇻🇳 VI
                 </button>
